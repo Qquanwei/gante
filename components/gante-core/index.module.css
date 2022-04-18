@@ -2,6 +2,11 @@
     position: relative;
     width: 100%;
     height: 100%;
+    overflow: hidden;
+}
+.graphcontent {
+    position: relative;
+    margin-top: 20px;
 }
 
 .svg {
@@ -10,6 +15,11 @@
 
 .line {
     stroke: #000;
+    strokeWidth: 1px;
+}
+
+.currentTimeLine {
+    stroke: red;
     strokeWidth: 1px;
 }
 
@@ -25,10 +35,43 @@
     border-radius: 5px;
     border: 1px solid #fccfff;
 
+    white-space: nowrap;
 }
 
 .node:hover {
     background: #fccfff;
     cursor: pointer;
     user-select: none;
+}
+
+.node .resizebar {
+    display: none;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.node.hover .resizebar {
+    display: block;
+}
+
+
+.timeline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: red;
+    display: flex;
+    flex-flow: row nowrap;
+
+    .spot {
+        color: red;
+    }
+}
+
+.timeline .spot {
+    flex-shrink: 0;
+    text-align: center;
 }

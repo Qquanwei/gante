@@ -12,6 +12,9 @@ export default function Provider({ children }) {
     const [list, setList] = useState([
         {
             title: 'there is title'
+        },
+        {
+            title: 'there is title2'
         }
     ]);
 
@@ -22,7 +25,10 @@ export default function Provider({ children }) {
         return {
             // 每个甬道的高度
             SINK_HEIGHT: 30,
+            // 每个时间节点的宽度
+            SPOT_WIDTH: 30,
             graphRef,
+            currentTime: 10.5,
             list
         };
     }, [list]);

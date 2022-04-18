@@ -5,7 +5,12 @@ import styles from './index.module.css';
    泳道，绘制一个通道, 绘制连线
 */
 export default function Sink() {
-    const { list, SINK_HEIGHT } = useGante();
+    const {
+        list,
+        SINK_HEIGHT,
+        SPOT_WIDTH,
+        currentTime,
+    } = useGante();
 
     return (
         <svg width="100%" height="100%" className={styles.svg}>
@@ -20,6 +25,15 @@ export default function Sink() {
                     )
                 })
             }
+
+            {/* 当前的线 */}
+            <line
+                x1={SPOT_WIDTH * currentTime}
+                x2={SPOT_WIDTH * currentTime}
+                y1="0"
+                y2="100%"
+                className={styles.currentTimeLine}
+            ></line>
         </svg>
     );
 }

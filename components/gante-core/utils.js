@@ -3,6 +3,13 @@ export function Position(x, y) {
     this.y = y;
 }
 
+Position.prototype.diff = function(a) {
+    return new Position(
+        this.x - a.x,
+        this.y - a.y
+    );
+}
+
 export function inherit(Super, Child) {
     function NewChild() {
         Super.apply(this, arguments);
