@@ -7,6 +7,7 @@ import useInteractionEvent from './use-interaction-event';
 function Node({ item, index }) {
     const { SINK_HEIGHT } = useGante();
     const [hover, setHover] = useState(false);
+    const [left, setLeft] = useState(0);
     const [width, setWidth] = useState(100);
 
     const ref = useInteractionEvent({
@@ -18,6 +19,11 @@ function Node({ item, index }) {
 
                 case 'resize':
                     setWidth(args.width);
+                    break;
+
+                case 'move':
+                    setLeft(args.left);
+                    break;
                 default:
                     break;
             }
@@ -31,6 +37,7 @@ function Node({ item, index }) {
                 [styles.hover]: hover
             })}
             style={{
+                left,
                 top: index * SINK_HEIGHT,
                 height: SINK_HEIGHT,
                 width

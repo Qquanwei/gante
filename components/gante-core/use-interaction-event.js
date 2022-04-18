@@ -44,10 +44,6 @@ State.prototype.mount = () => {
 State.prototype.unmount = () => {
 }
 
-State.prototype.getGraphElement = () => {
-    throw new Error('not implement');
-}
-
 // 监听模式
 const NormalState = inherit(State, function() {
     this.mousedown = false;
@@ -83,6 +79,7 @@ NormalState.prototype.onClick = function (e) {
 
 NormalState.prototype.onMouseDown = function(e) {
     this.mousedown = true;
+    this.machine.switchMode(new MoveState(getPosition(this.machine.getGraphElement(), e)));
 }
 
 NormalState.prototype.onMouseOver = function(e) {
@@ -114,6 +111,25 @@ ResizeState.prototype.onMouseMove = function(e) {
     this.machine.emit('resize', {
         width: this.initWidth + x
     });
+}
+
+var MoveState = inherit(State, function(initPosition) {
+    this.initPosition = initPosition;
+})
+
+MoveState.prototype.mount = function() {
+    this.left = this.machine.getElement().offsetLeft;
+}
+
+MoveState.prototype.onMouseMove = function(e) {
+    const position = getPosition(this.machine.getGraphElement(), e);
+    this.machine.emit('move', {
+        left: Math.max(this.left + position.diff(this.initPosition).x, 0)
+    });
+}
+
+MoveState.prototype.onMouseUp = function() {
+    this.machine.switchMode(new NormalState());
 }
 
 function StateMachine({ element, graphElement, onChange }) {
@@ -149,7 +165,7 @@ function StateMachine({ element, graphElement, onChange }) {
     this.element.addEventListener('click', this.onClick);
     this.element.addEventListener('mouseover', this.onMouseOver);
     this.element.addEventListener('mouseleave', this.onMouseLeave);
-    this.graphElement.addEventListener('mousedown', this.onMouseDown);
+    this.element.addEventListener('mousedown', this.onMouseDown);
     this.graphElement.addEventListener('mouseup', this.onMouseUp);
     this.graphElement.addEventListener('mousemove', this.onMouseMove, { passive: true });
 
@@ -162,7 +178,7 @@ StateMachine.prototype.dispose = function() {
     this.element.removeEventListener('click', this.onClick);
     this.element.removeEventListener('mouseover', this.onMouseOver);
     this.element.removeEventListener('mouseleave', this.onMouseLeave);
-    this.graphElement.removeEventListener('mousedown', this.onMouseDown);
+    this.element.removeEventListener('mousedown', this.onMouseDown);
     this.graphElement.removeEventListener('mouseup', this.onMouseUp);
     this.graphElement.removeEventListener('mousemove', this.onMouseMove, { passive: true });
     this.currentState.unmount();
