@@ -1,35 +1,81 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
+import moment from 'moment';
 import useGante from './useGante';
 import styles from './index.module.css';
 import useInteractionEvent from './use-interaction-event';
+import { positionToDay } from './utils';
 
-function Node({ item, index }) {
+function Node({ item, index, swap }) {
+    const { SPOT_WIDTH, startTime, updateItemDate, setCurrentId, setTempLine } = useGante();
+
     const { SINK_HEIGHT } = useGante();
     const [hover, setHover] = useState(false);
-    const [left, setLeft] = useState(0);
-    const [width, setWidth] = useState(100);
+
+    const width = useMemo(() => {
+        const day = moment(item.endTime).diff(moment(item.startTime), 'days') || 1;
+        return day * SPOT_WIDTH;
+    }, [item.startTime, item.endTime]);
+
+    const left = useMemo(() => {
+        const day = moment(item.startTime).diff(moment(startTime), 'days');
+        return day * SPOT_WIDTH;
+    }, [item.startTime, startTime]);
 
     const ref = useInteractionEvent({
         onChange: (event, args) => {
             switch(event) {
                 case 'hover':
                     setHover(args);
+                    if (args) {
+                        setCurrentId(item.id);
+                    } else {
+                        setCurrentId(null);
+                    }
                     break;
 
                 case 'resize':
-                    setWidth(args.width);
+                    {
+                        const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left || left).valueOf();
+                        const newEndTime = positionToDay(SPOT_WIDTH, startTime, args.left || left + args.width).valueOf();
+                        updateItemDate(item.id, newBeginTime, newEndTime);
+                    }
                     break;
 
                 case 'move':
-                    setLeft(args.left);
+                    {
+                        const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left).valueOf();
+                        const newEndTime = positionToDay(SPOT_WIDTH, startTime, args.left + width).valueOf();
+                        updateItemDate(
+                            item.id,
+                            newBeginTime,
+                            newEndTime
+                        );
+                    }
+                    break;
+
+                case 'swap':
+                    if (Math.floor(args.top / SINK_HEIGHT) !== index) {
+                        swap(item, Math.floor(args.top / SINK_HEIGHT));
+                    }
+                    break;
+
+                case 'preview-line':
+                    {
+                        if (args) {
+                            const { from, to } = args;
+                            setTempLine({ from, to });
+                        } else {
+                            setTempLine(null);
+                        }
+                    }
                     break;
                 default:
                     break;
             }
             console.log('event:', event, args);
         }
-    }, []);
+    });
 
     return (
         <div ref={ref}
@@ -42,25 +88,39 @@ function Node({ item, index }) {
                 height: SINK_HEIGHT,
                 width
             }}>
-            <div className={styles.resizebar} data-role="left-dragger">::</div>
             { item.title }
+            <div className={styles.resizebar} data-role="left-dragger">::</div>
             <div className={styles.resizebar} data-role="right-dragger">::</div>
+            <div className={styles.anchor} data-role="anchor"></div>
         </div>
     );
 }
 
 export default function Nodes() {
-    const { list } = useGante();
+    const { list, swapItem } = useGante();
+
+    const swap = useCallback((fromItem, toPosition) => {
+        swapItem(list.indexOf(fromItem), toPosition);
+    }, [list]);
 
     return (
         <div>
             {
                 list.map((item, index) => {
                     return (
-                        <Node item={item} key={index} index={index} />
+                        <Node item={item} key={item.id} index={index} swap={swap} />
                     )
                 })
             }
         </div>
     );
+}
+
+
+export function getStaticProps() {
+    return {
+        props: {
+            hello: "world"
+        }
+    }
 }

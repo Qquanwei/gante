@@ -1,5 +1,7 @@
 import useGante from './useGante';
 import styles from './index.module.css';
+import useCurrentDate from './useCurrentDate';
+import moment from 'moment';
 
 /*
    泳道，绘制一个通道, 绘制连线
@@ -7,10 +9,17 @@ import styles from './index.module.css';
 export default function Sink() {
     const {
         list,
+        // 一条临时的线
+        tempLine,
+        startTime,
+        endTime,
         SINK_HEIGHT,
         SPOT_WIDTH,
-        currentTime,
     } = useGante();
+
+    const currentTime = useCurrentDate();
+
+    const OFFSET_DAY = moment(currentTime).diff(moment(startTime), 'days');
 
     return (
         <svg width="100%" height="100%" className={styles.svg}>
@@ -28,12 +37,23 @@ export default function Sink() {
 
             {/* 当前的线 */}
             <line
-                x1={SPOT_WIDTH * currentTime}
-                x2={SPOT_WIDTH * currentTime}
+                x1={SPOT_WIDTH * OFFSET_DAY}
+                x2={SPOT_WIDTH * OFFSET_DAY}
                 y1="0"
                 y2="100%"
                 className={styles.currentTimeLine}
             ></line>
+
+            {
+                tempLine ? (
+                    <line
+                        className={styles.currentTimeLine}
+                        x1={tempLine.from.x}
+                        y1={tempLine.from.y}
+                        x2={tempLine.to.x}
+                        y2={tempLine.to.y} />
+                ) : null
+            }
         </svg>
     );
 }
