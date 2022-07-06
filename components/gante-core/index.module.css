@@ -47,7 +47,7 @@
     background: black;
 }
 
-.node:hover {
+.node.hover {
     background: #fccfff;
     cursor: pointer;
     user-select: none;

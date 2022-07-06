@@ -12,10 +12,7 @@ export default function TodoItem({ item }) {
     }, []);
 
     const onClick = useCallback((e) => {
-        // 双击
-        if (e.detail > 1) {
-            setMode('edit');
-        }
+        setMode('edit');
     }, []);
 
     const onSubmit = useCallback((e) => {
@@ -26,7 +23,10 @@ export default function TodoItem({ item }) {
         setMode('preview');
     }, [updateItemTitle, item]);
 
-    const style= { height: SINK_HEIGHT, display: 'flex', alignItems: 'center' };
+    const style= { height: SINK_HEIGHT,
+                   display: 'flex',
+                   alignItems: 'center',
+                   cursor: 'pointer' };
 
     if (mode === 'preview') {
         return (

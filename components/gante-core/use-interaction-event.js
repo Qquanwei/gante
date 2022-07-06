@@ -15,6 +15,9 @@ import { useRef, useEffect} from 'react';
 import { inherit, getPosition } from './utils';
 import useGante from './useGante';
 
+// 如果 globalHoverLock = true, 表示此时全局禁用hover事件。
+let globalHoverLock = false;
+
 function State() {
 }
 
@@ -101,11 +104,15 @@ NormalState.prototype.onMouseDown = function(e) {
 }
 
 NormalState.prototype.onMouseOver = function(e) {
-    this.machine.emit('hover', true);
+    if (!globalHoverLock) {
+        this.machine.emit('hover', true);
+    }
 }
 
 NormalState.prototype.onMouseLeave = function(e) {
-    this.machine.emit('hover', false);
+    if (!globalHoverLock) {
+        this.machine.emit('hover', false);
+    }
 }
 
 // 左边移动或右边移动, mode = left / right
@@ -118,9 +125,11 @@ var ResizeState = inherit(State, function(mode = 'left', initPosition) {
 ResizeState.prototype.mount = function() {
     this.initWidth = this.machine.getElement().offsetWidth;
     this.initLeft = this.machine.getElement().offsetLeft;
+    globalHoverLock = true;
 }
 ResizeState.prototype.onMouseUp = function() {
     this.machine.switchMode(new NormalState());
+    globalHoverLock = false;
 }
 
 ResizeState.prototype.onMouseMove = function(e) {
@@ -147,6 +156,11 @@ var MoveState = inherit(State, function(initPosition) {
 MoveState.prototype.mount = function() {
     this.left = this.machine.getElement().offsetLeft;
     this.top = this.machine.getElement().offsetTop;
+    globalHoverLock = true;
+}
+
+MoveState.prototype.unmount = function() {
+    globalHoverLock = false;
 }
 
 MoveState.prototype.onMouseMove = function(e) {
@@ -154,9 +168,9 @@ MoveState.prototype.onMouseMove = function(e) {
     this.machine.emit('move', {
         left: Math.max(this.left + position.diff(this.initPosition).x, 0)
     });
-    /* this.machine.emit('swap', {
-     *     top: Math.max(0, this.top + position.diff(this.initPosition).y)
-     * }) */
+    // this.machine.emit('swap', {
+    //    top: Math.max(0, this.top + position.diff(this.initPosition).y)
+    // })
 }
 
 MoveState.prototype.onMouseUp = function() {
@@ -168,6 +182,11 @@ var SortState = inherit(State, function() {
 })
 
 SortState.prototype.mount = function() {
+    globalHoverLock = true;
+}
+
+SortState.prototype.unmount = function() {
+    globalHoverLock = false;
 }
 
 SortState.prototype.onDragStart = function(event) {

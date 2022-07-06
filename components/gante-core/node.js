@@ -11,6 +11,7 @@ function Node({ item, index, swap }) {
         SPOT_WIDTH,
         startTime,
         updateItemDate,
+        currentId,
         setCurrentId,
         setTempLine,
         TODOLIST_WIDTH
@@ -20,7 +21,7 @@ function Node({ item, index, swap }) {
     const [hover, setHover] = useState(false);
 
     const width = useMemo(() => {
-        const day = moment(item.endTime).diff(moment(item.startTime), 'days') || 1;
+        const day = moment(item.endTime).diff(moment(item.startTime), 'days') || 0;
         return day * SPOT_WIDTH;
     }, [item.startTime, item.endTime]);
 
@@ -41,12 +42,13 @@ function Node({ item, index, swap }) {
                     }
                     break;
 
-                case 'resize':
-                    {
+                 case 'resize':
+                   {
                         const newBeginTime = positionToDay(
                             SPOT_WIDTH, startTime, (args.left || left) - TODOLIST_WIDTH).valueOf();
                         const newEndTime = positionToDay(
-                            SPOT_WIDTH, startTime, (args.left || left) + args.width - TODOLIST_WIDTH).valueOf();
+                            SPOT_WIDTH, startTime, (args.left || left) + args.width - TODOLIST_WIDTH
+                        ).valueOf();
                         updateItemDate(item.id, newBeginTime, newEndTime);
                     }
                     break;
@@ -94,7 +96,7 @@ function Node({ item, index, swap }) {
                 left,
                 top: index * SINK_HEIGHT,
                 height: SINK_HEIGHT,
-                width
+                width: width + SPOT_WIDTH
             }}>
             { item.title }
             <div className={styles.resizebar} data-role="left-dragger">::</div>

@@ -1,5 +1,5 @@
 import React, {
-    useReducer, useMemo, useState, useCallback, useRef
+    useReducer, useMemo, useState, useCallback, useRef, useEffect
 } from 'react';
 
 const Context = React.createContext();
@@ -8,49 +8,54 @@ export {
     Context
 };
 
+const STARTTIME = Date.now() - 7 * 24 * 60 * 60 * 1000;
+const ENDTIME =  Date.now() + 30 * 24 * 60 * 60 * 1000;
+
 export default function Provider({ children }) {
     const graphRef = useRef(null);
     const [currentId, setCurrentId] = useState(null);
     const [tempLine, setTempLine] = useState(null);
 
-    const [list, setList] = useState([
-        {
-            id: 1,
-            title: 'there is title',
-            startTime: Date.now(),
-            endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
-        },
-        {
-            id: 2,
-            title: 'there is title2',
-            startTime: Date.now(),
-            endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
-        },
-        {
-            id: 3,
-            title: 'there is title3',
-            startTime: Date.now(),
-            endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
-        },
-        {
-            id: 4,
-            title: 'there is title4',
-            startTime: Date.now(),
-            endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
-        },
-        {
-            id: 5,
-            title: 'there is title5',
-            startTime: Date.now(),
-            endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
-        },
-        {
-            id: 6,
-            title: 'there is title6',
-            startTime: Date.now(),
-            endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
-        },
-    ]);
+    const [list, setList] = useState(() => {
+        return [
+            {
+                id: 1,
+                title: 'there is title',
+                startTime: Date.now(),
+                endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
+            },
+            {
+                id: 2,
+                title: 'there is title2',
+                startTime: Date.now(),
+                endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
+            },
+            {
+                id: 3,
+                title: 'there is title3',
+                startTime: Date.now(),
+                endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
+            },
+            {
+                id: 4,
+                title: 'there is title4',
+                startTime: Date.now(),
+                endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
+            },
+            {
+                id: 5,
+                title: 'there is title5',
+                startTime: Date.now(),
+                endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
+            },
+            {
+                id: 6,
+                title: 'there is title6',
+                startTime: Date.now(),
+                endTime: Date.now() + 5 * 24 * 60 * 60 * 1000
+            },
+        ];
+    });
 
     const swapItem = useCallback((fromPosition, toPosition) => {
         setList(list => {
@@ -97,9 +102,9 @@ export default function Provider({ children }) {
             TODOLIST_WIDTH: 200,
             graphRef,
             // 开始时间
-            startTime: Date.now() - 7 * 24 * 60 * 60 * 1000,
+            startTime: STARTTIME,
             // 结束时间
-            endTime: Date.now() + 30 * 24 * 60 * 60 * 1000,
+            endTime: ENDTIME,
             swapItem,
             currentId,
             updateItemDate,
