@@ -8,7 +8,7 @@ import useGante from './useGante';
    展示时间轴，横轴
 */
 export default function Timeline() {
-    const { SPOT_WIDTH,list, startTime, endTime, currentId } = useGante();
+    const { SPOT_WIDTH,list, startTime, endTime, currentId, TODOLIST_WIDTH } = useGante();
     const currentTime = useCurrentDate();
 
     const START = moment(startTime);
@@ -23,7 +23,7 @@ export default function Timeline() {
     }, [currentId, list]);
 
     return (
-        <div className={styles.timeline}>
+            <div className={styles.timeline} style={{ left: TODOLIST_WIDTH }}>
             {
                 (() => {
                     let ans = [];

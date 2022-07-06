@@ -15,6 +15,7 @@ export default function Sink() {
         endTime,
         SINK_HEIGHT,
         SPOT_WIDTH,
+        TODOLIST_WIDTH
     } = useGante();
 
     const currentTime = useCurrentDate();
@@ -27,7 +28,7 @@ export default function Sink() {
                 list.map((_, index) => {
                     return (
                         <line key={index}
-                            x1="0" y1={(index + 1) * SINK_HEIGHT}
+                           x1={0} y1={(index + 1) * SINK_HEIGHT}
                             x2="100%" y2={(index + 1) * SINK_HEIGHT}
                             className={styles.line}
                         />
@@ -37,8 +38,8 @@ export default function Sink() {
 
             {/* 当前的线 */}
             <line
-                x1={SPOT_WIDTH * OFFSET_DAY}
-                x2={SPOT_WIDTH * OFFSET_DAY}
+                x1={TODOLIST_WIDTH + SPOT_WIDTH * OFFSET_DAY}
+                x2={TODOLIST_WIDTH + SPOT_WIDTH * OFFSET_DAY}
                 y1="0"
                 y2="100%"
                 className={styles.currentTimeLine}

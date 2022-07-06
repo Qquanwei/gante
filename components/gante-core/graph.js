@@ -2,6 +2,7 @@ import styles from './index.module.css';
 import Sink from './sink';
 import Node from './node';
 import Timeline from './timeline';
+import TodoList from './todolist';
 import useGante from './useGante';
 
 function Graph({ children }) {
@@ -11,6 +12,7 @@ function Graph({ children }) {
             <Timeline />
             <div className={styles.graphcontent}>
                 <Sink />
+                <TodoList />
                 <Node />
             </div>
         </div>

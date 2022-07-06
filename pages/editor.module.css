@@ -1,3 +1,10 @@
 .editor {
     height: 100vh;
 }
+
+.statusbar {
+    position: fixed;
+    bottom: 0;
+    height: 20px;
+    border-top: 1px solid #000;
+}

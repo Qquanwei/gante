@@ -75,12 +75,26 @@ export default function Provider({ children }) {
         });
     }, []);
 
+    const updateItemTitle = useCallback((id, title) => {
+        setList((list) => {
+            const index = list.findIndex(item => item.id === id);
+            const newlist = [...list];
+            newlist[index] = {
+                ...newlist[index],
+                title
+            }
+            return newlist;
+        });
+    }, []);
+
     const contextValue = useMemo(() => {
         return {
             // 每个甬道的高度
             SINK_HEIGHT: 30,
             // 每个时间节点的宽度
             SPOT_WIDTH: 30,
+            // todolist的宽度
+            TODOLIST_WIDTH: 200,
             graphRef,
             // 开始时间
             startTime: Date.now() - 7 * 24 * 60 * 60 * 1000,
@@ -89,6 +103,7 @@ export default function Provider({ children }) {
             swapItem,
             currentId,
             updateItemDate,
+            updateItemTitle,
             setCurrentId,
             tempLine,
             setTempLine,

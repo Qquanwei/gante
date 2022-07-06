@@ -7,7 +7,14 @@ import useInteractionEvent from './use-interaction-event';
 import { positionToDay } from './utils';
 
 function Node({ item, index, swap }) {
-    const { SPOT_WIDTH, startTime, updateItemDate, setCurrentId, setTempLine } = useGante();
+    const {
+        SPOT_WIDTH,
+        startTime,
+        updateItemDate,
+        setCurrentId,
+        setTempLine,
+        TODOLIST_WIDTH
+    } = useGante();
 
     const { SINK_HEIGHT } = useGante();
     const [hover, setHover] = useState(false);
@@ -19,8 +26,8 @@ function Node({ item, index, swap }) {
 
     const left = useMemo(() => {
         const day = moment(item.startTime).diff(moment(startTime), 'days');
-        return day * SPOT_WIDTH;
-    }, [item.startTime, startTime]);
+        return TODOLIST_WIDTH + day * SPOT_WIDTH;
+    }, [item.startTime, startTime, TODOLIST_WIDTH]);
 
     const ref = useInteractionEvent({
         onChange: (event, args) => {
@@ -36,16 +43,18 @@ function Node({ item, index, swap }) {
 
                 case 'resize':
                     {
-                        const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left || left).valueOf();
-                        const newEndTime = positionToDay(SPOT_WIDTH, startTime, args.left || left + args.width).valueOf();
+                        const newBeginTime = positionToDay(
+                            SPOT_WIDTH, startTime, (args.left || left) - TODOLIST_WIDTH).valueOf();
+                        const newEndTime = positionToDay(
+                            SPOT_WIDTH, startTime, (args.left || left) + args.width - TODOLIST_WIDTH).valueOf();
                         updateItemDate(item.id, newBeginTime, newEndTime);
                     }
                     break;
 
                 case 'move':
                     {
-                        const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left).valueOf();
-                        const newEndTime = positionToDay(SPOT_WIDTH, startTime, args.left + width).valueOf();
+                        const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left - TODOLIST_WIDTH).valueOf();
+                        const newEndTime = positionToDay(SPOT_WIDTH, startTime, args.left + width - TODOLIST_WIDTH).valueOf();
                         updateItemDate(
                             item.id,
                             newBeginTime,
@@ -73,7 +82,6 @@ function Node({ item, index, swap }) {
                 default:
                     break;
             }
-            console.log('event:', event, args);
         }
     });
 
