@@ -1,9 +1,8 @@
 import classNames from 'classnames';
-import styles from './index.module.css';
 
 function Container({ children, className }) {
     return (
-        <div className={classNames(styles.container, className)}>
+        <div>
             {children }
         </div>
     );
@@ -11,7 +10,7 @@ function Container({ children, className }) {
 
 function LeftSide({ children }) {
     return (
-        <div className={styles.left}>
+        <div>
             { children }
         </div>
     );
@@ -19,7 +18,7 @@ function LeftSide({ children }) {
 
 function Content({ children }) {
     return (
-        <div className={styles.content}>
+        <div>
             { children }
         </div>
     );
