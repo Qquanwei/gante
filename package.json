@@ -10,15 +10,15 @@
   },
   "dependencies": {
     "classnames": "^2.3.1",
+    "events": "^3.3.0",
     "moment": "^2.29.3",
     "next": "12.1.5",
+    "ot-json1": "^1.0.2",
     "ramda": "^0.28.0",
     "react": "18.0.0",
     "react-dom": "18.0.0",
     "reconnecting-websocket": "^4.4.0",
-    "sharedb": "^3.0.0",
-    "socket.io-client": "^4.5.1",
-    "websocket": "^1.0.34"
+    "sharedb": "^3.0.0"
   },
   "devDependencies": {
     "autoprefix": "^1.0.1",

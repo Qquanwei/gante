@@ -8,8 +8,9 @@ export default function TodoItem({ item }) {
   const onBlur = useCallback((e) => {
     const formData = new FormData(e.currentTarget);
     updateItemTitle(item.id, formData.get('title'));
+    console.log('blur')
     setMode('preview');
-  }, []);
+  }, [updateItemTitle]);
 
   const onClick = useCallback((e) => {
     setMode('edit');
@@ -18,6 +19,7 @@ export default function TodoItem({ item }) {
   const onSubmit = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('submit')
     const formData = new FormData(e.currentTarget);
     updateItemTitle(item.id, formData.get('title'));
     setMode('preview');
@@ -37,7 +39,7 @@ export default function TodoItem({ item }) {
   } else {
     // 因为React中onBlur使用focusout合成，所以具有冒泡特性。
     return (
-        <form action="" onSubmit={onSubmit} style={style} onBlur={onBlur} className="flex items-center cursor-pointer">
+        <form onSubmit={onSubmit} style={style} onBlur={onBlur} className="flex items-center cursor-pointer">
           <input
             autoFocus
             className="w-full"
