@@ -32,10 +32,19 @@ export default function Editor() {
           ganteRef.current.setList(doc.data);
         }
 
+        let ops = [];
+        let timer = null;
         ganteRef.current.event.on('op', (op) => {
-          setTimeout(() => {
-            doc.submitOp(op);
-          });
+          ops.push(op);
+          if (timer) {
+            return;
+          }
+          timer = setTimeout(() => {
+            const o = ops.reduce(json1.type.compose, null);
+            doc.submitOp(o);
+            ops = [];
+            timer = null;
+          }, 500);
         });
       });
 

@@ -127,7 +127,6 @@ NormalState.prototype.onMouseUp = function(e) {
 }
 
 NormalState.prototype.onMouseOver = function(e) {
-  console.log('onMouseOver');
   this.machine.emit('hover', true);
 }
 
@@ -143,7 +142,7 @@ NormalState.prototype.onMouseMove = function(e) {
     */
     if (Math.abs(position.diff(this.mousePosition).x) > (this.machine.SPOT_WIDTH * 0.9)) {
       this.machine.switchMode(new MoveState(this.mousePosition));
-    } else if (Math.abs(position.diff(this.mousePosition).y) > (this.machine.SINK_HEIGHT * 0.6) ) {
+    } else if (Math.abs(position.diff(this.mousePosition).y) > (this.machine.SINK_HEIGHT * 0.5) ) {
       // 如果上下移动即将超过一个甬道，则进入排序模式，排序模式不会触发左右移动
       this.machine.switchMode(new SortState(this.mousePosition));
     }

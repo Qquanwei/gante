@@ -33,12 +33,17 @@ function Provider({ children, forwardRef }) {
   const [list, setList] = useState([]);
 
   const swapItem = useCallback((fromPosition, toPosition) => {
-    setList(list => {
-      const fromitem = list[fromPosition];
-      const newlist = [...list];
-      newlist[fromPosition] = newlist[toPosition];
-      newlist[toPosition] = fromitem;
-      return newlist;
+    setList((list) => {
+      if (list[fromPosition] && list[toPosition]) {
+        // 不能用moveop, 要用setop
+        const op =[
+          json1.replaceOp([fromPosition], list[fromPosition], list[toPosition]),
+          json1.replaceOp([toPosition], list[toPosition], list[fromPosition])
+        ].reduce(json1.type.compose, null);
+        event.emit('op', op);
+        return json1.type.apply(list, op);
+      }
+      return list;
     });
   }, []);
 
