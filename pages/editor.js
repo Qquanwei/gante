@@ -53,7 +53,6 @@ export default function Editor() {
 
   const onInputChange = useCallback((value) => {
     if (value) {
-      console.log('invoke calback');
       ganteRef.current.createNewItem({
         title: value,
         startTime: Date.now(),

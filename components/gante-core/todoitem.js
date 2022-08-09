@@ -19,7 +19,6 @@ export default function TodoItem({ item }) {
   const onSubmit = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('submit')
     const formData = new FormData(e.currentTarget);
     updateItemTitle(item.id, formData.get('title'));
     setMode('preview');

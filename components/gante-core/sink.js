@@ -28,7 +28,7 @@ export default function Sink() {
             <line key={index}
                   x1={0} y1={(index + 1) * SINK_HEIGHT}
                   x2="100%" y2={(index + 1) * SINK_HEIGHT}
-                  className="stroke-gray-400 stroke"
+                  className="stroke-gray-400/25 stroke"
             />
           );
         })

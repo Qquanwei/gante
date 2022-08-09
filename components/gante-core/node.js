@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import moment from 'moment';
 import useGante from './useGante';
 import useInteractionEvent from './use-interaction-event';
+import NodeControlPanel from './node-control-panel';
 import { positionToDay } from './utils';
 
 function Node({ item, index, swap }) {
@@ -14,6 +15,10 @@ function Node({ item, index, swap }) {
     setCurrentId,
     setTempLine
   } = useGante();
+  const [contextInfo, setContextInfo] = useState({
+    show: false,
+    point: null
+  });
 
   const { SINK_HEIGHT } = useGante();
   const [hover, setHover] = useState(false);
@@ -36,6 +41,9 @@ function Node({ item, index, swap }) {
         if (args) {
           setCurrentId(item.id);
         } else {
+          setContextInfo({
+            show: false
+          });
           setCurrentId(null);
         }
         break;
@@ -55,6 +63,9 @@ function Node({ item, index, swap }) {
         {
           const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left).valueOf();
           const newEndTime = positionToDay(SPOT_WIDTH, startTime, args.left + width).valueOf();
+          setContextInfo({
+            show: false
+          });
           updateItemDate(
             item.id,
             newBeginTime,
@@ -79,6 +90,17 @@ function Node({ item, index, swap }) {
           }
         }
         break;
+
+      case 'click':
+        {
+          if (args) {
+            const { point } = args;
+            setContextInfo({
+              show: !contextInfo.show,
+              point
+            });
+          }
+        }
       default:
         break;
       }
@@ -87,24 +109,32 @@ function Node({ item, index, swap }) {
 
   return (
     <div ref={ref}
-         className="bg-white absolute select-none text-left flex items-center box-border whitespace-nowrap hover:bg-amber-500 hover:cursor-pointer shadow shadow-gray-500 hover:shadow-red-400"
+         className={classNames("bg-white absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all", {
+           'cursor-pointer outline outline-sky-500 outline-2': hover
+         })}
          style={{
            left,
-           top: index * SINK_HEIGHT + 1,
-           height: SINK_HEIGHT - 2,
-           width: width + SPOT_WIDTH
+           top: index * SINK_HEIGHT + 2,
+           height: SINK_HEIGHT- 4,
+           width: width + SPOT_WIDTH,
+           color: item.fgcolor || '#000',
+           background: item.color || '#eee'
          }}>
       <div className="flex-start" data-role="left-dragger"></div>
       <span className="grow px-2">
         { item.title }
       </span>
       <div className="flex-end" data-role="right-dragger"></div>
+      <div data-role="ignore-events">
+        <NodeControlPanel node={item} contextInfo={contextInfo} left={left} hover={hover}/>
+      </div>
     </div>
   );
 }
 
 export default function Nodes() {
   const { list, swapItem } = useGante();
+  const [showNodeContext, setShowNodeContext] = useState(null);
 
   const swap = useCallback((fromItem, toPosition) => {
     swapItem(list.indexOf(fromItem), toPosition);

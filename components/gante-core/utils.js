@@ -10,6 +10,11 @@ Position.prototype.diff = function(a) {
     );
 }
 
+/* 仅用来表示距离的程度，没有绝对意义，仅在小范围内有相对意义 */
+Position.prototype.Edistance = function(a) {
+  return Math.abs(this.x - a.x) + Math.abs(this.y - a.y);
+}
+
 export function inherit(Super, Child) {
     function NewChild() {
         Super.apply(this, arguments);

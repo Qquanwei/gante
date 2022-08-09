@@ -77,6 +77,38 @@ function Provider({ children, forwardRef }) {
     setList(json1.type.apply(list, op));
   }, [list]);
 
+  const updateItemColor = useCallback((id, bgcolor, fgcolor) => {
+    const index = list.findIndex(item => item.id === id);
+    let op = null;
+    if (list[index].color) {
+      op = [
+        json1.replaceOp(
+          [index, 'color'],
+          list[index].color,
+          bgcolor
+        ),
+        json1.replaceOp(
+          [index, 'fgcolor'],
+          list[index].fgcolor,
+          fgcolor
+        )
+      ].reduce(json1.type.compose, null);
+    } else {
+      op = [
+        json1.insertOp(
+          [index, 'color'],
+          bgcolor
+        ),
+        json1.insertOp(
+          [index, 'fgcolor'],
+          fgcolor
+        )
+      ].reduce(json1.type.compose, null);
+    }
+    event.emit('op', op);
+    setList(json1.type.apply(list, op));
+  }, [list]);
+
   const createNewItem = useCallback(({ title, startTime, endTime }) => {
     const newItem = {
       id: makeId(),
@@ -117,13 +149,14 @@ function Provider({ children, forwardRef }) {
       currentId,
       updateItemDate,
       updateItemTitle,
+      updateItemColor,
       setCurrentId,
       tempLine,
       setTempLine,
       list,
       listMap
     };
-  }, [list, currentId, tempLine, listMap, updateItemTitle, updateItemDate]);
+  }, [list, currentId, updateItemColor, tempLine, listMap, updateItemTitle, updateItemDate]);
 
   return (
     <Context.Provider value={contextValue}>
