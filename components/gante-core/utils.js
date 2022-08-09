@@ -38,6 +38,6 @@ export function getPosition(graphEle, event) {
 
 // 将鼠标坐标转化成天数
 import moment from 'moment';
-export function positionToDay(SPOT_WIDTH, startTime, left) {
-    return moment(startTime).add(Math.ceil(left / SPOT_WIDTH), 'days');
+export function positionToDay(SPOT_WIDTH, startTime, left, paddingFunction = Math.floor) {
+  return moment(startTime).startOf('day').add(paddingFunction(left / SPOT_WIDTH), 'days');
 }

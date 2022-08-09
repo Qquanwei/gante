@@ -5,6 +5,7 @@ import useGante from './useGante';
 import useInteractionEvent from './use-interaction-event';
 import NodeControlPanel from './node-control-panel';
 import { positionToDay } from './utils';
+import DraggleBar from './draggle-bar';
 
 function Node({ item, index, swap }) {
   const {
@@ -51,9 +52,9 @@ function Node({ item, index, swap }) {
       case 'resize':
         {
           const newBeginTime = positionToDay(
-            SPOT_WIDTH, startTime, (args.left || left)).valueOf();
+            SPOT_WIDTH, startTime, (args.left || left), Math.floor).valueOf();
           const newEndTime = positionToDay(
-            SPOT_WIDTH, startTime, (args.left || left) + args.width
+            SPOT_WIDTH, startTime, (args.left || left) + args.width, Math.ceil
           ).valueOf();
           updateItemDate(item.id, newBeginTime, newEndTime);
         }
@@ -110,7 +111,7 @@ function Node({ item, index, swap }) {
   return (
     <div ref={ref}
          className={classNames("bg-white absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all", {
-           'cursor-pointer outline outline-sky-500 outline-2': hover
+           'cursor-pointer outline outline-sky-400 outline-2': hover
          })}
          style={{
            left,
@@ -120,11 +121,19 @@ function Node({ item, index, swap }) {
            color: item.fgcolor || '#000',
            background: item.color || '#eee'
          }}>
-      <div className="flex-start" data-role="left-dragger"></div>
+      <div className={classNames("flex-start h-full", {
+             hidden: !hover
+           })}
+           data-role="left-dragger">
+        <DraggleBar />
+      </div>
       <span className="grow px-2">
         { item.title }
       </span>
-      <div className="flex-end" data-role="right-dragger"></div>
+      <div className={classNames("flex-end h-full",{ hidden: !hover })}
+           data-role="right-dragger">
+        <DraggleBar />
+      </div>
       <div data-role="ignore-events">
         <NodeControlPanel node={item} contextInfo={contextInfo} left={left} hover={hover}/>
       </div>

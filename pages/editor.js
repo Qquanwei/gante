@@ -44,6 +44,10 @@ export default function Editor() {
           ganteRef.current.setList(doc.toSnapshot().data);
         }
       });
+
+      doc.on('error', (error) => {
+        console.log('error', error);
+      });
     });
 
     return () => {

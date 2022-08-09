@@ -6,7 +6,7 @@ const HEIGHT = 45;
 
 // <bg, fg> colorpair
 const colors = [
-  ['#7FDEFF', '#fff'],
+  ['#CDC6A5', '#000'],
   ['#AA767C', '#fff'],
   ['#7FBEEB', '#fff'],
   ['#134074', '#fff'],

@@ -3,6 +3,7 @@ import moment from 'moment';
 import classNames from 'classnames';
 import useCurrentDate from './useCurrentDate';
 import useGante from './useGante';
+import TimelineStatusBar from './timeline-status-bar';
 /*
   展示时间轴，横轴
 */
@@ -33,7 +34,7 @@ export default function Timeline({ children }) {
 
   return (
     <div className="relative">
-      <div className="sticky flex flex-nowrap">
+      <div className="sticky flex flex-nowrap top-0 z-10 bg-white pb-5">
         {
           (() => {
             let ans = [];
@@ -54,15 +55,16 @@ export default function Timeline({ children }) {
                   {
                     moment(startTime).add(i, 'days').format('M.DD')
                   }
-                  <span>{ getDaySubtitle(moment(startTime).add(i, 'day'))}</span>
+                  <span className="text-xs">{ getDaySubtitle(moment(startTime).add(i, 'day'))}</span>
                 </div>
               );
             }
             return ans;
           })()
         }
+        <TimelineStatusBar />
       </div>
-      <div className="absolute top-10 w-full">
+      <div className="absolute top-16 w-full">
         { children }
       </div>
     </div>

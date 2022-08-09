@@ -165,7 +165,6 @@ ResizeState.prototype.onMouseMove = function(e) {
   const currentPosition = getPosition(this.machine.getGraphElement(), e);
   const { x } = currentPosition.diff(this.initPosition);
   const element = this.machine.getElement();
-
   if (this.mode === 'left') {
     this.machine.emit('resize', {
       width: this.initWidth - x,

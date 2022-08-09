@@ -15,8 +15,6 @@ export default function StatusBar({ className }) {
             {
                 node ? (
                     <div>
-                        <span>{new Date(node.startTime).toString()}</span>,
-                        <span>{new Date(node.endTime).toString()}</span>
                     </div>
                 ) : null
             }
