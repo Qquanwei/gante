@@ -127,11 +127,15 @@ NormalState.prototype.onMouseUp = function(e) {
 }
 
 NormalState.prototype.onMouseOver = function(e) {
-  this.machine.emit('hover', true);
+  if (!globalHoverLock) {
+    this.machine.emit('hover', true);
+  }
 }
 
 NormalState.prototype.onMouseLeave = function(e) {
-  this.machine.emit('hover', false);
+  if (!globalHoverLock) {
+    this.machine.emit('hover', false);
+  }
 }
 
 NormalState.prototype.onMouseMove = function(e) {
@@ -159,9 +163,11 @@ ResizeState.prototype.mount = function() {
   this.initWidth = this.machine.getElement().offsetWidth;
   this.initLeft = this.machine.getElement().offsetLeft;
   globalHoverLock = true;
+  this.machine.emit('lock-item', true);
 }
 ResizeState.prototype.onMouseUp = function() {
   this.machine.switchMode(new NormalState());
+  this.machine.emit('lock-item', false);
   globalHoverLock = false;
 }
 
@@ -172,7 +178,7 @@ ResizeState.prototype.onMouseMove = function(e) {
   if (this.mode === 'left') {
     this.machine.emit('resize', {
       left: this.initLeft + x
-    })
+    });
   } else {
     this.machine.emit('resize', {
       width: this.initWidth + x
@@ -234,6 +240,9 @@ SortState.prototype.mount = function() {
   this.clone.classList.remove('transition-all');
   graph.appendChild(this.clone);
   element.classList.add('opacity-0');
+
+  globalHoverLock = true;
+  this.machine.emit('lock-item', true);
 }
 
 SortState.prototype.unmount = function() {
@@ -241,6 +250,7 @@ SortState.prototype.unmount = function() {
   const graph = this.machine.getGraphElement();
   graph.removeChild(this.clone);
   this.machine.getElement().classList.remove('opacity-0');
+  this.machine.emit('lock-item', false);
 }
 
 SortState.prototype.onMouseUp = function() {
@@ -249,6 +259,7 @@ SortState.prototype.onMouseUp = function() {
 
 SortState.prototype.onMouseMove = function(event) {
   const position = getPosition(this.machine.getGraphElement(), event);
+  this.machine.getElement().classList.add('opacity-0');
   this.clone.style.top = position.y + 'px';
   this.machine.emit('sort', {
     position

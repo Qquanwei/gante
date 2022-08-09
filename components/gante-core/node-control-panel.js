@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import useGante from './useGante';
 
 const HEIGHT = 45;
+const WIDTH = 270;
 
 // <bg, fg> colorpair
 const colors = [
@@ -14,7 +15,7 @@ const colors = [
 ];
 
 function NodeControlPanel({ node, contextInfo, left, hover }) {
-  const { updateItemColor } = useGante();
+  const { updateItemColor, deleteItem } = useGante();
 
   const onClickColor = useCallback((e) => {
     const c = colors[e.currentTarget.dataset.color];
@@ -25,18 +26,22 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
     );
   }, [node.id, updateItemColor]);
 
+  const onClickDelete = useCallback(() => {
+    deleteItem(node.id);
+  }, [node.id]);
+
   return (
     <div
       style={{
-        left: (contextInfo?.point?.x || left) - left - 100,
+        left: (contextInfo?.point?.x || left) - left - (WIDTH/2),
         top: -HEIGHT,
-        width: 200,
+        width: WIDTH,
         height: HEIGHT
       }}
       className={classNames('absolute transition-all ', {
         'hidden': !contextInfo.show
       })}>
-      <div className="absolute top-0 w-full bg-gray-300/50 rounded" style={{
+      <div className="absolute top-0 w-full bg-gray-300/80 rounded" style={{
              height: HEIGHT - 10
            }}>
         <div className="flex cursor-auto items-center justify-start px-2 h-full">
@@ -47,6 +52,8 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
               )
             })
           }
+
+          <span className="px-1 ml-auto bg-white-500 text-xs cursor-pointer text-red-500 ml-2" onClick={onClickDelete}>删除</span>
           </div>
       </div>
     </div>

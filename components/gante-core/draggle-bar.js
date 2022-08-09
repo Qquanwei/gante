@@ -1,6 +1,6 @@
 function DraggleBar() {
   return (
-    <div className="h-full w-2 flex items-center justify-center bg-gray-300">
+    <div className="h-full w-2.5 flex items-center justify-center bg-gray-300">
       <div className="rounded h-full w-2/5 h-3/5 bg-white hover:outline hover:outline-sky-500"></div>
     </div>
   );

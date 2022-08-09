@@ -114,6 +114,18 @@ function Provider({ children, forwardRef }) {
     setList(json1.type.apply(list, op));
   }, [list]);
 
+  const deleteItem = useCallback((id) => {
+    setList((l) => {
+      const idx = l.findIndex(i => i.id === id);
+      if (l[idx]) {
+        const op = json1.removeOp([idx], list[idx]);
+        event.emit('op', op);
+        return json1.type.apply(l, op);
+      }
+      return l;
+    });
+  }, []);
+
   const createNewItem = useCallback(({ title, startTime, endTime }) => {
     const newItem = {
       id: makeId(),
@@ -154,6 +166,7 @@ function Provider({ children, forwardRef }) {
       currentId,
       updateItemDate,
       updateItemTitle,
+      deleteItem,
       updateItemColor,
       setCurrentId,
       tempLine,
@@ -161,7 +174,7 @@ function Provider({ children, forwardRef }) {
       list,
       listMap
     };
-  }, [list, currentId, updateItemColor, tempLine, listMap, updateItemTitle, updateItemDate]);
+  }, [list, currentId, deleteItem, updateItemColor, tempLine, listMap, updateItemTitle, updateItemDate]);
 
   return (
     <Context.Provider value={contextValue}>

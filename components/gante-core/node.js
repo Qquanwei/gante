@@ -49,6 +49,16 @@ function Node({ item, index, swap }) {
         }
         break;
 
+      case 'lock-item':
+        {
+          if (args) {
+            setCurrentId(item.id);
+          } else {
+            setCurrentId(null);
+            setHover(false);
+          }
+          break;
+        }
       case 'resize':
         {
           if (args.left) {
