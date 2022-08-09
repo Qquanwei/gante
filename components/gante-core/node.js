@@ -75,11 +75,18 @@ function Node({ item, index, swap }) {
         }
         break;
 
-      case 'swap':
-        if (Math.floor(args.top / SINK_HEIGHT) !== index) {
-          swap(item, Math.floor(args.top / SINK_HEIGHT));
+      case 'sort':
+        {
+          const { position } = args;
+          const toIndex = Math.floor(args.position.y / SINK_HEIGHT) - 2;
+          if (toIndex !== index && toIndex >= 0 && Number.isInteger(toIndex)) {
+            swap(
+              index,
+              toIndex
+            );
+          }
+          break;
         }
-        break;
 
       case 'preview-line':
         {
@@ -122,7 +129,7 @@ function Node({ item, index, swap }) {
            background: item.color || '#eee'
          }}>
       <div className={classNames("flex-start h-full", {
-             hidden: !hover
+             'opacity-0': !hover
            })}
            data-role="left-dragger">
         <DraggleBar />
@@ -130,7 +137,7 @@ function Node({ item, index, swap }) {
       <span className="grow px-2">
         { item.title }
       </span>
-      <div className={classNames("flex-end h-full",{ hidden: !hover })}
+      <div className={classNames("flex-end h-full",{ 'opacity-0': !hover })}
            data-role="right-dragger">
         <DraggleBar />
       </div>
@@ -145,8 +152,8 @@ export default function Nodes() {
   const { list, swapItem } = useGante();
   const [showNodeContext, setShowNodeContext] = useState(null);
 
-  const swap = useCallback((fromItem, toPosition) => {
-    swapItem(list.indexOf(fromItem), toPosition);
+  const swap = useCallback((fromIndex, toIndex) => {
+    swapItem(fromIndex, toIndex);
   }, [list]);
 
   return (

@@ -8,7 +8,6 @@ export default function TodoItem({ item }) {
   const onBlur = useCallback((e) => {
     const formData = new FormData(e.currentTarget);
     updateItemTitle(item.id, formData.get('title'));
-    console.log('blur')
     setMode('preview');
   }, [updateItemTitle]);
 

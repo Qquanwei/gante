@@ -47,8 +47,8 @@ export default function Timeline({ children }) {
               ans.push(
                 <div className={classNames("box-border shrink-0 flex-col h-10 text-center items-center flex justify-center", {
                        ["bg-sky-200/75"]: range,
-                       ["bg-gray-300/75"]: weekend && !range,
-                       ["bg-sky-200/100"]: weekend && range
+                       ["bg-gray-300/25"]: weekend && !range,
+                       ["bg-sky-200/20"]: weekend && range
                      })} style={{
                        width: SPOT_WIDTH,
                      }} key={i}>

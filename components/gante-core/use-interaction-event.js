@@ -87,6 +87,7 @@ NormalState.prototype.mount = function() {
   this.ignoreEventsEles = element.querySelectorAll('[data-role=ignore-events]');
 }
 
+
 NormalState.prototype.unmount = function() {
   this.leftDragger.removeEventListener('mousedown', this.leftClick);
   this.rightDragger.removeEventListener('mousedown', this.rightClick);
@@ -126,6 +127,7 @@ NormalState.prototype.onMouseUp = function(e) {
 }
 
 NormalState.prototype.onMouseOver = function(e) {
+  console.log('onMouseOver');
   this.machine.emit('hover', true);
 }
 
@@ -141,6 +143,9 @@ NormalState.prototype.onMouseMove = function(e) {
     */
     if (Math.abs(position.diff(this.mousePosition).x) > (this.machine.SPOT_WIDTH * 0.9)) {
       this.machine.switchMode(new MoveState(this.mousePosition));
+    } else if (Math.abs(position.diff(this.mousePosition).y) > (this.machine.SINK_HEIGHT * 0.6) ) {
+      // 如果上下移动即将超过一个甬道，则进入排序模式，排序模式不会触发左右移动
+      this.machine.switchMode(new SortState(this.mousePosition));
     }
   }
 }
@@ -206,9 +211,6 @@ MoveState.prototype.onMouseMove = function(e) {
   this.machine.emit('move', {
     left: Math.max(this.left + position.diff(this.initPosition).x, 0)
   });
-  // this.machine.emit('swap', {
-  //    top: Math.max(0, this.top + position.diff(this.initPosition).y)
-  // })
 }
 
 MoveState.prototype.onMouseUp = function(e) {
@@ -220,30 +222,39 @@ MoveState.prototype.onMouseUp = function(e) {
 }
 
 
-var SortState = inherit(State, function() {
-})
+var SortState = inherit(State, function(initPosition) {
+  this.initPosition = initPosition;
+});
 
 SortState.prototype.mount = function() {
-  globalHoverLock = true;
+  const graph = this.machine.getGraphElement();
+  const element = this.machine.getElement();
+  this.clone = element.cloneNode(true);
+  this.clone.id = '';
+  this.clone.classList.add('z-20');
+  this.clone.classList.add('opacity-50');
+  this.clone.classList.remove('transition-all');
+  graph.appendChild(this.clone);
+  element.classList.add('opacity-0');
 }
 
 SortState.prototype.unmount = function() {
   globalHoverLock = false;
-}
-
-SortState.prototype.onDragStart = function(event) {
-  event.dataTransfer.setData('text/plain', 'hello');
-  event.dataTransfer.dropEffect = 'move';
-  const div = document.createElement('div');
-  div.innerText = 'hello';
-  event.dataTransfer.setData('text/html', div);
+  const graph = this.machine.getGraphElement();
+  graph.removeChild(this.clone);
+  this.machine.getElement().classList.remove('opacity-0');
 }
 
 SortState.prototype.onMouseUp = function() {
   this.machine.switchMode(new NormalState());
 }
-SortState.prototype.onDragEnd = function() {
-  this.machine.switchMode(new NormalState());
+
+SortState.prototype.onMouseMove = function(event) {
+  const position = getPosition(this.machine.getGraphElement(), event);
+  this.clone.style.top = position.y + 'px';
+  this.machine.emit('sort', {
+    position
+  });
 }
 
 var AnchorConnect = inherit(State, function(event) {
@@ -269,11 +280,12 @@ AnchorConnect.prototype.onMouseMove = function(event) {
   });
 };
 
-function StateMachine({ element, graphElement, onChange, SPOT_WIDTH }) {
+function StateMachine({ element, graphElement, onChange, SPOT_WIDTH, SINK_HEIGHT }) {
   this.onChange = onChange;
   this.element = element;
   this.graphElement = graphElement;
   this.SPOT_WIDTH = SPOT_WIDTH;
+  this.SINK_HEIGHT = SINK_HEIGHT;
 
 
   this.onClick = (e) => {
@@ -366,7 +378,7 @@ StateMachine.prototype.emit = function(type, args) {
 export default function useInteractionEvent({ onChange }) {
   const ref = useRef(null);
   const onChangeRef = useRef(null);
-  const { graphRef, SPOT_WIDTH } = useGante();
+  const { graphRef, SPOT_WIDTH, SINK_HEIGHT } = useGante();
 
   onChangeRef.current = onChange;
 
@@ -374,6 +386,7 @@ export default function useInteractionEvent({ onChange }) {
     const machine = new StateMachine({
       graphElement: graphRef.current,
       SPOT_WIDTH,
+      SINK_HEIGHT,
       element: ref.current,
       onChange: (...args) => onChangeRef.current.apply(null, args)
     });

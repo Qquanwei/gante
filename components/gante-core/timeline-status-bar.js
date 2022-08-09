@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import classNames from 'classnames';
 import moment from 'moment';
 import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
@@ -37,8 +38,11 @@ function TimelineStatusBar() {
     const totalDay = moment(item.endTime).startOf('day').diff(moment(item.startTime).startOf('day'), 'days');
     return [totalDay];
   }, [item]);
+
   return (
-    <div className="absolute whitespace-nowrap text-xs bottom-0 h-5 flex justify-center border-gray-200 border-l border-r" style={{
+    <div className={classNames("absolute items-center whitespace-nowrap text-xs bottom-0 h-5 flex justify-center border-gray-200 border-l border-r", {
+           hidden: !currentId
+         })} style={{
            left,
            width
          }}>
