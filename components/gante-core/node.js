@@ -51,12 +51,24 @@ function Node({ item, index, swap }) {
 
       case 'resize':
         {
-          const newBeginTime = positionToDay(
-            SPOT_WIDTH, startTime, (args.left || left), Math.floor).valueOf();
-          const newEndTime = positionToDay(
-            SPOT_WIDTH, startTime, (args.left || left) + args.width, Math.ceil
-          ).valueOf();
-          updateItemDate(item.id, newBeginTime, newEndTime);
+          if (args.left) {
+            const newBeginTime = positionToDay(
+              SPOT_WIDTH,
+              startTime,
+              args.left,
+              Math.floor
+            ).valueOf();
+            updateItemDate(item.id, newBeginTime, item.endTime);
+          }
+          if (args.width) {
+            const newEndTime = positionToDay(
+              SPOT_WIDTH,
+              startTime,
+              (args.left || left) + args.width,
+              Math.floor
+            ).valueOf();
+            updateItemDate(item.id, item.startTime, newEndTime);
+          }
         }
         break;
 

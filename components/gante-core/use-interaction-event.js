@@ -171,7 +171,6 @@ ResizeState.prototype.onMouseMove = function(e) {
   const element = this.machine.getElement();
   if (this.mode === 'left') {
     this.machine.emit('resize', {
-      width: this.initWidth - x,
       left: this.initLeft + x
     })
   } else {
