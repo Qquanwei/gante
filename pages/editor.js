@@ -14,7 +14,7 @@ export default function Editor() {
   const ganteRef = useRef(null);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://192.168.1.2:9081/');
+    const socket = new WebSocket('ws://localhost:9081/');
 
     socket.addEventListener('open', () => {
       const connection = new Connection(socket);

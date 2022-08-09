@@ -19,12 +19,12 @@ function Node({ item, index, swap }) {
   const [hover, setHover] = useState(false);
 
   const width = useMemo(() => {
-    const day = moment(item.endTime).diff(moment(item.startTime), 'days') || 0;
+    const day = moment(item.endTime).diff(moment(item.startTime).startOf('day'), 'days');
     return day * SPOT_WIDTH;
   }, [item.startTime, item.endTime]);
 
   const left = useMemo(() => {
-    const day = moment(item.startTime).diff(moment(startTime), 'days');
+    const day = moment(item.startTime).diff(moment(startTime).startOf('day'), 'days');
     return day * SPOT_WIDTH;
   }, [item.startTime, startTime]);
 
@@ -87,18 +87,18 @@ function Node({ item, index, swap }) {
 
   return (
     <div ref={ref}
-         className="absolute border-2 border-black select-none text-left flex items-center box-border whitespace-nowrap hover:bg-amber-500 hover:cursor-pointer"
+         className="bg-white absolute select-none text-left flex items-center box-border whitespace-nowrap hover:bg-amber-500 hover:cursor-pointer shadow shadow-gray-500 hover:shadow-red-400"
          style={{
            left,
-           top: index * SINK_HEIGHT,
-           height: SINK_HEIGHT,
+           top: index * SINK_HEIGHT + 1,
+           height: SINK_HEIGHT - 2,
            width: width + SPOT_WIDTH
          }}>
-      <div className="flex-start" data-role="left-dragger">::</div>
+      <div className="flex-start" data-role="left-dragger"></div>
       <span className="grow px-2">
         { item.title }
       </span>
-      <div className="flex-end" data-role="right-dragger">::</div>
+      <div className="flex-end" data-role="right-dragger"></div>
     </div>
   );
 }

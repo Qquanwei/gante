@@ -18,7 +18,7 @@ export default function Sink() {
 
   const currentTime = useCurrentDate();
 
-  const OFFSET_DAY = moment(currentTime).diff(moment(startTime), 'days');
+  const OFFSET_DAY = moment(currentTime).startOf('day').diff(startTime, 'days');
 
   return (
     <svg width="100%" height="100%" style={{ height: list.length * SINK_HEIGHT}}className="pointer-events-none">
@@ -28,20 +28,20 @@ export default function Sink() {
             <line key={index}
                   x1={0} y1={(index + 1) * SINK_HEIGHT}
                   x2="100%" y2={(index + 1) * SINK_HEIGHT}
-                  className="stroke-black stroke-1"
+                  className="stroke-gray-400 stroke"
             />
           );
         })
       }
 
       {/* 当前的线 */}
-      <line
-        x1={SPOT_WIDTH * OFFSET_DAY + SPOT_WIDTH / 2}
-        x2={SPOT_WIDTH * OFFSET_DAY + SPOT_WIDTH / 2}
-        y1="0"
-        y2="100%"
-        className="stroke-red-500 stroke-1"
-      ></line>
+      <rect
+        width={SPOT_WIDTH}
+        height="100%"
+        x={SPOT_WIDTH * OFFSET_DAY}
+        y="0"
+        className="fill-red-500/25"
+      ></rect>
 
       {
         tempLine ? (

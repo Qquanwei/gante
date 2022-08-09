@@ -6,7 +6,7 @@ function Input({ onChange, placeholder }) {
   const onSubmit = useCallback((event) => {
     event.stopPropagation();
     event.preventDefault();
-    if (onChange) {
+    if (onChange && iptRef.current.value) {
       const form = new FormData(event.target);
       onChange(form.get('input'));
       iptRef.current.value = '';
