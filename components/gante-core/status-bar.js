@@ -3,21 +3,10 @@ import classNames from 'classnames';
 import useGante from './useGante';
 
 
-export default function StatusBar({ className }) {
-    const { list, currentId } = useGante();
-
-    const node = useMemo(() => {
-        return list.filter(v => v.id === currentId)[0];
-    }, [list, currentId]);
-
-    return (
-        <div className={classNames(className, 'gante-status-bar')}>
-            {
-                node ? (
-                    <div>
-                    </div>
-                ) : null
-            }
-        </div>
-    );
+export default function StatusBar({ className, children }) {
+  return (
+    <div className={classNames(className, 'h-5 flex items-center px-3 bg-gray-500/25')}>
+      { children }
+    </div>
+  );
 }

@@ -1,7 +1,7 @@
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useCallback, useState, useRef, Fragment } from 'react';
 import WebSocket from 'reconnecting-websocket';
+import classNames from 'classnames';
 import * as json1 from 'ot-json1';
-// import io from 'socket.io-client';
 import Client, { Connection } from 'sharedb/lib/client';
 import { Container, LeftSide, Content } from '../components/layout';
 import { GanteProvider, GanteGraph, StatusBar } from '../components/gante-core';
@@ -11,10 +11,11 @@ import Sidebar from '../components/sidebar';
 Client.types.register(json1.type);
 // 左边是一个TODO，右边是一个Gante
 export default function Editor() {
+  const [connected, setConnected] = useState(false);
   const ganteRef = useRef(null);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:9081/');
+    const socket = new WebSocket('ws://192.168.1.2:9081/');
 
     socket.addEventListener('open', () => {
       const connection = new Connection(socket);
@@ -31,6 +32,8 @@ export default function Editor() {
           // doc.del();
           ganteRef.current.setList(doc.data);
         }
+
+        setConnected(true);
 
         let ops = [];
         let timer = null;
@@ -83,7 +86,16 @@ export default function Editor() {
         <Content>
           <GanteGraph />
         </Content>
-      <StatusBar className="fixed bottom-0"/>
+        <StatusBar className="fixed bottom-0 left-0 z-10 w-30">
+          <Fragment>
+            <span className={classNames("shrink-0 block rounded-full w-3 h-3", !connected ? 'bg-gray-300' : 'bg-green-500' )}></span>
+            <span className="text-xs ml-2 inline-block whitespace-nowrap">
+              {
+                connected ? '连接成功' : '连接失败'
+              }
+            </span>
+          </Fragment>
+        </StatusBar>
       </Container>
     </GanteProvider>
   );

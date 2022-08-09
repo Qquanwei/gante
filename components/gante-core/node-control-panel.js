@@ -38,7 +38,7 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
         width: WIDTH,
         height: HEIGHT
       }}
-      className={classNames('absolute transition-all ', {
+      className={classNames('absolute z-10 transition-all ', {
         'hidden': !contextInfo.show
       })}>
       <div className="absolute top-0 w-full bg-gray-300/80 rounded" style={{
