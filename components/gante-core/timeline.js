@@ -34,7 +34,7 @@ export default function Timeline({ children }) {
 
   return (
     <div className="relative">
-      <div className="sticky flex flex-nowrap top-0 z-10 bg-white pb-5">
+      <div className="sticky shadow flex flex-nowrap top-0 z-10 bg-white pb-5">
         {
           (() => {
             let ans = [];

@@ -13,11 +13,12 @@
 
 import ReactDOM from 'react-dom';
 import { useRef, useEffect} from 'react';
-import { inherit, getPosition } from './utils';
+import { inherit, getPosition, hasProp, getEleRect } from './utils';
 import useGante from './useGante';
 
 // 如果 globalHoverLock = true, 表示此时全局禁用hover事件。
 let globalHoverLock = false;
+let globalDropLock = false;
 
 function State() {
 }
@@ -46,6 +47,13 @@ State.prototype.onDragStart = () => {
 State.prototype.onDragEnd = () => {
 }
 
+// 当任意一个元素mouseover触发(不仅仅是自己)
+State.prototype.onInteractionMouseOver = () => {
+}
+// 当任意一个元素mouseleave触发(同上)
+State.prototype.onInteractionMouseLeave = () => {
+}
+
 State.prototype.onDrop = () => {
 }
 
@@ -66,7 +74,7 @@ NormalState.prototype.mount = function() {
   const element = this.machine.getElement();
   this.leftDragger = element.querySelector('[data-role=left-dragger]');
   this.rightDragger = element.querySelector('[data-role=right-dragger]');
-  //this.anchor = element.querySelector('[data-role=anchor]');
+  this.anchor = element.querySelector('[data-role=anchor]');
 
   this.leftClick = (e) => {
     this.machine.switchMode(new ResizeState('left', getPosition(this.machine.getGraphElement(), e)));
@@ -77,12 +85,12 @@ NormalState.prototype.mount = function() {
   };
 
   this.anchorClick = (e) => {
-    this.machine.switchMode(new AnchorConnect(e));
+    this.machine.switchMode(new AnchorConnect(e, this.anchor));
   };
 
   this.leftDragger.addEventListener('mousedown', this.leftClick);
   this.rightDragger.addEventListener('mousedown', this.rightClick);
-  // this.anchor.addEventListener('mousedown', this.anchorClick);
+  this.anchor.addEventListener('mousedown', this.anchorClick);
 
   this.ignoreEventsEles = element.querySelectorAll('[data-role=ignore-events]');
 }
@@ -91,17 +99,17 @@ NormalState.prototype.mount = function() {
 NormalState.prototype.unmount = function() {
   this.leftDragger.removeEventListener('mousedown', this.leftClick);
   this.rightDragger.removeEventListener('mousedown', this.rightClick);
-  // this.anchor.removeEventListener('mousedown', this.anchorClick);
+  this.anchor.removeEventListener('mousedown', this.anchorClick);
 }
 
 NormalState.prototype.onMouseDown = function(e) {
-  e.preventDefault();
-  e.stopPropagation();
   for (let ignoreE of this.ignoreEventsEles) {
     if (ignoreE.contains(e.target)) {
       return;
     }
   }
+  e.preventDefault();
+  e.stopPropagation();
   this.mousedown = true;
   this.mousePosition = getPosition(this.machine.getGraphElement(), e);
 }
@@ -124,18 +132,29 @@ NormalState.prototype.onMouseUp = function(e) {
     });
   }
   this.mousedown = false;
-}
+};
 
-NormalState.prototype.onMouseOver = function(e) {
+NormalState.prototype.onMouseOver = function() {
   if (!globalHoverLock) {
     this.machine.emit('hover', true);
   }
-}
+  const e = new CustomEvent('interaction-mouseover', {
+    detail: {
+      target: this.machine.getElement(),
+      nodeId: this.machine.nodeId
+    }
+  });
+  this.machine.getGraphElement().dispatchEvent(e);
+};
 
-NormalState.prototype.onMouseLeave = function(e) {
-  if (!globalHoverLock) {
-    this.machine.emit('hover', false);
-  }
+NormalState.prototype.onMouseLeave = function() {
+  this.machine.emit('hover', false);
+  const e = new CustomEvent('interaction-mouseleave', {
+    detail: {
+      target: this.machine.getElement()
+    }
+  });
+  this.machine.getGraphElement().dispatchEvent(e);
 }
 
 NormalState.prototype.onMouseMove = function(e) {
@@ -145,10 +164,14 @@ NormalState.prototype.onMouseMove = function(e) {
       当即将移动到一个格子的时候，进入移动状态
     */
     if (Math.abs(position.diff(this.mousePosition).x) > (this.machine.SPOT_WIDTH * 0.9)) {
-      this.machine.switchMode(new MoveState(this.mousePosition));
+      if (this.machine.enableFeature('move')) {
+        this.machine.switchMode(new MoveState(this.mousePosition));
+      }
     } else if (Math.abs(position.diff(this.mousePosition).y) > (this.machine.SINK_HEIGHT * 0.5) ) {
       // 如果上下移动即将超过一个甬道，则进入排序模式，排序模式不会触发左右移动
-      this.machine.switchMode(new SortState(this.mousePosition));
+      if (this.machine.enableFeature('sort')) {
+        this.machine.switchMode(new SortState(this.mousePosition));
+      }
     }
   }
 }
@@ -163,13 +186,22 @@ ResizeState.prototype.mount = function() {
   this.initWidth = this.machine.getElement().offsetWidth;
   this.initLeft = this.machine.getElement().offsetLeft;
   globalHoverLock = true;
-  this.machine.emit('lock-item', true);
-}
-ResizeState.prototype.onMouseUp = function() {
-  this.machine.switchMode(new NormalState());
-  this.machine.emit('lock-item', false);
+  this.machine.emit('lock-item', {
+    lock: true
+  });
+};
+
+ResizeState.prototype.unmount = function() {
   globalHoverLock = false;
-}
+};
+
+ResizeState.prototype.onMouseUp = function(e) {
+  this.machine.emit('lock-item', {
+    lock: false,
+    hover: this.machine.getElement().contains(e.target)
+  });
+  this.machine.switchMode(new NormalState());
+};
 
 ResizeState.prototype.onMouseMove = function(e) {
   const currentPosition = getPosition(this.machine.getGraphElement(), e);
@@ -197,10 +229,12 @@ MoveState.prototype.mount = function() {
   globalHoverLock = true;
 
   this.ignoreEventsEles = element.querySelectorAll('[data-role=ignore-events]');
+  this.machine.emit('enter-move');
 }
 
 MoveState.prototype.unmount = function() {
   globalHoverLock = false;
+  this.machine.emit('leave-move');
 }
 
 MoveState.prototype.onMouseMove = function(e) {
@@ -242,18 +276,26 @@ SortState.prototype.mount = function() {
   element.classList.add('opacity-0');
 
   globalHoverLock = true;
-  this.machine.emit('lock-item', true);
+  this.machine.emit('lock-item', {
+    lock: true
+  });
+
+  this.machine.emit('enter-sort');
 }
 
 SortState.prototype.unmount = function() {
-  globalHoverLock = false;
   const graph = this.machine.getGraphElement();
   graph.removeChild(this.clone);
   this.machine.getElement().classList.remove('opacity-0');
-  this.machine.emit('lock-item', false);
+  globalHoverLock = false;
+  this.machine.emit('leave-sort');
 }
 
-SortState.prototype.onMouseUp = function() {
+SortState.prototype.onMouseUp = function(e) {
+  this.machine.emit('lock-item', {
+    lock: false,
+    hover: this.machine.getElement().contains(e.target)
+  });
   this.machine.switchMode(new NormalState());
 }
 
@@ -266,36 +308,82 @@ SortState.prototype.onMouseMove = function(event) {
   });
 }
 
-var AnchorConnect = inherit(State, function(event) {
+var AnchorConnect = inherit(State, function(event, anchorEle) {
   this.initEvent = event;
+  this.anchorEle = anchorEle;
 });
+
 
 AnchorConnect.prototype.mount = function() {
   this.initPosition = getPosition(this.machine.getGraphElement(), this.initEvent);
-}
+  this.machine.emit('lock-item', { lock: true});
+  globalHoverLock = true;
+
+  this.pointStart = getEleRect(this.machine.getGraphElement(), this.anchorEle).center();
+
+  const graph = this.machine.getGraphElement();
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+  svg.setAttributeNS(null, 'class', 'absolute left-0 top-0 z-10 pointer-events-none');
+  svg.setAttributeNS(null, 'width', '100%');
+  svg.setAttributeNS(null, 'height', '100%');
+
+  this.svg = svg;
+  graph.appendChild(svg);
+
+  this.path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+  this.path.setAttributeNS(null, 'class', 'stroke-2 stroke-sky-500');
+  this.path.setAttributeNS(null, 'fill', 'transparent');
+  this.svg.appendChild(this.path);
+};
+
 AnchorConnect.prototype.unmount = function() {
-  this.machine.emit('preview-line', null);
+  globalHoverLock = false;
+  this.machine.getGraphElement().removeChild(this.svg);
+};
+
+import { connectTo } from './svgtool';
+// 当自定义mouseover到别的元素上时
+AnchorConnect.prototype.onInteractionMouseOver = function(e) {
+  this.mouseOverEle = e.detail.target;
+  this.targetNodeId = e.detail.nodeId;
+  const point = getEleRect(this.machine.getGraphElement(), this.mouseOverEle).leftCenter();
+  const d = connectTo(this.pointStart, point);
+  this.path.setAttributeNS(null, 'd', d);
 }
 
-AnchorConnect.prototype.onMouseUp = function() {
+AnchorConnect.prototype.onInteractionMouseLeave = function() {
+  this.mouseOverEle = null;
+};
+
+AnchorConnect.prototype.onMouseUp = function(e) {
   this.machine.switchMode(new NormalState());
-}
-
-AnchorConnect.prototype.onMouseMove = function(event) {
-  const currentPosition = getPosition(this.machine.getGraphElement(), event);
-  this.machine.emit('preview-line', {
-    from: this.initPosition,
-    to: currentPosition
+  if (this.mouseOverEle) {
+    this.machine.emit('connect', {
+      targetNodeId: this.targetNodeId
+    });
+  }
+  this.machine.emit('lock-item', {
+    lock: false,
+    hover: this.machine.getElement().contains(e.target)
   });
 };
 
-function StateMachine({ element, graphElement, onChange, SPOT_WIDTH, SINK_HEIGHT }) {
+AnchorConnect.prototype.onMouseMove = function(event) {
+  if (!this.mouseOverEle) {
+    const currentPosition = getPosition(this.machine.getGraphElement(), event);
+    const d = connectTo(this.pointStart, currentPosition);
+    this.path.setAttributeNS(null, 'd', d);
+  }
+};
+
+function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SINK_HEIGHT }, featuresRef) {
   this.onChange = onChange;
   this.element = element;
+  this.nodeId = nodeId;
   this.graphElement = graphElement;
   this.SPOT_WIDTH = SPOT_WIDTH;
   this.SINK_HEIGHT = SINK_HEIGHT;
-
+  this.featuresRef = featuresRef;
 
   this.onClick = (e) => {
     this.currentState.onClick(e);
@@ -315,23 +403,31 @@ function StateMachine({ element, graphElement, onChange, SPOT_WIDTH, SINK_HEIGHT
 
   this.onMouseOver = (e) => {
     this.currentState.onMouseOver(e);
-  }
+  };
 
   this.onMouseLeave = (e) => {
     this.currentState.onMouseLeave(e);
-  }
+  };
 
   this.onDragStart = (e) => {
     this.currentState.onDragStart(e);
-  }
+  };
 
   this.onDragEnd = (e) => {
     this.currentState.onDragEnd(e);
-  }
+  };
 
   this.onDrop = (e) => {
     this.currentState.onDrop(e);
-  }
+  };
+
+  this.onInteractionMouseOver = (e) => {
+    this.currentState.onInteractionMouseOver(e);
+  };
+
+  this.onInteractionMouseLeave = (e) => {
+    this.currentState.onInteractionMouseLeave(e);
+  };
 
   // this.element.setAttribute('draggable', "true");
   this.element.addEventListener('click', this.onClick);
@@ -341,6 +437,8 @@ function StateMachine({ element, graphElement, onChange, SPOT_WIDTH, SINK_HEIGHT
   this.element.addEventListener('dragstart', this.onDragStart);
   this.element.addEventListener('dragend', this.onDragEnd);
   this.element.addEventListener('drop', this.onDrop);
+  this.graphElement.addEventListener('interaction-mouseover', this.onInteractionMouseOver);
+  this.graphElement.addEventListener('interaction-mouseleave', this.onInteractionMouseLeave);
   this.graphElement.addEventListener('mouseup', this.onMouseUp);
   this.graphElement.addEventListener('mousemove', this.onMouseMove, { passive: true });
 
@@ -365,6 +463,12 @@ StateMachine.prototype.getElement = function() {
   return this.element;
 }
 
+StateMachine.prototype.enableFeature = function(featureName) {
+  return !hasProp(this.featuresRef.current, featureName) || (
+    this.featuresRef.current[featureName]
+  );
+};
+
 StateMachine.prototype.switchMode = function(newMode) {
   newMode.machine = this;
   if (this.currentState) {
@@ -372,37 +476,41 @@ StateMachine.prototype.switchMode = function(newMode) {
   }
   newMode.mount();
   this.currentState = newMode;
-}
+};
 
 StateMachine.prototype.getGraphElement = function() {
   return this.graphElement;
-}
+};
 
 StateMachine.prototype.emit = function(type, args) {
   ReactDOM.unstable_batchedUpdates(() => {
     this.onChange(type, args);
   });
-}
+};
 
-export default function useInteractionEvent({ onChange }) {
+const defaultFeatures = {};
+export default function useInteractionEvent(nodeId, { onChange }, enableFeatures = defaultFeatures) {
   const ref = useRef(null);
+  const featureRef = useRef(null);
   const onChangeRef = useRef(null);
   const { graphRef, SPOT_WIDTH, SINK_HEIGHT } = useGante();
 
   onChangeRef.current = onChange;
+  featureRef.current = enableFeatures;
 
   useEffect(() => {
     const machine = new StateMachine({
       graphElement: graphRef.current,
+      nodeId,
       SPOT_WIDTH,
       SINK_HEIGHT,
       element: ref.current,
       onChange: (...args) => onChangeRef.current.apply(null, args)
-    });
+    }, featureRef);
 
     return () => {
       machine.dispose();
-    }
-  }, []);
+    };
+  }, [nodeId]);
   return ref;
 }

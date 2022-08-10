@@ -7,9 +7,9 @@ export default function TodoItem({ item }) {
 
   const onBlur = useCallback((e) => {
     const formData = new FormData(e.currentTarget);
-    updateItemTitle(item.id, formData.get('title'));
+    updateItemTitle(item.id, formData.get('title'), item.remark);
     setMode('preview');
-  }, [updateItemTitle]);
+  }, [updateItemTitle, item]);
 
   const onClick = useCallback((e) => {
     setMode('edit');
@@ -19,7 +19,7 @@ export default function TodoItem({ item }) {
     e.preventDefault();
     e.stopPropagation();
     const formData = new FormData(e.currentTarget);
-    updateItemTitle(item.id, formData.get('title'));
+    updateItemTitle(item.id, formData.get('title'), item.remark);
     setMode('preview');
   }, [updateItemTitle, item]);
 

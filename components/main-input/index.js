@@ -19,8 +19,7 @@ function Input({ onChange, placeholder }) {
              placeholder={placeholder}
              name="input"
              type="text"
-             autoFocus
-             className="h-8 w-full border-0 focus:outline-0 font-bold text-xl" />
+    className="h-8 w-full border-0 focus:outline-0 font-bold text-xl" />
     </form>
   );
 }

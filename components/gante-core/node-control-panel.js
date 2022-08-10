@@ -1,9 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
+import { Transition } from '@headlessui/react';
 import classNames from 'classnames';
 import useGante from './useGante';
 
 const HEIGHT = 45;
-const WIDTH = 270;
+const WIDTH = 280;
 
 // <bg, fg> colorpair
 const colors = [
@@ -11,11 +12,13 @@ const colors = [
   ['#AA767C', '#fff'],
   ['#7FBEEB', '#fff'],
   ['#134074', '#fff'],
+  ['#000', '#fff'],
   ['#eee', '#000']
 ];
 
 function NodeControlPanel({ node, contextInfo, left, hover }) {
-  const { updateItemColor, deleteItem } = useGante();
+  const { updateItemColor, deleteItem, updateItemLock } = useGante();
+  const leftRef = useRef(0);
 
   const onClickColor = useCallback((e) => {
     const c = colors[e.currentTarget.dataset.color];
@@ -28,35 +31,55 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
 
   const onClickDelete = useCallback(() => {
     deleteItem(node.id);
-  }, [node.id]);
+  }, [node.id, deleteItem]);
+
+  const onClickLock = useCallback(() => {
+    updateItemLock(node.id, !node.lock);
+  }, [node.id, node.lock]);
+
+  const show = hover && contextInfo.show;
+
+  if (show) {
+    leftRef.current = (contextInfo?.point?.x || left) - left - (WIDTH/2);
+  }
 
   return (
-    <div
-      style={{
-        left: (contextInfo?.point?.x || left) - left - (WIDTH/2),
-        top: -HEIGHT,
-        width: WIDTH,
-        height: HEIGHT
-      }}
-      className={classNames('absolute z-10 transition-all ', {
-        'hidden': !contextInfo.show
-      })}>
-      <div className="absolute top-0 w-full bg-gray-300/80 rounded" style={{
-             height: HEIGHT - 10
-           }}>
-        <div className="flex cursor-auto items-center justify-start px-2 h-full">
-          {
-            colors.map((color, index) => {
-              return (
-                <div key={index} onClick={onClickColor} data-color={index} style={{ background: color[0], width: 24, height: 24 }} className="cursor-pointer rounded-full ml-2 border border-white"></div>
-              )
-            })
-          }
+    <Transition show={show}
+                enter="transition-opacity duration-150"
+                enterFrom="opacity-0"
+                enterTo="opacity-100" >
+      <div
+        style={{
+          left: leftRef.current,
+          top: -HEIGHT,
+          width: WIDTH,
+          height: HEIGHT
+        }}
+        className='absolute'>
+        <div className="absolute top-0 w-full bg-gray-300/80 rounded" style={{
+               height: HEIGHT - 10
+             }}>
+          <div className="flex cursor-auto items-center justify-start px-[8px] h-full">
+            {
+              colors.map((color, index) => {
+                return (
+                  <div key={index} onClick={onClickColor} data-color={index} style={{ background: color[0], width: 24, height: 24 }} className="cursor-pointer rounded-full ml-[8px] border border-white"></div>
+                )
+              })
+            }
 
-          <span className="px-1 ml-auto bg-white-500 text-xs cursor-pointer text-red-500 ml-2" onClick={onClickDelete}>删除</span>
+            <span className="ml-auto text-[12px] text-black cursor-pointer" onClick={onClickLock}>
+              {
+                node.lock ? '解锁' : '锁定'
+              }
+            </span>
+            <span className="px-1 ml-1 bg-white-500 text-[12px] cursor-pointer text-red-500" onClick={onClickDelete}>
+              删除
+            </span>
           </div>
+        </div>
       </div>
-    </div>
+    </Transition>
   );
 }
 

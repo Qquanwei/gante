@@ -1,20 +1,24 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
+import { Transition } from '@headlessui/react';
 import moment from 'moment';
 import useGante from './useGante';
 import useInteractionEvent from './use-interaction-event';
 import NodeControlPanel from './node-control-panel';
+import NodeFormModal from './node-form-modal';
 import { positionToDay } from './utils';
 import DraggleBar from './draggle-bar';
 
-function Node({ item, index, swap }) {
+function Node({ item, index }) {
   const {
     SPOT_WIDTH,
     startTime,
+    swapItem,
+    updateItemConnect,
     updateItemDate,
     currentId,
     setCurrentId,
-    setTempLine
+    setCurrentFeatures
   } = useGante();
   const [contextInfo, setContextInfo] = useState({
     show: false,
@@ -34,11 +38,12 @@ function Node({ item, index, swap }) {
     return day * SPOT_WIDTH;
   }, [item.startTime, startTime]);
 
-  const ref = useInteractionEvent({
+  const ref = useInteractionEvent(item.id, {
     onChange: (event, args) => {
       switch(event) {
       case 'hover':
         setHover(args);
+        setCurrentFeatures({});
         if (args) {
           setCurrentId(item.id);
         } else {
@@ -51,12 +56,18 @@ function Node({ item, index, swap }) {
 
       case 'lock-item':
         {
-          if (args) {
+          if (args.lock) {
             setCurrentId(item.id);
           } else {
             setCurrentId(null);
-            setHover(false);
+            setHover(args.hover);
           }
+          break;
+        }
+
+      case 'connect':
+        {
+          updateItemConnect(item.id, args.targetNodeId);
           break;
         }
       case 'resize':
@@ -82,6 +93,19 @@ function Node({ item, index, swap }) {
         }
         break;
 
+      case 'enter-move':
+        setCurrentFeatures(v => ({
+          ...v,
+          movex: true
+        }));
+        break;
+      case 'leave-move':
+        setCurrentFeatures(v => ({
+          ...v,
+          movex: false
+        }));
+        break;
+
       case 'move':
         {
           const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left).valueOf();
@@ -89,6 +113,7 @@ function Node({ item, index, swap }) {
           setContextInfo({
             show: false
           });
+
           updateItemDate(
             item.id,
             newBeginTime,
@@ -97,29 +122,30 @@ function Node({ item, index, swap }) {
         }
         break;
 
+      case 'enter-sort':
+        setCurrentFeatures(v => ({
+          ...v,
+          sort: true
+        }));
+        break;
+      case 'leave-sort':
+        setCurrentFeatures(v => ({
+          ...v,
+          sort: false
+        }));
+        break;
       case 'sort':
         {
           const { position } = args;
           const toIndex = Math.floor(args.position.y / SINK_HEIGHT) - 2;
           if (toIndex !== index && toIndex >= 0 && Number.isInteger(toIndex)) {
-            swap(
+            swapItem(
               index,
               toIndex
             );
           }
           break;
         }
-
-      case 'preview-line':
-        {
-          if (args) {
-            const { from, to } = args;
-            setTempLine({ from, to });
-          } else {
-            setTempLine(null);
-          }
-        }
-        break;
 
       case 'click':
         {
@@ -135,23 +161,30 @@ function Node({ item, index, swap }) {
         break;
       }
     }
+  }, {
+    move: !item.lock
   });
+
+  const top = index * SINK_HEIGHT + 3;
 
   return (
     <div ref={ref}
-         className={classNames("bg-white absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all", {
-           'cursor-pointer outline outline-sky-400 outline-2': hover
+         className={classNames("absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all duration-350 cursor-pointer", {
+           'rounded': !item.lock,
+           "z-10": hover,
+           'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock,
+           'outline outline-white': !hover && !item.lock
          })}
          style={{
            left,
-           top: index * SINK_HEIGHT + 2,
-           height: SINK_HEIGHT- 4,
+           top,
+           height: SINK_HEIGHT- 6,
            width: width + SPOT_WIDTH,
            color: item.fgcolor || '#000',
            background: item.color || '#eee'
          }}>
       <div className={classNames("flex-start h-full", {
-             'opacity-0': !hover
+             'opacity-0': !hover || item.lock
            })}
            data-role="left-dragger">
         <DraggleBar />
@@ -159,31 +192,43 @@ function Node({ item, index, swap }) {
       <span className="grow px-2">
         { item.title }
       </span>
-      <div className={classNames("flex-end h-full",{ 'opacity-0': !hover })}
+
+      <div data-role="ignore-events">
+
+        <NodeControlPanel node={item} contextInfo={contextInfo} left={left} hover={hover}/>
+
+        <NodeFormModal node={item} contextInfo={contextInfo} top={top} left={left} hover={hover}/>
+
+        <div className={classNames("absolute left-full w-7 flex top-0 items-center", {
+               hidden: !hover && !(item.connectTo && item.connectTo.length !== 0)
+             })} style={{ height: SINK_HEIGHT - 6 }}>
+          <div data-role="anchor" className="absolute right-1 w-2 h-2 rounded-full bg-sky-500 ring ring-gray-100 ring-offset-gray-300"></div>
+        </div>
+
+
+      </div>
+      <div className={classNames("ml-auto sticky right-2 text-xs mr-2", { hidden: !item.lock })}>
+        锁定
+      </div>
+
+      <div className={classNames("flex-end h-full",{ 'opacity-0': !hover || item.lock })}
            data-role="right-dragger">
         <DraggleBar />
-      </div>
-      <div data-role="ignore-events">
-        <NodeControlPanel node={item} contextInfo={contextInfo} left={left} hover={hover}/>
       </div>
     </div>
   );
 }
 
 export default function Nodes() {
-  const { list, swapItem } = useGante();
+  const { list } = useGante();
   const [showNodeContext, setShowNodeContext] = useState(null);
-
-  const swap = useCallback((fromIndex, toIndex) => {
-    swapItem(fromIndex, toIndex);
-  }, [list]);
 
   return (
     <div>
       {
         list.map((item, index) => {
           return (
-            <Node item={item} key={item.id} index={index} swap={swap} />
+            <Node item={item} key={item.id} index={index} />
           );
         })
       }

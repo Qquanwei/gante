@@ -40,13 +40,15 @@ function TimelineStatusBar() {
   }, [item]);
 
   return (
-    <div className={classNames("absolute items-center whitespace-nowrap text-xs bottom-0 h-5 flex justify-center border-gray-200 border-l border-r", {
+    <div className={classNames("absolute bg-gray-100 items-center whitespace-nowrap text-xs bottom-0 h-5 flex justify-center border-gray-200 border-l border-r", {
            hidden: !currentId
          })} style={{
            left,
            width
          }}>
-      一共 { totalDay } 天
+      <span className="sticky right-0 left-0">
+        一共 { totalDay } 天
+      </span>
     </div>
   );
 }
