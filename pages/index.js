@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -14,7 +15,10 @@ export default function Home() {
         </div>
         <div className="text-black h-[300px] flex items-center text-blod text-[30px] absolute top-0 shadow-lg shadow-blue/50 shadow px-10 bg-[#003f5c] w-full">
           <div className="flex font-mono text-white justify-center items-center">
-            打开我的 <a className="ml-4 bg-blue-500/50 p-4 border-box text-[20px] block box-border rounded-lg hover:ring ring-[#d6e6ff] ring-offset-black hover:ring-offset-2" href="/editor">Gante工具</a>
+            打开我的
+            <Link href="/editor">
+              <a className="ml-4 bg-blue-500/50 p-4 border-box text-[20px] block box-border rounded-lg hover:ring ring-[#d6e6ff] ring-offset-black hover:ring-offset-2">Gante工具</a>
+            </Link>
           </div>
         </div>
       </main>
