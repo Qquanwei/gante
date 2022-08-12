@@ -1,5 +1,4 @@
-import { useCallback, useState} from 'react';
-import { useId, Fragment, useMemo, useRef, useEffect } from 'react';
+import { useState, useCallback, useId, Fragment, useMemo, useRef, useEffect } from 'react';
 import { Transition } from '@headlessui/react';
 import classNames from 'classnames';
 import moment from 'moment';
@@ -85,7 +84,7 @@ function NodeFormModal({ node, top, hover, left, contextInfo }) {
             </div>
             <div className="mt-3 flex">
               <label htmlFor="ipt-remark">备注</label>
-              <textarea name="ipt-remark" rows={5}name="remark" type="text" className="ml-2 py-1 border flex-grow px-2" defaultValue={node.remark}/>
+              <textarea id="ipt-remark" rows={5} name="remark" type="text" className="ml-2 py-1 border flex-grow px-2" defaultValue={node.remark}/>
             </div>
             <button className="ring ring-offset-transparent rounded h-[30px] bg-blue-500 text-white px-[16px] cursor-pointer mt-10">确定</button>
           </form>

@@ -14,7 +14,7 @@ function Input({ onChange, placeholder }) {
   }, [onChange]);
 
   return (
-    <form className="inline-flex p-1 border-4 rounded-lg border-black w-3/6" onSubmit={onSubmit}>
+    <form className="inline-flex p-1 border-4 rounded-lg border-gray-300 w-3/6" onSubmit={onSubmit}>
       <input ref={iptRef}
              placeholder={placeholder}
              name="input"

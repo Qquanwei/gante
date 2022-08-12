@@ -1,4 +1,7 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
+import sortBy from 'ramda/src/sortBy';
+import hotkeys from 'hotkeys-js';
+import path from 'ramda/src/path';
 import classNames from 'classnames';
 import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
@@ -18,11 +21,13 @@ export default function Sink() {
     endTime,
     SINK_HEIGHT,
     SPOT_WIDTH,
+    updateItemConnect,
     currentFeatures
   } = useGante();
 
   const currentTime = useCurrentDate();
   const currentNode = listMap[currentId];
+  const [currentSelectConnect, setCurrentSelectConnect] = useState(null);
   const OFFSET_DAY = moment(currentTime).startOf('day').diff(startTime, 'days');
 
   const getNodeLeft = useCallback((currentNode) => {
@@ -47,8 +52,52 @@ export default function Sink() {
     return getNodeLeft(currentNode);
   }, [currentNode, getNodeLeft]);
 
+  const onClickConnectLine = useCallback((fromNode, toNode) => {
+    setCurrentSelectConnect([
+      fromNode.id,
+      toNode.id
+    ]);
+  }, []);
+
+  const onMouseOverConnectLine = useCallback((fromNode, toNode) => {
+    setCurrentSelectConnect([
+      fromNode.id,
+      toNode.id
+    ]);
+  }, []);
+
+  const onMouseLeaveConnectLine = useCallback((fromNode, tNode) => {
+    if (currentSelectConnect &&
+        currentSelectConnect[0] === fromNode.id &&
+        currentSelectConnect[1] === tNode.id) {
+      setCurrentSelectConnect(null);
+    }
+  }, [currentSelectConnect]);
+
+  const onClickEmptySVG = useCallback((event) => {
+    // 双击空白创建
+    if (event.detail === 2) {
+    }
+  }, []);
+
+  useEffect(() => {
+    hotkeys('delete,backspace', () => {
+      if (currentSelectConnect) {
+        updateItemConnect(currentSelectConnect[0], currentSelectConnect[1], false);
+      }
+    });
+
+    return () => {
+      hotkeys.unbind('delete,backspace');
+    }
+  }, [currentSelectConnect, updateItemConnect]);
+
   return (
-    <svg width="100%" height="100%" style={{ height: Math.max(list.length, 20) * SINK_HEIGHT}} className="pointer-events-none bg-gray-200">
+    <svg
+      width="100%"
+      height="100%"
+      onClick={onClickEmptySVG}
+      style={{ height: Math.max(list.length, 20) * SINK_HEIGHT}} className="bg-gray-200">
       <g>
         {
           (() => {
@@ -97,10 +146,13 @@ export default function Sink() {
           refX="1" refY="5"
           markerUnits="strokeWidth"
           markerWidth="10" markerHeight="10"
-          orient="auto" />
+          orient="auto" >
+        </marker>
       </defs>
 
-      <g className="stroke-2 stroke-orange-500" fill="transparent">
+      <g className="stroke-2 stroke-gray-500"
+        strokeDasharray="5,5"
+        strokeLinejoin="round" fill="transparent">
         {
           // 处理connectTo
           (() => {
@@ -113,7 +165,7 @@ export default function Sink() {
                 const top = getNodeTop(node);
 
                 const fromPoint = new Position(
-                  left + width + 24,
+                  left + width + 24 + 45,
                   top + (SINK_HEIGHT - 6)/ 2,
                 );
 
@@ -135,15 +187,25 @@ export default function Sink() {
                   );
 
                   const d = connectTo(fromPoint, toPoint);
-
+                  const selected = (
+                    currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
+                  );
+                  // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
                   arg.push(
-                    <path key={k} d={d} markerEnd="url(#triangle)" ></path>
+                    <path
+                      custom-order={selected ? Infinity : arg.length}
+                      className={classNames({
+                        ['stroke-sky-500 ring ring-gray-100 ring-offset-gray-500 ring-offset-2']: selected
+                      })}
+                      onMouseLeave={() => onMouseLeaveConnectLine(node, tNode)}
+                      onMouseOver={() => onMouseOverConnectLine(node, tNode)}
+                      onClick={() => onClickConnectLine(node, tNode)} key={k} d={d} markerEnd="url(#triangle)" ></path>
                   );
                 }));
               }
             }
 
-            return arg;
+            return sortBy(path(['props', 'custom-order']), arg);
           })()
         }
       </g>

@@ -144,30 +144,46 @@ function Provider({ children, forwardRef }) {
     const targetIndex = list.indexOf(target);
 
     let op = null;
-    if (!node.connectTo) {
-      op = json1.insertOp(
-        [sourceIndex, 'connectTo'],
-        [targetId]
-      );
-    } else {
-      if (node.connectTo.indexOf(targetId) === -1) {
-        op = json1.insertOp(
-          [sourceIndex, 'connectTo', node.connectTo.length],
-          targetId
-        );
-      }
-    }
 
-    if (!target.from) {
-      op = json1.type.compose(op, json1.insertOp(
-        [targetIndex, 'from'],
-        [id]
-      ));
+    if (add) {
+      if (!node.connectTo) {
+        op = json1.insertOp(
+          [sourceIndex, 'connectTo'],
+          [targetId]
+        );
+      } else {
+        if (node.connectTo.indexOf(targetId) === -1) {
+          op = json1.insertOp(
+            [sourceIndex, 'connectTo', node.connectTo.length],
+            targetId
+          );
+        }
+      }
+
+      if (!target.from) {
+        op = json1.type.compose(op, json1.insertOp(
+          [targetIndex, 'from'],
+          [id]
+        ));
+      } else {
+        op = json1.type.compose(op, json1.insertOp(
+          [targetIndex, 'from', target.from.length],
+          id
+        ));
+      }
     } else {
-      op = json1.type.compose(op, json1.insertOp(
-        [targetIndex, 'from', target.from.length],
-        id
-      ));
+      if (node.connectTo && node.connectTo.indexOf(targetId) !== -1) {
+        op = json1.type.compose(op, json1.removeOp(
+          [sourceIndex, 'connectTo', node.connectTo.indexOf(targetId)],
+          targetId
+        ));
+      }
+      if (target && target.from && target.from.indexOf(id) !== -1) {
+        op = json1.type.compose(op, json1.removeOp(
+          [targetIndex, 'from', target.from.indexOf(id)],
+          id
+        ));
+      }
     }
     event.emit('op', op);
     setList(json1.type.apply(list, op));
@@ -307,6 +323,6 @@ function Provider({ children, forwardRef }) {
   );
 };
 
-export default React.forwardRef((props, ref) => {
+export default React.forwardRef(function ProviderRef(props, ref) {
   return <Provider {...props} forwardRef={ref} />;
 });
