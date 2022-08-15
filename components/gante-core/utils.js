@@ -55,6 +55,13 @@ export function getPosition(graphEle, event) {
     );
 }
 
+export function getPositionViewport(event) {
+  return new Position(
+    event.screenX,
+    event.screenY
+  );
+}
+
 // 将一个元素转化成甘特图坐标系
 export function getEleRect(graphEle, Ele) {
   const rect = Ele.getBoundingClientRect();

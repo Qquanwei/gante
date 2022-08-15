@@ -8,12 +8,12 @@ const WIDTH = 280;
 
 // <bg, fg> colorpair
 const colors = [
+  ['#eee', '#000'],
+  ['#000', '#fff'],
   ['#CDC6A5', '#000'],
   ['#AA767C', '#fff'],
   ['#7FBEEB', '#fff'],
   ['#134074', '#fff'],
-  ['#000', '#fff'],
-  ['#eee', '#000']
 ];
 
 function NodeControlPanel({ node, contextInfo, left, hover }) {
@@ -68,12 +68,15 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
               })
             }
 
-            <span className="ml-auto text-[12px] text-black cursor-pointer" onClick={onClickLock}>
+            <span className="mr-auto ml-2  text-[12px] text-black cursor-pointer" onClick={onClickLock}>
               {
                 node.lock ? '解锁' : '锁定'
               }
             </span>
-            <span className="px-1 ml-1 bg-white-500 text-[12px] cursor-pointer text-red-500" onClick={onClickDelete}>
+            <span
+              className={classNames("px-1 ml-1 bg-white-500 text-[12px] cursor-pointer text-red-500", {
+                hidden: node.lock
+              })} onClick={onClickDelete}>
               删除
             </span>
           </div>

@@ -41,20 +41,11 @@ State.prototype.onMouseOver = () => {
 State.prototype.onMouseLeave = () => {
 }
 
-State.prototype.onDragStart = () => {
-}
-
-State.prototype.onDragEnd = () => {
-}
-
 // 当任意一个元素mouseover触发(不仅仅是自己)
 State.prototype.onInteractionMouseOver = () => {
 }
 // 当任意一个元素mouseleave触发(同上)
 State.prototype.onInteractionMouseLeave = () => {
-}
-
-State.prototype.onDrop = () => {
 }
 
 // 即将切换时触发
@@ -429,13 +420,10 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
     this.currentState.onInteractionMouseLeave(e);
   };
 
-  // this.element.setAttribute('draggable', "true");
   this.element.addEventListener('click', this.onClick);
   this.element.addEventListener('mouseover', this.onMouseOver);
   this.element.addEventListener('mouseleave', this.onMouseLeave);
   this.element.addEventListener('mousedown', this.onMouseDown);
-  this.element.addEventListener('dragstart', this.onDragStart);
-  this.element.addEventListener('dragend', this.onDragEnd);
   this.element.addEventListener('drop', this.onDrop);
   this.graphElement.addEventListener('interaction-mouseover', this.onInteractionMouseOver);
   this.graphElement.addEventListener('interaction-mouseleave', this.onInteractionMouseLeave);
@@ -452,8 +440,6 @@ StateMachine.prototype.dispose = function() {
   this.element.removeEventListener('mouseover', this.onMouseOver);
   this.element.removeEventListener('mouseleave', this.onMouseLeave);
   this.element.removeEventListener('mousedown', this.onMouseDown);
-  this.element.removeEventListener('dragstart', this.onDragStart);
-  this.element.removeEventListener('dragend', this.onDragEnd);
   this.graphElement.removeEventListener('mouseup', this.onMouseUp);
   this.graphElement.removeEventListener('mousemove', this.onMouseMove, { passive: true });
   this.currentState.unmount();
@@ -505,7 +491,7 @@ export default function useInteractionEvent(nodeId, { onChange }, enableFeatures
       SPOT_WIDTH,
       SINK_HEIGHT,
       element: ref.current,
-      onChange: (...args) => onChangeRef.current.apply(null, args)
+      onChange: (...args) => onChangeRef.current.apply(null, args),
     }, featureRef);
 
     return () => {
