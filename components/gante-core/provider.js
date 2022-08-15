@@ -29,6 +29,7 @@ function Provider({ children, forwardRef }) {
   });
 
   const graphRef = useRef(null);
+  const sinkRef = useRef(null);
   const portalRef = useRef(null);
   const [currentId, setCurrentId] = useState(null);
   // 当前元素开启的辅助特性
@@ -257,7 +258,8 @@ function Provider({ children, forwardRef }) {
     }
   }, [list, listMap]);
 
-  const createNewItem = useCallback(({ title, startTime, endTime }) => {
+  // swapIndex 创建后立即定位到指定位置
+  const createNewItem = useCallback(({ title, startTime, endTime }, swapIndex) => {
     const newItem = {
       id: makeId(),
       title,
@@ -265,9 +267,13 @@ function Provider({ children, forwardRef }) {
       endTime
     };
     const op = json1.insertOp([list.length], newItem);
-    event.emit('op', op);
-    setList(json1.type.apply(list, op));
-  }, [list]);
+
+    if (Number.isInteger(swapIndex)) {
+      event.emit('op', op);
+      setList(json1.type.apply(list, op));
+      swapItem(list.length, swapIndex);
+    }
+  }, [list, swapItem]);
 
   useImperativeHandle(forwardRef, () => {
     return {
@@ -280,11 +286,11 @@ function Provider({ children, forwardRef }) {
   const contextValue = useMemo(() => {
     return {
       // 每个甬道的高度
-      SINK_HEIGHT: 32,
+      SINK_HEIGHT: 41,
       // 每个时间节点的宽度
       SPOT_WIDTH: 50,
       graphRef,
-      portalRef,
+      sinkRef,
       // 开始时间
       startTime: moment(STARTTIME).startOf('day'),
       // 结束时间
@@ -295,6 +301,7 @@ function Provider({ children, forwardRef }) {
       updateItemDate,
       updateItemTitle,
       updateItemLock,
+      createNewItem,
       deleteItem,
       updateItemColor,
       setCurrentId,
@@ -305,6 +312,7 @@ function Provider({ children, forwardRef }) {
     };
   }, [
     list,
+    createNewItem,
     currentFeatures,
     setCurrentFeatures,
     currentId,

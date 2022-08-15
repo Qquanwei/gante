@@ -360,6 +360,8 @@ AnchorConnect.prototype.onMouseUp = function(e) {
 };
 
 AnchorConnect.prototype.onMouseMove = function(event) {
+  event.stopPropagation();
+  event.preventDefault();
   if (!this.mouseOverEle) {
     const currentPosition = getPosition(this.machine.getGraphElement(), event);
     const d = connectTo(this.pointStart, currentPosition);

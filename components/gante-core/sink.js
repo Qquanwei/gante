@@ -7,7 +7,7 @@ import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
 import { connectTo } from './svgtool';
 import useGrabEvent from './use-grab-event';
-import { Position } from './utils';
+import { Position, getPosition, positionToDay } from './utils';
 import moment from 'moment';
 
 /*
@@ -16,8 +16,11 @@ import moment from 'moment';
 export default function Sink() {
   const {
     list,
+    sinkRef,
     listMap,
+    graphRef,
     currentId,
+    createNewItem,
     startTime,
     endTime,
     SINK_HEIGHT,
@@ -79,8 +82,16 @@ export default function Sink() {
   const onClickEmptySVG = useCallback((event) => {
     // 双击空白创建
     if (event.detail === 2) {
+      const position = getPosition(sinkRef.current, event);
+      const startTime = positionToDay(SPOT_WIDTH, startTime, position.x);
+      const idx= Math.ceil(position.y / SINK_HEIGHT);
+      createNewItem({
+        title: '新建任务',
+        startTime: startTime.valueOf() - 7 * 24 * 60 * 60 * 1000,
+        endTime: startTime.valueOf()
+      }, Math.max(idx - 1, 0));
     }
-  }, []);
+  }, [startTime, SPOT_WIDTH, createNewItem]);
 
   useEffect(() => {
     hotkeys('delete,backspace', () => {
@@ -95,7 +106,7 @@ export default function Sink() {
   }, [currentSelectConnect, updateItemConnect]);
 
   return (
-    <div >
+    <div ref={sinkRef} >
       <svg
         ref={grabElementRef}
         width="100%"
