@@ -165,7 +165,7 @@ function Node({ item, index }) {
     move: !item.lock
   });
 
-  const top = index * SINK_HEIGHT + 3;
+  const top = index * SINK_HEIGHT + 7;
 
   return (
     <div ref={ref}
@@ -178,7 +178,7 @@ function Node({ item, index }) {
          style={{
            left,
            top,
-           height: SINK_HEIGHT- 6,
+           height: SINK_HEIGHT- 15,
            width: width + SPOT_WIDTH,
            color: item.fgcolor || '#000',
            background: item.color || '#eee'

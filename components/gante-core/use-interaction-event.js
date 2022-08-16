@@ -314,7 +314,7 @@ AnchorConnect.prototype.mount = function() {
 
   const graph = this.machine.getGraphElement();
   const svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
-  svg.setAttributeNS(null, 'class', 'absolute left-0 top-0 z-10 pointer-events-none');
+  svg.setAttributeNS(null, 'class', 'absolute left-0 top-0 z-20 pointer-events-none');
   svg.setAttributeNS(null, 'width', '100%');
   svg.setAttributeNS(null, 'height', '100%');
 
@@ -360,8 +360,6 @@ AnchorConnect.prototype.onMouseUp = function(e) {
 };
 
 AnchorConnect.prototype.onMouseMove = function(event) {
-  event.stopPropagation();
-  event.preventDefault();
   if (!this.mouseOverEle) {
     const currentPosition = getPosition(this.machine.getGraphElement(), event);
     const d = connectTo(this.pointStart, currentPosition);
@@ -410,10 +408,6 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
     this.currentState.onDragEnd(e);
   };
 
-  this.onDrop = (e) => {
-    this.currentState.onDrop(e);
-  };
-
   this.onInteractionMouseOver = (e) => {
     this.currentState.onInteractionMouseOver(e);
   };
@@ -426,7 +420,6 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
   this.element.addEventListener('mouseover', this.onMouseOver);
   this.element.addEventListener('mouseleave', this.onMouseLeave);
   this.element.addEventListener('mousedown', this.onMouseDown);
-  this.element.addEventListener('drop', this.onDrop);
   this.graphElement.addEventListener('interaction-mouseover', this.onInteractionMouseOver);
   this.graphElement.addEventListener('interaction-mouseleave', this.onInteractionMouseLeave);
   this.graphElement.addEventListener('mouseup', this.onMouseUp);

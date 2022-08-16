@@ -9,9 +9,6 @@ function Graph({ children }) {
   const { graphRef } = useGante();
   return (
     <div className="relative w-full flex pl-10 pb-20 select-none" >
-      <div className="shadow w-36 pt-16 shrink-0 sticky left-0 z-10 bg-white">
-      </div>
-
       <div className="relative inline-flex grow" ref={graphRef}>
         <Timeline >
           <Fragment>

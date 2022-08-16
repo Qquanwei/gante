@@ -106,7 +106,7 @@ export default function Sink() {
   }, [currentSelectConnect, updateItemConnect]);
 
   return (
-    <div ref={sinkRef} >
+    <div ref={sinkRef} className="relative">
       <svg
         ref={grabElementRef}
         width="100%"

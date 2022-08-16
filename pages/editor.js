@@ -5,7 +5,6 @@ import * as json1 from 'ot-json1';
 import Client, { Connection } from 'sharedb/lib/client';
 import { Container, LeftSide, Content } from '../components/layout';
 import { GanteProvider, GanteGraph, StatusBar } from '../components/gante-core';
-import MainInput from 'components/main-input';
 import Sidebar from '../components/sidebar';
 
 Client.types.register(json1.type);
@@ -20,7 +19,7 @@ export default function Editor() {
 
     socket.addEventListener('open', () => {
       const connection = new Connection(socket);
-      const doc = connection.get('doc-collection', 'doc-id');
+      const doc = connection.get('doc-collection', 'my-self');
 
       doc.subscribe((error) => {
         if (error) {
@@ -74,22 +73,9 @@ export default function Editor() {
     };
   }, []);
 
-  const onInputChange = useCallback((value) => {
-    if (value) {
-      ganteRef.current.createNewItem({
-        title: value,
-        startTime: Date.now(),
-        endTime: Date.now() + 7 * 24 * 60 * 60 * 1000
-      });
-    }
-  }, []);
-
   return (
     <div className="w-full h-full">
       <GanteProvider ref={ganteRef}>
-        <div className="flex justify-center py-10">
-          <MainInput onChange={onInputChange} placeholder="创建一条..."/>
-        </div>
         <Container className="h-screen">
           <Content>
             <GanteGraph />
