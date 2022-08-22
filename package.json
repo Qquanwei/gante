@@ -12,6 +12,7 @@
     "@headlessui/react": "^1.6.6",
     "@heroicons/react": "^1.0.6",
     "classnames": "^2.3.1",
+    "dayjs": "^1.11.5",
     "events": "^3.3.0",
     "hotkeys-js": "^3.9.4",
     "lodash.debounce": "^4.0.8",

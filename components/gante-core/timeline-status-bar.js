@@ -35,7 +35,7 @@ function TimelineStatusBar() {
     }
     // 一共多少天
     // 多少个工作日
-    const totalDay = moment(item.endTime).startOf('day').diff(moment(item.startTime).startOf('day'), 'days');
+    const totalDay = moment(item.endTime).startOf('day').diff(moment(item.startTime).startOf('day'), 'days') + 1;
     return [totalDay];
   }, [item]);
 

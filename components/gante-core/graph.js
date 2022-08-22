@@ -8,7 +8,7 @@ import useGante from './useGante';
 function Graph({ children }) {
   const { graphRef } = useGante();
   return (
-    <div className="relative w-full flex pl-10 pb-20 select-none" >
+    <div className="relative w-full flex pl-10 pb-20 select-none min-h-[1000px]" >
       <div className="relative inline-flex grow" ref={graphRef}>
         <Timeline >
           <Fragment>

@@ -33,7 +33,7 @@ export default function Timeline({ children }) {
   }, []);
 
   return (
-    <div className="relative">
+    <div>
       <div className="sticky shadow flex flex-nowrap top-0 z-10 bg-white pb-5">
         {
           (() => {
@@ -46,12 +46,12 @@ export default function Timeline({ children }) {
 
               ans.push(
                 <div className={classNames("box-border shrink-0 flex-col h-10 text-center items-center flex justify-center", {
-                       ["bg-sky-200/75"]: range,
-                       ["bg-gray-300/25"]: weekend && !range,
-                       ["bg-sky-200/20"]: weekend && range
-                     })} style={{
-                       width: SPOT_WIDTH,
-                     }} key={i}>
+                  ["bg-sky-200/75"]: range,
+                  ["bg-gray-300/25"]: weekend && !range,
+                  ["bg-sky-200/20"]: weekend && range
+                })} style={{
+                  width: SPOT_WIDTH,
+                }} key={i}>
                   {
                     moment(startTime).add(i, 'days').format('M.DD')
                   }
