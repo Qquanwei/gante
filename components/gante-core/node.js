@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
-import { Transition } from '@headlessui/react';
 import moment from 'moment';
 import useGante from './useGante';
 import useInteractionEvent from './use-interaction-event';

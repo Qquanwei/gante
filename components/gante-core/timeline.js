@@ -3,6 +3,7 @@ import moment from 'moment';
 import classNames from 'classnames';
 import useCurrentDate from './useCurrentDate';
 import useGante from './useGante';
+import * as utils from './utils';
 import TimelineStatusBar from './timeline-status-bar';
 /*
   展示时间轴，横轴
@@ -10,9 +11,6 @@ import TimelineStatusBar from './timeline-status-bar';
 export default function Timeline({ children }) {
   const { SPOT_WIDTH,list, startTime, endTime, currentId, listMap } = useGante();
   const currentTime = useCurrentDate();
-
-  const START = moment(startTime);
-  const END = moment(endTime);
 
   const inRange = useCallback((ts) => {
     if (!currentId || !listMap[currentId]) {
@@ -38,7 +36,8 @@ export default function Timeline({ children }) {
         {
           (() => {
             let ans = [];
-            for (let i = 0; i < END.diff(START, 'days'); ++i) {
+            const totalDays = utils.getRangeDays(startTime, endTime) + 1;
+            for (let i = 0; i < totalDays ; ++i) {
               const day = moment(startTime).add(i, 'days');
               const range = inRange(day);
               const today = day.isSame(moment(currentTime), 'day');

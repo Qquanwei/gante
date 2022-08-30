@@ -13,9 +13,20 @@ export default function Editor() {
   const [pending, setPending] = useState(true);
   const [connected, setConnected] = useState(false);
   const ganteRef = useRef(null);
+  const docRef = useRef(null);
+
+  const onExport = useCallback(() => {
+    const a = document.createElement('a');
+    const data = docRef.current.toSnapshot().data;
+    const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
+    a.href = dataStr;
+    a.setAttribute('download', `gante-snapshot-${Date.now()}.json`);
+    a.click();
+  }, []);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://116.62.19.157:9081/');
+    // const socket = new WebSocket('ws://116.62.19.157:9081/');
+    const socket = new WebSocket('ws://localhost:9081/');
 
     socket.addEventListener('open', () => {
       const connection = new Connection(socket);
@@ -32,6 +43,8 @@ export default function Editor() {
           // doc.del();
           ganteRef.current.setList(doc.data || []);
         }
+
+        docRef.current = doc;
 
         setConnected(true);
         setPending(false);
@@ -75,6 +88,7 @@ export default function Editor() {
 
   return (
     <div className="w-full h-full">
+      <Sidebar onExport={onExport} />
       <GanteProvider ref={ganteRef}>
         <Container className="h-screen">
           <Content>

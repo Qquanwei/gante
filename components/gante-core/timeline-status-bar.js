@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import classNames from 'classnames';
-import moment from 'moment';
+import * as utils from './utils';
 import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
 import Image from 'next/image';
@@ -13,21 +13,13 @@ function TimelineStatusBar() {
 
   const item = listMap[currentId];
 
-  const left = useMemo(() => {
+  const { x: left, w: width } = useMemo(() => {
     if (!item) {
-      return 0;
+      return {};
     }
-    const day = moment(item.startTime).diff(moment(startTime).startOf('day'), 'days');
-    return day * SPOT_WIDTH;
-  }, [item, startTime]);
 
-  const width = useMemo(() => {
-    if (!item) {
-      return 0;
-    }
-    const day = moment(item.endTime).diff(moment(item.startTime).startOf('day'), 'days');
-    return (day + 1) * SPOT_WIDTH;
-  }, [item, item]);
+    return utils.dayToRect(SPOT_WIDTH, startTime, item.startTime, item.endTime);
+  }, [startTime, SPOT_WIDTH, item]);
 
   const [totalDay] = useMemo(() => {
     if (!item) {
@@ -35,7 +27,7 @@ function TimelineStatusBar() {
     }
     // 一共多少天
     // 多少个工作日
-    const totalDay = moment(item.endTime).startOf('day').diff(moment(item.startTime).startOf('day'), 'days') + 1;
+    const totalDay = utils.getRangeDays(item.startTime, item.endTime) + 1;
     return [totalDay];
   }, [item]);
 

@@ -7,8 +7,7 @@ import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
 import { connectTo } from './svgtool';
 import useGrabEvent from './use-grab-event';
-import { Position, getPosition, positionToDay } from './utils';
-import moment from 'moment';
+import { Position, getPosition, positionToDay, dayToRect, getRangeDays } from './utils';
 
 /*
   泳道，绘制一个通道, 绘制连线
@@ -33,29 +32,21 @@ export default function Sink() {
   const grabElementRef = useGrabEvent({});
   const currentNode = listMap[currentId];
   const [currentSelectConnect, setCurrentSelectConnect] = useState(null);
-  const OFFSET_DAY = moment(currentTime).startOf('day').diff(startTime, 'days');
-
-  const getNodeLeft = useCallback((currentNode) => {
-    if (currentNode) {
-      const day = moment(currentNode.startTime).diff(moment(startTime).startOf('day'), 'days');
-      return day * SPOT_WIDTH;
-    }
-    return 0;
-  }, [startTime]);
-
-  const getNodeWidth = useCallback((item) => {
-      const day = moment(item.endTime).diff(moment(item.startTime).startOf('day'), 'days');
-      return day * SPOT_WIDTH;
-  }, []);
+  const OFFSET_DAY = getRangeDays(startTime, currentTime);
 
   const getNodeTop = useCallback((item) => {
     return list.indexOf(item) * SINK_HEIGHT + 3;
   }, [list]);
 
 
-  const left = useMemo(() => {
-    return getNodeLeft(currentNode);
-  }, [currentNode, getNodeLeft]);
+  const { x: left } = useMemo(() => {
+    if (!currentNode) {
+      return {
+        x: -99
+      };
+    }
+    return dayToRect(SPOT_WIDTH, startTime, currentNode.startTime, currentNode.endTime);
+  }, [currentNode, startTime, SPOT_WIDTH]);
 
   const onClickConnectLine = useCallback((fromNode, toNode) => {
     setCurrentSelectConnect([
@@ -167,7 +158,8 @@ export default function Sink() {
 
         <g className="stroke-2 stroke-gray-500"
            strokeDasharray="5,5"
-           strokeLinejoin="round" fill="transparent">
+           strokeLinejoin="round"
+           fill="transparent">
           {
             // 处理connectTo
             (() => {
@@ -175,8 +167,9 @@ export default function Sink() {
               for (let i = 0; i < list.length; ++i) {
                 const node = list[i];
                 if (node.connectTo && node.connectTo.length) {
-                  const left = getNodeLeft(node);
-                  const width = getNodeWidth(node);
+                  const rect = dayToRect(SPOT_WIDTH, startTime, node.startTime, node.endTime);
+                  const left = rect.x;
+                  const width = rect.w;
                   const top = getNodeTop(node);
 
                   const fromPoint = new Position(
@@ -192,8 +185,9 @@ export default function Sink() {
                       return null;
                     }
 
-                    const tLeft = getNodeLeft(tNode);
-                    const tWidth = getNodeWidth(tNode);
+                    const tRect = dayToRect(SPOT_WIDTH, startTime, tNode.startTime, tNode.endTime);
+                    const tLeft = tRect.x;
+                    const tWidth = tRect.w;
                     const tTop = getNodeTop(tNode);
 
                     const toPoint = new Position(

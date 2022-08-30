@@ -76,9 +76,37 @@ export function getEleRect(graphEle, Ele) {
 }
 
 // 将鼠标坐标转化成天数
-import moment from 'moment';
+import dayjs from 'dayjs';
 export function positionToDay(SPOT_WIDTH, startTime, left, paddingFunction = Math.floor) {
-  return moment(startTime).startOf('day').add(paddingFunction(left / SPOT_WIDTH), 'days');
+  return dayjs(startTime).add(paddingFunction(left / SPOT_WIDTH), 'd');
+}
+
+export function getRangeDays(startTime, endTime) {
+  return dayjs(endTime).startOf('day').diff(
+    dayjs(startTime).startOf('day'),
+    'day'
+  );
+}
+
+// x, w 为左点和长度, dayEndTime 可选，如不传则认为持续1d
+export function dayToRect(SPOT_WIDTH, startTime, dayTime, dayEndTime) {
+  const left = dayjs(dayTime)
+        .startOf('day')
+        .diff(
+          dayjs(startTime).startOf('day'),
+          'day'
+        ) * SPOT_WIDTH;
+
+  if (!dayEndTime) {
+    return new Rect(left, 0, SPOT_WIDTH, 0);
+  }
+
+  const w = dayjs(dayEndTime).startOf('day')
+    .diff(
+      dayjs(dayTime).startOf('day'),
+      'day'
+    );
+  return new Rect(left, 0, (1 + w) * SPOT_WIDTH);
 }
 
 
