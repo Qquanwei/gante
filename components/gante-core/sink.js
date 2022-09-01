@@ -73,13 +73,13 @@ export default function Sink() {
   const onClickEmptySVG = useCallback((event) => {
     // 双击空白创建
     if (event.detail === 2) {
-      const position = getPosition(sinkRef.current, event);
-      const startTime = positionToDay(SPOT_WIDTH, startTime, position.x);
+      const position = getPosition(graphRef.current, event);
+      const beginTime = positionToDay(SPOT_WIDTH, startTime, position.x);
       const idx= Math.ceil(position.y / SINK_HEIGHT);
       createNewItem({
         title: '新建任务',
-        startTime: startTime.valueOf() - 7 * 24 * 60 * 60 * 1000,
-        endTime: startTime.valueOf()
+        startTime: beginTime.valueOf(),
+        endTime: beginTime.valueOf() + 7 * 24 * 60 * 60 * 1000,
       }, Math.max(idx - 1, 0));
     }
   }, [startTime, SPOT_WIDTH, createNewItem]);
@@ -93,7 +93,7 @@ export default function Sink() {
 
     return () => {
       hotkeys.unbind('delete,backspace');
-    }
+    };
   }, [currentSelectConnect, updateItemConnect]);
 
   return (

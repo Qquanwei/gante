@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import Events from 'events';
 import indexBy from 'ramda/src/indexBy';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
 import prop from 'ramda/src/prop';
 import { hasProp } from './utils';
@@ -22,7 +22,7 @@ function makeId() {
 
 function Provider({ children, forwardRef }) {
   const [STARTTIME, setSTARTTIME] = useState(() => {
-    return Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return Date.now() - 30 * 24 * 60 * 60 * 1000;
   });
   const [ENDTIME, setENDTIME] =  useState(() => {
     return Date.now() + 40 * 24 * 60 * 60 * 1000;
@@ -292,9 +292,9 @@ function Provider({ children, forwardRef }) {
       graphRef,
       sinkRef,
       // 开始时间
-      startTime: moment(STARTTIME).startOf('day'),
+      startTime: dayjs(STARTTIME).startOf('day'),
       // 结束时间
-      endTime: moment(ENDTIME).startOf('day'),
+      endTime: dayjs(ENDTIME).startOf('day'),
       swapItem,
       currentId,
       updateItemConnect,

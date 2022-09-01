@@ -1,10 +1,13 @@
 import { useCallback } from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
 import classNames from 'classnames';
 import useCurrentDate from './useCurrentDate';
 import useGante from './useGante';
 import * as utils from './utils';
 import TimelineStatusBar from './timeline-status-bar';
+
+dayjs.extend(isBetween);
 /*
   展示时间轴，横轴
 */
@@ -38,9 +41,9 @@ export default function Timeline({ children }) {
             let ans = [];
             const totalDays = utils.getRangeDays(startTime, endTime) + 1;
             for (let i = 0; i < totalDays ; ++i) {
-              const day = moment(startTime).add(i, 'days');
+              const day = dayjs(startTime).add(i, 'days');
               const range = inRange(day);
-              const today = day.isSame(moment(currentTime), 'day');
+              const today = day.isSame(dayjs(currentTime), 'day');
               const weekend = day.day() === 6 || day.day() === 0;
 
               ans.push(
@@ -52,9 +55,9 @@ export default function Timeline({ children }) {
                   width: SPOT_WIDTH,
                 }} key={i}>
                   {
-                    moment(startTime).add(i, 'days').format('M.DD')
+                    dayjs(startTime).add(i, 'days').format('M.DD')
                   }
-                  <span className="text-xs">{ getDaySubtitle(moment(startTime).add(i, 'day'))}</span>
+                  <span className="text-xs">{ getDaySubtitle(dayjs(startTime).add(i, 'day'))}</span>
                 </div>
               );
             }

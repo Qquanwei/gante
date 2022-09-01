@@ -5,7 +5,7 @@ import Button from 'components/button';
 import classNames from 'classnames';
 
 function Sidebar({ onExport }) {
-  const [toggleOpen, setToggleOpen] = useState(true);
+  const [toggleOpen, setToggleOpen] = useState(false);
 
   const onClickToggle = useCallback(() => {
     setToggleOpen(v => !v);
@@ -15,6 +15,18 @@ function Sidebar({ onExport }) {
     onExport();
   }, [onExport]);
 
+  const onClickImport = useCallback(() => {
+    const input = document.createElement('input');
+    input.accept= ".json";
+    input.type = 'file';
+    input.oninput = (event) => {
+      if (event.path[0] && event.path[0].file && event.path[0].file[0]) {
+        const reader = new FileReader();
+        reader.readAsText(event.path[0].file[0], 'UTF-8');
+      }
+    }
+    input.click();
+  }, []);
   return (
     <div className="py-20 px-2 bg-white z-20 h-full select-none whitespace-nowrap fixed left-0 min-w-[40px]">
       <div onClick={onClickToggle} className="absolute cursor-pointer top-2 left-2 w-[24px] h-[24px]">
@@ -35,6 +47,13 @@ function Sidebar({ onExport }) {
             onClick={onClickExport}>
             导出
           </Button>
+
+          <Button className="ml-2 cursor-pointer inline-flex items-center justify-center text-white text-sm py-1 px-3 rounded-sm bg-blue-500"
+            onClick={onClickImport}>
+            导入
+          </Button>
+
+
         </Transition.Child>
       </Transition>
     </div>

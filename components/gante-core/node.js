@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import useGante from './useGante';
 import useInteractionEvent from './use-interaction-event';
 import NodeControlPanel from './node-control-panel';
@@ -28,12 +28,12 @@ function Node({ item, index }) {
   const [hover, setHover] = useState(false);
 
   const width = useMemo(() => {
-    const day = moment(item.endTime).diff(moment(item.startTime).startOf('day'), 'days');
+    const day = dayjs(item.endTime).diff(dayjs(item.startTime).startOf('day'), 'days');
     return day * SPOT_WIDTH;
   }, [item.startTime, item.endTime]);
 
   const left = useMemo(() => {
-    const day = moment(item.startTime).diff(moment(startTime).startOf('day'), 'days');
+    const day = dayjs(item.startTime).diff(dayjs(startTime).startOf('day'), 'days');
     return day * SPOT_WIDTH;
   }, [item.startTime, startTime]);
 

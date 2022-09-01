@@ -1,7 +1,7 @@
 import { useState, useCallback, useId, Fragment, useMemo, useRef, useEffect } from 'react';
 import { Transition } from '@headlessui/react';
 import classNames from 'classnames';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { addEventOnce } from './utils';
 import useGante from './useGante';
 
@@ -20,8 +20,8 @@ function NodeFormModal({ node, top, hover, left, contextInfo }) {
     const data = new FormData(e.currentTarget);
     updateItemDate(
       node.id,
-      moment(data.get('startTime') || node.startTime).valueOf(),
-      moment(data.get('endTime') || node.endTime).valueOf()
+      dayjs(data.get('startTime') || node.startTime).valueOf(),
+      dayjs(data.get('endTime') || node.endTime).valueOf()
     );
     updateItemTitle(node.id, data.get('title') || node.title, data.get('remark'));
     setEditMode(false);
@@ -55,12 +55,12 @@ function NodeFormModal({ node, top, hover, left, contextInfo }) {
 
   return (
     <Transition show={show}
-                enter="transition-opacity duration-150"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="transition-opacity duration-50"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0">
+      enter="transition-opacity duration-150"
+      enterFrom="opacity-0"
+      enterTo="opacity-100"
+      leave="transition-opacity duration-50"
+      leaveFrom="opacity-100"
+      leaveTo="opacity-0">
       <div ref={containerRef} className={"absolute z-10 top-full"} onClick={onClick} style={{ height: HEIGHT, width: WIDTH, left: leftRef.current }}>
         <div
           className="rounded-md bg-white p-6 text-left align-middle shadow-xl absolute cursor-auto top-3 h-full w-full p-3"
@@ -69,11 +69,11 @@ function NodeFormModal({ node, top, hover, left, contextInfo }) {
             <div className="flex">
               <div className="inline-flex">
                 <label htmlFor="">开始时间</label>
-                <input className="ml-2" name="startTime" type="date" defaultValue={moment(node.startTime).format('YYYY-MM-DD')} />
+                <input className="ml-2" name="startTime" type="date" defaultValue={dayjs(node.startTime).format('YYYY-MM-DD')} />
               </div>
               <div className="inline-flex ml-auto">
                 <label htmlFor="">结束时间</label>
-                <input className="ml-2" name="endTime" type="date" defaultValue={moment(node.endTime).format('YYYY-MM-DD')}/>
+                <input className="ml-2" name="endTime" type="date" defaultValue={dayjs(node.endTime).format('YYYY-MM-DD')}/>
               </div>
               <div>
               </div>
