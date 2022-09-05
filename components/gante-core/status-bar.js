@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import classNames from 'classnames';
-import useGante from './useGante';
 
 
 export default function StatusBar({ className, children }) {

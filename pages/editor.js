@@ -25,8 +25,8 @@ export default function Editor() {
   }, []);
 
   useEffect(() => {
-    // const socket = new WebSocket('ws://116.62.19.157:9081/');
-    const socket = new WebSocket('ws://localhost:9081/');
+    const socket = new WebSocket('ws://116.62.19.157:9081/');
+    // const socket = new WebSocket('ws://localhost:9081/');
 
     socket.addEventListener('open', () => {
       const connection = new Connection(socket);
@@ -88,8 +88,8 @@ export default function Editor() {
 
   return (
     <div className="w-full h-full">
-      <Sidebar onExport={onExport} />
       <GanteProvider ref={ganteRef}>
+      <Sidebar onExport={onExport} pending={pending} connected={connected} />
         <Container className="h-screen">
           <Content>
             <GanteGraph />

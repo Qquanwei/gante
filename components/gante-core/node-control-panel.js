@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react';
 import { Transition } from '@headlessui/react';
 import classNames from 'classnames';
 import useGante from './useGante';
+import * as actions from './action';
 
 const HEIGHT = 45;
 const WIDTH = 280;
@@ -20,14 +21,12 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
   const { updateItemColor, deleteItem, updateItemLock } = useGante();
   const leftRef = useRef(0);
 
+  const updateItemProperty = actions.useUpdateItemProperty();
+
   const onClickColor = useCallback((e) => {
     const c = colors[e.currentTarget.dataset.color];
-    updateItemColor(
-      node.id,
-      c[0],
-      c[1]
-    );
-  }, [node.id, updateItemColor]);
+    updateItemProperty(node.id, 'color', c[0], 'fgcolor', c[1]);
+  }, [node.id, updateItemProperty]);
 
   const onClickDelete = useCallback(() => {
     deleteItem(node.id);

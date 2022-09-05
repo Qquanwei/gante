@@ -470,11 +470,15 @@ StateMachine.prototype.emit = function(type, args) {
 };
 
 const defaultFeatures = {};
+import * as atoms from './atom';
+import { useRecoilValue } from 'recoil';
 export default function useInteractionEvent(nodeId, { onChange }, enableFeatures = defaultFeatures) {
   const ref = useRef(null);
   const featureRef = useRef(null);
   const onChangeRef = useRef(null);
-  const { graphRef, SPOT_WIDTH, SINK_HEIGHT } = useGante();
+  const { graphRef } = useGante();
+  const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
+  const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
 
   onChangeRef.current = onChange;
   featureRef.current = enableFeatures;

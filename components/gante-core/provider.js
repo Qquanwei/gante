@@ -2,10 +2,10 @@ import React, {
   useReducer, useMemo, useState, useCallback, useRef, useEffect, useImperativeHandle
 } from 'react';
 import Events from 'events';
-import indexBy from 'ramda/src/indexBy';
+import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
+import * as atoms from './atom';
 import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
-import prop from 'ramda/src/prop';
 import { hasProp } from './utils';
 
 const Context = React.createContext();
@@ -21,30 +21,16 @@ function makeId() {
 }
 
 function Provider({ children, forwardRef }) {
-  const [STARTTIME, setSTARTTIME] = useState(() => {
-    return Date.now() - 30 * 24 * 60 * 60 * 1000;
-  });
-  const [ENDTIME, setENDTIME] =  useState(() => {
-    return Date.now() + 40 * 24 * 60 * 60 * 1000;
-  });
-
   const graphRef = useRef(null);
   const sinkRef = useRef(null);
   const portalRef = useRef(null);
-  const [currentId, setCurrentId] = useState(null);
-  // 当前元素开启的辅助特性
-  const [currentFeatures, setCurrentFeatures] = useState(null);
 
   const event = useMemo(() => {
     return new Events();
   }, []);
 
-  const [list, setList] = useState([]);
-
-  const listMap = useMemo(() => {
-    return indexBy(prop('id'), list);
-  }, [list]);
-
+  const [list, setList]= useRecoilState(atoms.list);
+  const listMap = useRecoilValue(atoms.listMap);
 
   const swapItem = useCallback((fromPosition, toPosition) => {
     setList((list) => {
@@ -190,38 +176,6 @@ function Provider({ children, forwardRef }) {
     setList(json1.type.apply(list, op));
   }, [list]);
 
-  const updateItemColor = useCallback((id, bgcolor, fgcolor) => {
-    const index = list.findIndex(item => item.id === id);
-    let op = null;
-    if (list[index].color) {
-      op = [
-        json1.replaceOp(
-          [index, 'color'],
-          list[index].color,
-          bgcolor
-        ),
-        json1.replaceOp(
-          [index, 'fgcolor'],
-          list[index].fgcolor,
-          fgcolor
-        )
-      ].reduce(json1.type.compose, null);
-    } else {
-      op = [
-        json1.insertOp(
-          [index, 'color'],
-          bgcolor
-        ),
-        json1.insertOp(
-          [index, 'fgcolor'],
-          fgcolor
-        )
-      ].reduce(json1.type.compose, null);
-    }
-    event.emit('op', op);
-    setList(json1.type.apply(list, op));
-  }, [list]);
-
   const deleteItem = useCallback((id) => {
     const node = listMap[id];
     if (node) {
@@ -283,43 +237,25 @@ function Provider({ children, forwardRef }) {
       event
     };
   });
+
   const contextValue = useMemo(() => {
     return {
-      // 每个甬道的高度
-      SINK_HEIGHT: 41,
-      // 每个时间节点的宽度
-      SPOT_WIDTH: 50,
       graphRef,
+      setList,
       sinkRef,
-      // 开始时间
-      startTime: dayjs(STARTTIME).startOf('day'),
-      // 结束时间
-      endTime: dayjs(ENDTIME).startOf('day'),
       swapItem,
-      currentId,
       updateItemConnect,
       updateItemDate,
       updateItemTitle,
       updateItemLock,
       createNewItem,
       deleteItem,
-      updateItemColor,
-      setCurrentId,
-      list,
-      listMap,
-      currentFeatures,
-      setCurrentFeatures
     };
   }, [
-    list,
+    setList,
     createNewItem,
-    currentFeatures,
-    setCurrentFeatures,
-    currentId,
     deleteItem,
     updateItemConnect,
-    updateItemColor,
-    listMap,
     updateItemTitle,
     updateItemDate
   ]);
@@ -332,5 +268,9 @@ function Provider({ children, forwardRef }) {
 };
 
 export default React.forwardRef(function ProviderRef(props, ref) {
-  return <Provider {...props} forwardRef={ref} />;
+  return (
+    <RecoilRoot>
+      <Provider {...props} forwardRef={ref} />
+    </RecoilRoot>
+  );
 });

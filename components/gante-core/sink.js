@@ -1,5 +1,6 @@
 import { useMemo, useCallback, useState, useEffect } from 'react';
 import sortBy from 'ramda/src/sortBy';
+import { useRecoilValue } from 'recoil';
 import hotkeys from 'hotkeys-js';
 import path from 'ramda/src/path';
 import classNames from 'classnames';
@@ -7,6 +8,7 @@ import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
 import { connectTo } from './svgtool';
 import useGrabEvent from './use-grab-event';
+import * as atoms from './atom';
 import { Position, getPosition, positionToDay, dayToRect, getRangeDays } from './utils';
 
 /*
@@ -14,24 +16,22 @@ import { Position, getPosition, positionToDay, dayToRect, getRangeDays } from '.
 */
 export default function Sink() {
   const {
-    list,
     sinkRef,
-    listMap,
     graphRef,
-    currentId,
     createNewItem,
-    startTime,
-    endTime,
-    SINK_HEIGHT,
-    SPOT_WIDTH,
-    updateItemConnect,
-    currentFeatures
+    updateItemConnect
   } = useGante();
-
+  const list = useRecoilValue(atoms.list);
+  const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
+  const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
+  const listMap = useRecoilValue(atoms.listMap);
+  const currentId = useRecoilValue(atoms.currentNodeId);
+  const currentNode = useRecoilValue(atoms.currentNode);
+  const currentFeatures = useRecoilValue(atoms.currentFeatures);
   const currentTime = useCurrentDate();
   const grabElementRef = useGrabEvent({});
-  const currentNode = listMap[currentId];
   const [currentSelectConnect, setCurrentSelectConnect] = useState(null);
+  const startTime = useRecoilValue(atoms.startTime);
   const OFFSET_DAY = getRangeDays(startTime, currentTime);
 
   const getNodeTop = useCallback((item) => {
@@ -103,7 +103,7 @@ export default function Sink() {
         width="100%"
         height="100%"
         onClick={onClickEmptySVG}
-        style={{ height: Math.max(list.length, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
+        style={{ height: Math.max(list.length + 5, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
         <g>
           {
             (() => {

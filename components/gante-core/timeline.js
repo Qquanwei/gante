@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 import dayjs from 'dayjs';
+import { useRecoilValue } from 'recoil';
+import * as atoms from './atom';
 import isBetween from 'dayjs/plugin/isBetween';
 import classNames from 'classnames';
 import useCurrentDate from './useCurrentDate';
@@ -12,7 +14,12 @@ dayjs.extend(isBetween);
   展示时间轴，横轴
 */
 export default function Timeline({ children }) {
-  const { SPOT_WIDTH,list, startTime, endTime, currentId, listMap } = useGante();
+  const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
+  const list = useRecoilValue(atoms.list);
+  const currentId = useRecoilValue(atoms.currentNodeId);
+  const listMap = useRecoilValue(atoms.listMap);
+  const startTime = useRecoilValue(atoms.startTime);
+  const endTime = useRecoilValue(atoms.endTime);
   const currentTime = useCurrentDate();
 
   const inRange = useCallback((ts) => {
