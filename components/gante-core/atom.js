@@ -80,19 +80,25 @@ export const thatNode = selectorFamily({
   }
 });
 
-// 这个节点的宽度
-export const thatNodeWidth = selectorFamily({
-  key: 'gante: some node width',
+// 这个节点有多少天
+export const thatNodeDays = selectorFamily({
+  key: 'gante: some node days',
   get: (nodeId) => ({ get }) => {
     const node = get(thatNode(nodeId));
 
     if (!node) {
       return 0;
     }
+    return dayjs(node.endTime).startOf('dayjs')
+      .diff(dayjs(node.startTime).startOf('day'), 'd') + 1;
+  }
+});
 
-    const day = dayjs(node.endTime)
-          .diff(dayjs(node.startTime).startOf('day'), 'days') + 1;
-    return day * get(SPOT_WIDTH);
+// 这个节点的宽度
+export const thatNodeWidth = selectorFamily({
+  key: 'gante: some node width',
+  get: (nodeId) => ({ get }) => {
+    return get(thatNodeDays(nodeId)) * get(SPOT_WIDTH);
   }
 });
 

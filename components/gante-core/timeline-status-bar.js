@@ -17,6 +17,7 @@ function TimelineStatusBar() {
 
   const left = useRecoilValue(atoms.thatNodeLeft(item?.id));
   const width = useRecoilValue(atoms.thatNodeWidth(item?.id));
+  const days = useRecoilValue(atoms.thatNodeDays(item?.id));
 
   const [totalDay] = useMemo(() => {
     if (!item) {
@@ -24,9 +25,9 @@ function TimelineStatusBar() {
     }
     // 一共多少天
     // 多少个工作日
-    const totalDay = utils.getRangeDays(item.startTime, item.endTime) + 1;
+    const totalDay = days;
     return [totalDay];
-  }, [item]);
+  }, [item, days]);
 
   return (
     <div className={classNames("absolute bg-sky-200/75 items-center whitespace-nowrap text-xs bottom-0 h-5 flex justify-center border-gray-200 border-l border-r", {

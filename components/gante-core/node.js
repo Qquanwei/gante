@@ -31,6 +31,7 @@ function Node({ item, index }) {
 
   const width = useRecoilValue(atoms.thatNodeWidth(item.id));
   const left = useRecoilValue(atoms.thatNodeLeft(item.id));
+  const days = useRecoilValue(atoms.thatNodeDays(item.id));
 
   const ref = useInteractionEvent(item.id, {
     onChange: (event, args) => {
@@ -102,13 +103,12 @@ function Node({ item, index }) {
 
         case 'move':
           {
-            const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left).valueOf();
-            const newEndTime = positionToDay(SPOT_WIDTH, startTime, args.left + width).valueOf();
+            const newBeginTime = positionToDay(SPOT_WIDTH, startTime, args.left);
+            const newEndTime = newBeginTime.add(days - 1, 'day');
             setContextInfo({
               show: false
             });
-            console.log('newEndTime', newEndTime);
-            updateItemProperty(item.id, 'startTime', newBeginTime, 'endTime', newEndTime);
+            updateItemProperty(item.id, 'startTime', newBeginTime.valueOf(), 'endTime', newEndTime.valueOf());
           }
           break;
 
