@@ -9,6 +9,7 @@ import useCurrentDate from './useCurrentDate';
 import { connectTo } from './svgtool';
 import useGrabEvent from './use-grab-event';
 import * as atoms from './atom';
+import { useCreateNewNode } from './action';
 import { Position, getPosition, positionToDay, dayToRect, getRangeDays } from './utils';
 
 /*
@@ -18,13 +19,12 @@ export default function Sink() {
   const {
     sinkRef,
     graphRef,
-    createNewItem,
     updateItemConnect
   } = useGante();
+  const createNewItem = useCreateNewNode();
   const list = useRecoilValue(atoms.list);
   const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
-  const listMap = useRecoilValue(atoms.listMap);
   const currentId = useRecoilValue(atoms.currentNodeId);
   const currentNode = useRecoilValue(atoms.currentNode);
   const currentFeatures = useRecoilValue(atoms.currentFeatures);
@@ -166,7 +166,7 @@ export default function Sink() {
               let arg = [];
               for (let i = 0; i < list.length; ++i) {
                 const node = list[i];
-                if (node.connectTo && node.connectTo.length) {
+                if (node && node.connectTo && node.connectTo.length) {
                   const rect = dayToRect(SPOT_WIDTH, startTime, node.startTime, node.endTime);
                   const left = rect.x;
                   const width = rect.w;
@@ -179,7 +179,7 @@ export default function Sink() {
 
                   arg = arg.concat(node.connectTo.map((t, idx) => {
                     const k = `${node.id}-${idx}`;
-                    const tNode = listMap[t];
+                    const tNode = null;
 
                     if (!tNode) {
                       return null;

@@ -18,10 +18,10 @@ const colors = [
 ];
 
 function NodeControlPanel({ node, contextInfo, left, hover }) {
-  const { updateItemColor, deleteItem, updateItemLock } = useGante();
   const leftRef = useRef(0);
 
   const updateItemProperty = actions.useUpdateItemProperty();
+  const deleteItem = actions.useDeleteItem();
 
   const onClickColor = useCallback((e) => {
     const c = colors[e.currentTarget.dataset.color];
@@ -33,7 +33,7 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
   }, [node.id, deleteItem]);
 
   const onClickLock = useCallback(() => {
-    updateItemLock(node.id, !node.lock);
+    updateItemProperty(node.id, 'lock', !node.lock);
   }, [node.id, node.lock]);
 
   const show = hover && contextInfo.show;

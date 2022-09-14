@@ -11,24 +11,22 @@ import TimelineStatusBar from './timeline-status-bar';
 
 dayjs.extend(isBetween);
 /*
-  展示时间轴，横轴
-*/
+   展示时间轴，横轴
+ */
 export default function Timeline({ children }) {
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
   const list = useRecoilValue(atoms.list);
-  const currentId = useRecoilValue(atoms.currentNodeId);
-  const listMap = useRecoilValue(atoms.listMap);
+  const currentNode = useRecoilValue(atoms.currentNode);
   const startTime = useRecoilValue(atoms.startTime);
   const endTime = useRecoilValue(atoms.endTime);
   const currentTime = useCurrentDate();
 
   const inRange = useCallback((ts) => {
-    if (!currentId || !listMap[currentId]) {
+    if (!currentNode) {
       return false;
     }
-    const currentItem = listMap[currentId];
-    return ts.isBetween(currentItem.startTime, currentItem.endTime, 'day', '[]');
-  }, [currentId, listMap]);
+    return ts.isBetween(currentNode.startTime, currentNode.endTime, 'day', '[]');
+  }, [currentNode]);
 
   const getDaySubtitle = useCallback((momDay) => {
     const day = momDay.day();
@@ -73,8 +71,10 @@ export default function Timeline({ children }) {
         }
         <TimelineStatusBar />
       </div>
-      <div className="absolute top-16 w-full">
-        { children }
+      <div className="relative">
+        <div className="relative w-full">
+          { children }
+        </div>
       </div>
     </div>
   );

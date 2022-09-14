@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { Suspense, useState, useRef, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import useGante from './useGante';
@@ -11,14 +11,12 @@ import NodeFormModal from './node-form-modal';
 import { positionToDay } from './utils';
 import DraggleBar from './draggle-bar';
 
-function Node({ item, index }) {
-  const {
-    swapItem,
-    updateItemConnect,
-  } = useGante();
+function Node({id, index }) {
+  const item = useRecoilValue(atoms.thatNode(id));
   const updateItemProperty = actions.useUpdateItemProperty();
   const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
+  const swapItem = actions.useSwapItem();
   const startTime = useRecoilValue(atoms.startTime);
   const setCurrentId = useSetRecoilState(atoms.currentNodeId);
   const setCurrentFeatures = useSetRecoilState(atoms.currentFeatures);
@@ -29,11 +27,11 @@ function Node({ item, index }) {
 
   const [hover, setHover] = useState(false);
 
-  const width = useRecoilValue(atoms.thatNodeWidth(item.id));
-  const left = useRecoilValue(atoms.thatNodeLeft(item.id));
-  const days = useRecoilValue(atoms.thatNodeDays(item.id));
+  const width = useRecoilValue(atoms.thatNodeWidth(id));
+  const left = useRecoilValue(atoms.thatNodeLeft(id));
+  const days = useRecoilValue(atoms.thatNodeDays(id));
 
-  const ref = useInteractionEvent(item.id, {
+  const ref = useInteractionEvent(id, {
     onChange: (event, args) => {
       switch(event) {
         case 'hover':
@@ -62,7 +60,13 @@ function Node({ item, index }) {
 
         case 'connect':
           {
-            updateItemConnect(item.id, args.targetNodeId);
+            updateItemProperty(item.id, 'connectTo', [].concat(item.connectTo || [], args.targetNodeId));
+            updateItemProperty(args.targetNodeId, (target) => {
+              return {
+                ...target,
+                from: [].concat(target.from || [], item.id)
+              }
+            });
             break;
           }
         case 'resize':
@@ -218,7 +222,9 @@ export default function Nodes() {
       {
         list.map((item, index) => {
           return (
-            <Node item={item} key={item.id} index={index} />
+            <Suspense key={item}>
+              <Node id={item} index={index} />
+            </Suspense>
           );
         })
       }

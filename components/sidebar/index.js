@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Transition } from '@headlessui/react';
 import { Bars4Icon } from '@heroicons/react/24/solid';
 import { HomeIcon, ArrowDownOnSquareIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/outline';
+import { Tooltip } from '@material-tailwind/react';
 import Button from 'components/button';
 import classNames from 'classnames';
 import useGante from 'components/gante-core/useGante';
@@ -30,6 +31,7 @@ function Sidebar({ onExport }) {
         reader.addEventListener('load', () => {
           try {
             const list = JSON.parse(reader.result);
+            window.localStorage.setItem('save', JSON.stringify(list));
             setList(list);
           } catch(err) {
             console.error(err);
@@ -58,7 +60,9 @@ function Sidebar({ onExport }) {
       </div>
       <div className={classNames({ hidden: toggleOpen })}>
         <div>
-          <HomeIcon className="cursor-pointer w-[24px]" onClick={onClickToday} />
+          <Tooltip content="->->回到今天">
+            <HomeIcon className="cursor-pointer w-[24px]" onClick={onClickToday} />
+          </Tooltip>
         </div>
         <div>
           <ArrowDownOnSquareIcon className="mt-4 cursor-pointer w-[24px] h-[24px]" onClick={onClickExport} />

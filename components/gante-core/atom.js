@@ -3,7 +3,8 @@ import dayjs from 'dayjs';
 import indexBy from 'ramda/src/indexBy';
 import * as json1 from 'ot-json1';
 import prop from 'ramda/src/prop';
-
+import { syncEffect } from 'recoil-sync';
+import * as refine from '@recoiljs/refine';
 
 // 每个甬道的高度
 export const SINK_HEIGHT = atom({
@@ -20,7 +21,7 @@ export const SPOT_WIDTH = atom({
 // 整个甘特图起始时间
 export const startTime = atom({
   key: 'gante global starttime',
-  default: dayjs(Date.now() - 30 * 24 * 60 * 60 * 1000).startOf('day')
+  default: dayjs(Date.now() - 10 * 24 * 60 * 60 * 1000).startOf('day')
 });
 
 // 整个甘特图结束时间
@@ -29,54 +30,46 @@ export const endTime = atom({
   default: dayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day')
 });
 
-export const _listCore = atom({
-  key: 'gante list core',
-  default: {
-    list: [],
-    map: {}
+export const _listCore__list = atom({
+  key: 'gante_list_core_list',
+  default: [],
+  effects: [
+    syncEffect({ refine: refine.array(refine.string())})
+  ]
+});
+
+export const thatNode = atomFamily({
+  key: 'gante: some node by id',
+  effects: (nodeKey) => {
+    if (!nodeKey) {
+      return [];
+    }
+
+    return [
+      syncEffect({
+        itemKey: nodeKey,
+        refine: refine.voidable(refine.object({
+          id: refine.string(),
+          title: refine.optional(refine.string()),
+          startTime: refine.number(),
+          endTime: refine.number(),
+          color: refine.optional(refine.string()),
+          fgcolor: refine.optional(refine.string()),
+          connectTo: refine.optional(refine.array(refine.string())),
+          from: refine.optional(refine.array(refine.string()))
+        }))
+      })
+    ];
   }
 });
 
 export const list = selector({
   key: 'gante list',
   get: ({ get }) => {
-    const coreData = get(_listCore);
-    return coreData.list.map(i => {
-      return coreData.map[i];
-    });
+    return get(_listCore__list);
   },
   set: ({ set }, newValue) => {
-    set(_listCore, coreData => {
-      return {
-        list: newValue.map(prop('id')),
-        map: indexBy(prop('id'))(newValue)
-      };
-    });
-  }
-});
-
-export const listMap = selector({
-  key: 'gante list but map',
-  get: ({ get }) => {
-    return indexBy(prop('id'), get(list));
-  }
-});
-
-export const thatNode = selectorFamily({
-  key: 'gante: some node by id',
-  get: (nodeId) => ({ get }) => {
-    return get(listMap)[nodeId];
-  },
-  set: (nodeId) => ({ set }, newValue) => {
-    set(_listCore, coreData => {
-      return {
-        ...coreData,
-        map: {
-          ...coreData.map,
-          [nodeId]: newValue
-        }
-      };
-    });
+    set(_listCore__list, newValue.map(prop('id')));
   }
 });
 
@@ -84,6 +77,10 @@ export const thatNode = selectorFamily({
 export const thatNodeDays = selectorFamily({
   key: 'gante: some node days',
   get: (nodeId) => ({ get }) => {
+    if (!nodeId) {
+      return 0;
+    }
+
     const node = get(thatNode(nodeId));
 
     if (!node) {
@@ -106,6 +103,10 @@ export const thatNodeWidth = selectorFamily({
 export const thatNodeLeft = selectorFamily({
   key: 'gante: some node left',
   get: (nodeId) => ({ get }) => {
+    if (!nodeId) {
+      return 0;
+    }
+
     const node = get(thatNode(nodeId));
 
     if (!node) {
@@ -125,8 +126,10 @@ export const currentNodeId = atom({
 export const currentNode = selector({
   key: 'gante current node',
   get: ({ get }) => {
-
-    return get(listMap)[get(currentNodeId)];
+    if (get(currentNodeId)) {
+      return get(thatNode(get(currentNodeId)));
+    }
+    return null;
   }
 });
 

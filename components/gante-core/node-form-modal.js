@@ -2,6 +2,7 @@ import { useState, useCallback, useId, Fragment, useMemo, useRef, useEffect } fr
 import { Transition } from '@headlessui/react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
+import * as actions from './action';
 import { addEventOnce } from './utils';
 import useGante from './useGante';
 
@@ -12,20 +13,21 @@ function NodeFormModal({ node, top, hover, left, contextInfo }) {
   const containerRef = useRef(null);
   const [editMode, setEditMode] = useState(false);
   const leftRef = useRef(0);
-  const { updateItemDate, updateItemTitle } = useGante();
+  const updateItemProperty = actions.useUpdateItemProperty();
 
   const onSubmit = useCallback((e) => {
     e.stopPropagation();
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    updateItemDate(
+    updateItemProperty(
       node.id,
-      dayjs(data.get('startTime') || node.startTime).valueOf(),
-      dayjs(data.get('endTime') || node.endTime).valueOf()
+      'startTime', dayjs(data.get('startTime') || node.startTime).valueOf(),
+      'endTime', dayjs(data.get('endTime') || node.endTime).valueOf(),
+      'title', data.get('title') || node.title,
+      'remark', data.get('remark')
     );
-    updateItemTitle(node.id, data.get('title') || node.title, data.get('remark'));
     setEditMode(false);
-  }, [node, updateItemDate, updateItemTitle]);
+  }, [node]);
 
   if (contextInfo.show) {
     leftRef.current = (contextInfo?.point?.x || 0) - left - (WIDTH / 2);
