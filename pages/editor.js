@@ -3,14 +3,14 @@ import classNames from 'classnames';
 import { Container, LeftSide, Content } from '../components/layout';
 import { GanteProvider, GanteGraph, StatusBar } from '../components/gante-core';
 import Sidebar from '../components/sidebar';
+import config from '../config';
 
 // 左边是一个TODO，右边是一个Gante
-export default function Editor() {
+export default function Editor({ user }) {
   const [pending, setPending] = useState(true);
   const [connected, setConnected] = useState(false);
   const ganteRef = useRef(null);
   const docRef = useRef(null);
-
 
   const onExport = useCallback(() => {
     const a = document.createElement('a');
@@ -48,4 +48,23 @@ export default function Editor() {
       </GanteProvider>
     </div>
   );
+}
+
+import fetch from 'node-fetch';
+export async function getServerSideProps({ req, res }) {
+  const userres = await fetch(`${config.BACKEND_API_ADDRESS}/user`);
+  if (!userres.ok) {
+    const user = await userres.json();
+    return {
+      props: {
+        user
+      }
+    };
+  } else {
+    return {
+      redirect: {
+        destination: `/login?to=${encodeURIComponent(req.url)}`
+      }
+    };
+  }
 }

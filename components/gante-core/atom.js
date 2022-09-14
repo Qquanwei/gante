@@ -6,6 +6,11 @@ import prop from 'ramda/src/prop';
 import { syncEffect } from 'recoil-sync';
 import * as refine from '@recoiljs/refine';
 
+export const user = atom({
+  key: 'current user',
+  default: null
+});
+
 // 每个甬道的高度
 export const SINK_HEIGHT = atom({
   key: 'gante spot height',
