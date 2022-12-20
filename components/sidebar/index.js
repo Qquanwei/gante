@@ -9,7 +9,7 @@ import useGante from 'components/gante-core/useGante';
 
 function Sidebar({ onExport }) {
   const [toggleOpen, setToggleOpen] = useState(false);
-  const { setList } = useGante();
+  const { importList, zoomOut, zoomIn } = useGante();
 
   const onClickToggle = useCallback(() => {
     setToggleOpen(v => !v);
@@ -32,7 +32,7 @@ function Sidebar({ onExport }) {
           try {
             const list = JSON.parse(reader.result);
             window.localStorage.setItem('save', JSON.stringify(list));
-            setList(list);
+            importList(list);
           } catch(err) {
             console.error(err);
           }
@@ -42,15 +42,17 @@ function Sidebar({ onExport }) {
     };
     document.body.appendChild(input);
     input.click();
-  }, [setList]);
+  }, [importList]);
 
   const onClickToday = useCallback(() => {
   }, []);
 
   const onClickZoomIn = useCallback(() => {
+    zoomIn();
   }, []);
 
   const onClickZoomOut = useCallback(() => {
+    zoomOut();
   }, []);
 
   return (
@@ -60,12 +62,14 @@ function Sidebar({ onExport }) {
       </div>
       <div className={classNames({ hidden: toggleOpen })}>
         <div>
-          <Tooltip content="->->回到今天">
+          <Tooltip className="z-20" content="回到今天" placement="right">
             <HomeIcon className="cursor-pointer w-[24px]" onClick={onClickToday} />
           </Tooltip>
         </div>
         <div>
-          <ArrowDownOnSquareIcon className="mt-4 cursor-pointer w-[24px] h-[24px]" onClick={onClickExport} />
+          <Tooltip content="导出到本地" className="z-20" placement="right">
+            <ArrowDownOnSquareIcon className="mt-4 cursor-pointer w-[24px] h-[24px]" onClick={onClickExport} />
+          </Tooltip>
         </div>
         <div>
           <MagnifyingGlassPlusIcon className="mt-4 cursor-pointer w-[24px] h-[24px]" onClick={onClickZoomIn} />

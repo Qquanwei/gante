@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import indexBy from 'ramda/src/indexBy';
 import * as json1 from 'ot-json1';
 import prop from 'ramda/src/prop';
+import { effect } from 'recoil-sharedb';
 import { syncEffect } from 'recoil-sync';
 import * as refine from '@recoiljs/refine';
 
@@ -20,13 +21,13 @@ export const SINK_HEIGHT = atom({
 // 每个格子的高度
 export const SPOT_WIDTH = atom({
   key: 'gante spot width',
-  default: 50
+  default: 40
 });
 
 // 整个甘特图起始时间
 export const startTime = atom({
   key: 'gante global starttime',
-  default: dayjs(Date.now() - 10 * 24 * 60 * 60 * 1000).startOf('day')
+  default: dayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day')
 });
 
 // 整个甘特图结束时间
@@ -39,22 +40,23 @@ export const _listCore__list = atom({
   key: 'gante_list_core_list',
   default: [],
   effects: [
-    syncEffect({ refine: refine.array(refine.string())})
+    effect('list', 'default', {
+      refine: refine.array(refine.string()),
+      syncDefault: false
+    })
   ]
 });
 
 export const thatNode = atomFamily({
   key: 'gante: some node by id',
   effects: (nodeKey) => {
-    if (!nodeKey) {
-      return [];
-    }
-
     return [
-      syncEffect({
-        itemKey: nodeKey,
+      effect('item', nodeKey, {
         refine: refine.voidable(refine.object({
           id: refine.string(),
+          segments: refine.optional(refine.array()),
+          remark: refine.optional(refine.string()),
+          lock: refine.optional(refine.bool()),
           title: refine.optional(refine.string()),
           startTime: refine.number(),
           endTime: refine.number(),

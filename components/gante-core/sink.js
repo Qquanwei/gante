@@ -23,6 +23,7 @@ export default function Sink() {
   } = useGante();
   const createNewItem = useCreateNewNode();
   const list = useRecoilValue(atoms.list);
+
   const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
   const currentId = useRecoilValue(atoms.currentNodeId);
@@ -103,7 +104,7 @@ export default function Sink() {
         width="100%"
         height="100%"
         onClick={onClickEmptySVG}
-        style={{ height: Math.max(list.length + 5, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
+        style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
         <g>
           {
             (() => {

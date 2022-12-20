@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
 import { useRecoilValue } from 'recoil';
 import * as atoms from './atom';
@@ -18,6 +18,7 @@ export default function Timeline({ children }) {
   const list = useRecoilValue(atoms.list);
   const currentNode = useRecoilValue(atoms.currentNode);
   const startTime = useRecoilValue(atoms.startTime);
+  const todayRef = useRef(null);
   const endTime = useRecoilValue(atoms.endTime);
   const currentTime = useCurrentDate();
 
@@ -31,10 +32,41 @@ export default function Timeline({ children }) {
   const getDaySubtitle = useCallback((momDay) => {
     const day = momDay.day();
 
+    if (SPOT_WIDTH < 30) {
+      if (day === 0) {
+        return '日';
+      }
+      return day;
+    }
+
     if (day === 0) {
       return '周日';
     } else {
       return '周' + day;
+    }
+  }, [SPOT_WIDTH]);
+
+  const getDayTitle = useCallback((time) => {
+    const isStart = dayjs(time).date() === 1;
+
+    if (isStart) {
+      return (
+          <div className="font-bold text-orange-500 whitespace-nowrap text-[15px] px-1">{ dayjs(time).month() + 1}月</div>
+      );
+    }
+
+    let title = null;
+    if (SPOT_WIDTH >= 50) {
+      title = dayjs(time).format('M.DD');
+    } else {
+      title = dayjs(time).format('D');
+    }
+    return title;
+  }, [SPOT_WIDTH]);
+
+  useEffect(() => {
+    if (todayRef.current) {
+      todayRef.current.scrollIntoView();
     }
   }, []);
 
@@ -52,7 +84,7 @@ export default function Timeline({ children }) {
               const weekend = day.day() === 6 || day.day() === 0;
 
               ans.push(
-                <div className={classNames("box-border shrink-0 flex-col h-10 text-center items-center flex justify-center", {
+                <div ref={today ? todayRef : null} className={classNames("box-border text-[13px] shrink-0 flex-col h-10 text-center items-center flex justify-center", {
                   ["bg-sky-200/75"]: range,
                   ["bg-gray-300/25"]: weekend && !range,
                   ["bg-sky-200/20"]: weekend && range
@@ -60,7 +92,7 @@ export default function Timeline({ children }) {
                   width: SPOT_WIDTH,
                 }} key={i}>
                   {
-                    dayjs(startTime).add(i, 'days').format('M.DD')
+                    getDayTitle(dayjs(startTime).add(i, 'days'))
                   }
                   <span className="text-xs">{ getDaySubtitle(dayjs(startTime).add(i, 'day'))}</span>
                 </div>

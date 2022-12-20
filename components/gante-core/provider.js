@@ -3,13 +3,15 @@ import React, {
   Suspense
 } from 'react';
 import Events from 'events';
-import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
-import RecoilSyncShareDB from './RecoilSyncShareDB';
+import dynamic from 'next/dynamic';
+import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { RecoilSyncShareDB } from 'recoil-sharedb';
 import { ErrorBoundary } from 'react-error-boundary';
 import * as atoms from './atom';
 import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
 import { hasProp } from './utils';
+import * as actions from './action';
 
 const Context = React.createContext();
 
@@ -22,37 +24,40 @@ function Provider({ children, forwardRef }) {
   const graphRef = useRef(null);
   const sinkRef = useRef(null);
   const portalRef = useRef(null);
+  const list = useRecoilValue(atoms.list);
+  const setSpotWidth = useSetRecoilState(atoms.SPOT_WIDTH);
+
+  const importList = actions.useImportList();
+
+  const zoomOut = useCallback(() => {
+    setSpotWidth(v => Math.max(v - 5, 25));
+  }, []);
+
+  const zoomIn = useCallback(() => {
+    setSpotWidth(v => Math.min(v + 5, 50));
+  }, []);
 
   const event = useMemo(() => {
     return new Events();
   }, []);
 
-  const [list, setList]= useRecoilState(atoms.list);
-
-  useEffect(() => {
-    const v = JSON.parse(window.localStorage.getItem('save'))
-    if (v) {
-      setList(v);
-    }
-  }, []);
-
   useImperativeHandle(forwardRef, () => {
     return {
-      list,
-      setList,
-      event
+      importList,
+      event,
+      zoomOut
     };
   });
 
   const contextValue = useMemo(() => {
     return {
       graphRef,
-      setList,
-      sinkRef
+      sinkRef,
+      zoomOut,
+      importList,
+      zoomIn
     };
-  }, [
-    setList
-  ]);
+  }, [importList]);
 
   return (
     <Context.Provider value={contextValue}>
@@ -74,16 +79,28 @@ function ErrorFallback({ error }) {
   );
 }
 
-export default React.forwardRef(function ProviderRef(props, ref) {
+export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderRef(props, ref) {
+  let host = (() => {
+    if (typeof window !== 'undefined') {
+      return window.location.host;
+    } else {
+      // in node environment
+      // never in this
+      const port = process.env.PORT || 8088;
+      return `127.0.0.1:${port}`;
+    }
+  })();
   return (
     <RecoilRoot>
       <Suspense fallback={<div>global loading...</div>}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <RecoilSyncShareDB>
+          <RecoilSyncShareDB wsUrl={`ws://${host}/share`}>
             <Provider {...props} forwardRef={ref} />
           </RecoilSyncShareDB>
         </ErrorBoundary>
       </Suspense>
     </RecoilRoot>
   );
+})), {
+  ssr: false
 });

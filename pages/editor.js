@@ -21,8 +21,9 @@ export default function Editor({ user }) {
     a.click();
   }, []);
 
+  console.log(user);
   return (
-    <div className="w-full h-full">
+    <div className="w-[1000px] h-full">
       <GanteProvider ref={ganteRef}>
         <Sidebar onExport={onExport} pending={pending} connected={connected} />
         <Container className="h-screen">
@@ -50,21 +51,12 @@ export default function Editor({ user }) {
   );
 }
 
-import fetch from 'node-fetch';
-export async function getServerSideProps({ req, res }) {
-  const userres = await fetch(`${config.BACKEND_API_ADDRESS}/user`);
-  if (!userres.ok) {
-    const user = await userres.json();
-    return {
-      props: {
-        user
+export function getServerSideProps({ res, req }) {
+  return {
+    props: {
+      user: {
+        userId: 1000
       }
-    };
-  } else {
-    return {
-      redirect: {
-        destination: `/login?to=${encodeURIComponent(req.url)}`
-      }
-    };
-  }
+    }
+  };
 }

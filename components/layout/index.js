@@ -18,7 +18,7 @@ function LeftSide({ children }) {
 
 function Content({ children }) {
     return (
-        <div>
+        <div className="w-[100vw] h-[100vh] overflow-auto">
             { children }
         </div>
     );
