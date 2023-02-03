@@ -46,9 +46,7 @@
     "sharedb-mongo": "^2.0.0",
     "supertest": "^6.3.3",
     "svg-path-generator": "^1.1.0",
-    "tiny-event-manager": "^1.0.0"
-  },
-  "devDependencies": {
+    "tiny-event-manager": "^1.0.0",
     "autoprefix": "^1.0.1",
     "cross-env": "^7.0.3",
     "eslint": "8.13.0",
