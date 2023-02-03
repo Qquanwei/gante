@@ -7,7 +7,9 @@ const json1 = require('ot-json1');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const { WebSocketServer } = require('ws');
 const { MongoClient } = require('mongodb');
-const db = require('sharedb-mongo')('mongodb://root:example@localhost:27017');
+const serverApi = require('./server/router');
+const config = require('./config');
+const db = require('sharedb-mongo')(config.MONGO_ADDR);
 
 const app = new koa();
 const server = http.createServer(app.callback());
@@ -20,19 +22,22 @@ const nextApp = next({
 const handler = nextApp.getRequestHandler();
 const router = new Router();
 
-
 async function startApp() {
   await nextApp.prepare();
-  router.get(/.*/, async ctx => {
+  router.use(serverApi.routes());
+  router.use(serverApi.allowedMethods());
+
+  router.get(/^[^(api)].*$/, async ctx => {
     await handler(ctx.req, ctx.res);
     ctx.respond = false;
   });
   app.use(router.routes());
+  const port = process.env.PORT || 8088;
   server.listen({
     host: '0.0.0.0',
-    port: process.env.PORT || 8088
+    port
   }, () => {
-    console.log('start');
+    console.log(`start on localhost:${port}`);
   });
 }
 

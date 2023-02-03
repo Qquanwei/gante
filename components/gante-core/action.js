@@ -30,9 +30,8 @@ export function useUpdateItemProperty() {
 }
 
 
-let globalIndex = 10;
 function makeId() {
-  return Math.floor(Math.random() * 1000) + 'rand' + globalIndex++;
+  return Math.floor(Math.random() * 10000000) + 'rand';
 }
 
 export function useCreateNewNode() {
@@ -46,7 +45,6 @@ export function useCreateNewNode() {
         if (err) {
           reject(err);
         } else {
-          console.log('new Position', newPosition);
           set(atoms._listCore__list, list => {
             if (newPosition >= list.length) {
               return list.concat(newId);

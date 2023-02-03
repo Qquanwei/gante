@@ -40,7 +40,7 @@ export const _listCore__list = atom({
   key: 'gante_list_core_list',
   default: [],
   effects: [
-    effect('list', 'default', {
+    effect('list', '<docId>', {
       refine: refine.array(refine.string()),
       syncDefault: false
     })

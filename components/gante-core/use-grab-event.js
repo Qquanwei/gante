@@ -6,10 +6,10 @@ import useGante from './useGante';
 
 function getScrollingElement(element) {
   let cur = element;
-  while (cur.scrollHeight === cur.clientHeight) {
+  while (cur && (cur.scrollHeight === cur.clientHeight)) {
     cur = cur.parentElement;
   }
-  return cur || window;
+  return cur || document.scrollingElement;
 }
 
 var NormalState = inherit(State, function () {

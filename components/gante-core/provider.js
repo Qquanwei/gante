@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { RecoilSyncShareDB } from 'recoil-sharedb';
 import { ErrorBoundary } from 'react-error-boundary';
+import Modal from '../../components/modal';
 import * as atoms from './atom';
 import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
@@ -79,24 +80,33 @@ function ErrorFallback({ error }) {
   );
 }
 
-export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderRef(props, ref) {
-  let host = (() => {
-    if (typeof window !== 'undefined') {
-      return window.location.host;
-    } else {
-      // in node environment
-      // never in this
-      const port = process.env.PORT || 8088;
-      return `127.0.0.1:${port}`;
-    }
-  })();
+export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderRef({docId, ...props}, ref) {
+  const [error, setError] = useState(null);
+  const [show, setShow] = useState(false);
+
+  const onError = useCallback((err) => {
+    setError(err);
+    setShow(true);
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    window.location.reload();
+  }, []);
+
   return (
     <RecoilRoot>
       <Suspense fallback={<div>global loading...</div>}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <RecoilSyncShareDB wsUrl={`ws://${host}/share`}>
+          <RecoilSyncShareDB wsUrl={`ws://${window.location.host}/share`} onError={onError} docId={docId}>
             <Provider {...props} forwardRef={ref} />
           </RecoilSyncShareDB>
+
+          <Modal show={show} title="同步发生错误" onClose={onRefresh}>
+            <h1>
+              { error?.message }
+            </h1>
+            <div>请刷新</div>
+          </Modal>
         </ErrorBoundary>
       </Suspense>
     </RecoilRoot>

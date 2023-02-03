@@ -67,11 +67,6 @@ function Sidebar({ onExport }) {
           </Tooltip>
         </div>
         <div>
-          <Tooltip content="导出到本地" className="z-20" placement="right">
-            <ArrowDownOnSquareIcon className="mt-4 cursor-pointer w-[24px] h-[24px]" onClick={onClickExport} />
-          </Tooltip>
-        </div>
-        <div>
           <MagnifyingGlassPlusIcon className="mt-4 cursor-pointer w-[24px] h-[24px]" onClick={onClickZoomIn} />
         </div>
         <div>
@@ -79,11 +74,6 @@ function Sidebar({ onExport }) {
         </div>
       </div>
       <div className={classNames(toggleOpen ? 'w-[300px]' : 'hidden')}>
-        <Button className="cursor-pointer inline-flex items-center justify-center text-white text-sm py-1 px-3 rounded-sm bg-blue-500"
-          onClick={onClickExport}>
-          导出
-        </Button>
-
         <Button className="ml-2 cursor-pointer inline-flex items-center justify-center text-white text-sm py-1 px-3 rounded-sm bg-blue-500"
           onClick={onClickImport}>
           导入

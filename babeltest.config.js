@@ -1,4 +1,4 @@
-if (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === 'unittest') {
   module.exports = {
     presets: ['next/babel']
   };
