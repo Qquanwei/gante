@@ -94,7 +94,7 @@ export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderR
   }, []);
 
   const protocol = useMemo(() => {
-    if (window.location.protocol === 'https://') {
+    if (window.location.protocol === 'https:') {
       return 'wss://';
     }
     return 'ws://';
