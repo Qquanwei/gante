@@ -93,11 +93,18 @@ export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderR
     window.location.reload();
   }, []);
 
+  const protocol = useMemo(() => {
+    if (window.location.protocol === 'https://') {
+      return 'wss://';
+    }
+    return 'ws://';
+  }, []);
+
   return (
     <RecoilRoot>
       <Suspense fallback={<div>global loading...</div>}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <RecoilSyncShareDB wsUrl={`ws://${window.location.host}/share`} onError={onError} docId={docId}>
+          <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share`} onError={onError} docId={docId}>
             <Provider {...props} forwardRef={ref} />
           </RecoilSyncShareDB>
 
