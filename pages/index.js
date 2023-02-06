@@ -23,7 +23,7 @@ export default function Home({ user }) {
           <div className="flex font-mono text-white justify-center items-center">
             打开我的
             <Link href={`/editor?id=${user?.defaultTableId || 0}`}>
-              <a className="ml-4 bg-blue-500/50 p-4 border-box text-[20px] block box-border rounded-lg hover:ring ring-[#d6e6ff] ring-offset-black hover:ring-offset-2">Gante工具</a>
+              <div className="ml-4 bg-blue-500/50 p-4 border-box text-[20px] block box-border rounded-lg hover:ring ring-[#d6e6ff] ring-offset-black hover:ring-offset-2">Gante工具</div>
             </Link>
           </div>
         </div>
