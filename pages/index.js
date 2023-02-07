@@ -3,7 +3,6 @@ import Link from 'next/link';
 import User from 'components/user';
 
 export default function Home({ user }) {
-  console.log('->', user);
   return (
     <div >
       <Head>
