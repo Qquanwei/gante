@@ -1,3 +1,19 @@
+配置文件
+
+config/config.dev.js
+config/config.online.js
+
+开发
+
+npm run dev
+
+
+部署生产(需要设置环境变量)
+
+npm run build
+npm run start
+
+
 环境变量
 
 1. GANTE_GITHUB_CLIENT_ID
