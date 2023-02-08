@@ -6,7 +6,7 @@ import useGante from './useGante';
 
 function getScrollingElement(element) {
   let cur = element;
-  while (cur && (cur.scrollHeight === cur.clientHeight)) {
+  while (cur && !/scroll-container/.test(cur.dataset.role)) {
     cur = cur.parentElement;
   }
   return cur || document.scrollingElement;

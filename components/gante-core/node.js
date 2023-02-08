@@ -183,12 +183,11 @@ function Node({id, index }) {
         data-role="left-dragger">
         <DraggleBar />
       </div>
-      <span className="grow px-2">
+      <span className="grow px-2 sticky overflow-hidden right-[2px] left-[2px]">
         { item.title }
       </span>
 
       <div data-role="ignore-events">
-
         <NodeControlPanel node={item} contextInfo={contextInfo} left={left} hover={hover}/>
 
         <NodeFormModal node={item} contextInfo={contextInfo} top={top} left={left} hover={hover}/>
@@ -201,7 +200,7 @@ function Node({id, index }) {
 
 
       </div>
-      <div className={classNames("ml-auto sticky right-2 text-xs mr-2", { hidden: !item.lock })}>
+      <div className={classNames("ml-auto sticky right-[2px] text-xs mr-2", { hidden: !item.lock })}>
         锁定
       </div>
 

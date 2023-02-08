@@ -48,7 +48,6 @@ function User({ user }) {
           第三方登录授权
         </h1>
         <div className="flex items-center justify-center flex-col mx-auto mt-[20px] w-[300px]">
-
           <div className="g-signin2 h-[36px]" data-onsuccess="onGoogleSignIn"></div>
           <a className="github-login block border flex items-center justify-center hover:bg-gray-300 w-full mt-[10px] h-[36px]" noreferer="true" href="https://github.com/login/oauth/authorize?login&client_id=c7b4ad0b9f7f6b38da81&scope=user" >
             Github

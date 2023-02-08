@@ -18,7 +18,7 @@ function LeftSide({ children }) {
 
 function Content({ children }) {
     return (
-        <div className="w-[100vw] h-[100vh] overflow-auto">
+        <div className="w-[100vw] h-[100vh] overflow-auto relative" data-role="scroll-container">
             { children }
         </div>
     );
