@@ -104,7 +104,7 @@ export default function Sink() {
         width="100%"
         height="100%"
         onClick={onClickEmptySVG}
-        style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
+    style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
         <g>
           {
             (() => {

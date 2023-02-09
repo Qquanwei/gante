@@ -36,15 +36,38 @@ export const endTime = atom({
   default: dayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day')
 });
 
-export const _listCore__list = atom({
-  key: 'gante_list_core_list',
-  default: [],
+export const _listCore__editor = atom({
+  key: 'gante_list_core_editor',
+  default: {
+    version: '1.0.0',
+    list: []
+  },
   effects: [
     effect('list', '<docId>', {
-      refine: refine.array(refine.string()),
+      // 版本迁移，历史版本是一个数组，迁移到对象中
+      refine: refine.match(
+        refine.object({
+          list: refine.array(refine.string()),
+          version: refine.optional(refine.string())
+        }),
+        refine.asType(refine.array(refine.string()), list => ({ list }))
+      ),
       syncDefault: false
     })
   ]
+});
+
+export const _listCore__list = selector({
+  key: 'gante_list_core_list',
+  get: ({ get }) => {
+    return get(_listCore__editor).list;
+  },
+  set: ({ set }, newValue) => {
+    set(_listCore__editor, oldValue => ({
+      ...oldValue,
+      list: newValue
+    }));
+  }
 });
 
 export const thatNode = atomFamily({

@@ -60,35 +60,6 @@ export function useCreateNewNode() {
   }, []);
 }
 
-// 从外部导入
-export function useImportList() {
-  const conRef = useConnectionRef();
-  return useRecoilCallback(({ set }) => (list) => {
-    // list: [{ }, { }, itemObject]
-    Promise.all(
-      list.map((item) => {
-        return new Promise((resolve) => {
-          const doc = conRef.current.get('item', item.id);
-          doc.fetch(() => {
-            if (doc.type) {
-              resolve();
-            } else {
-              doc.create(item, 'json1', (error) => {
-                if (error) {
-                  console.log(error);
-                }
-                resolve();
-              });
-            }
-          });
-        });
-      })
-    ).then(() => {
-      set(atoms._listCore__list, list.map(prop('id')));
-    });
-  }, []);
-}
-
 // 导出到json
 export function useExportList() {
   return useRecoilCallback(({ snapshot }) => () => {

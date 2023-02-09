@@ -6,10 +6,14 @@ const koa = require('koa');
 const json1 = require('ot-json1');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const { WebSocketServer } = require('ws');
-const { MongoClient } = require('mongodb');
+const cookie = require('cookie');
 const serverApi = require('./server/router');
 const config = require('./config');
-const db = require('sharedb-mongo')(config.MONGO_ADDR);
+const db = require('sharedb-mongo')(config.MONGO_ADDR, {
+  mongoOptions: {
+    appname: 'gante'
+  }
+});
 
 const app = new koa();
 const server = http.createServer(app.callback());
@@ -50,12 +54,22 @@ const wsServer = new WebSocketServer({ noServer: true });
 ShareDB.types.register(json1.type);
 const backend = new ShareDB({ db });
 
+backend.use('connect', ({ steam, req }, next) => {
+  // console.log('新连接接入', cookie.parse(req.headers.cookie));
+  next();
+});
+
+backend.use('op', function({collection, id, op}, next) {
+  console.log('收到:', collection, id, op);
+  next();
+});
+
 server.on('upgrade', function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
   if (pathname === '/share') {
     wsServer.handleUpgrade(request, socket, head, (ws) => {
       const stream = new WebSocketJSONStream(ws);
-      backend.listen(stream);
+      backend.listen(stream, request);
     });
   }
 });

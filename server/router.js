@@ -14,7 +14,6 @@ const router = new Router({
 router.use(bodyParser());
 router.use(mongo({
   uri: config.MONGO_ADDR,
-  db: config.MONGO_DB_NAME,
   max: 100,
   min: 1
 }));
@@ -114,7 +113,6 @@ router.post('/login', async (ctx, next) => {
 router.get('/user', async (ctx) => {
   const uid = helper.getUserIdBySession(ctx);
 
-  console.log(uid);
   if (!uid) {
     ctx.status = 401;
     return;

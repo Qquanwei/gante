@@ -9,7 +9,7 @@ import useGante from 'components/gante-core/useGante';
 
 function Sidebar({ onExport }) {
   const [toggleOpen, setToggleOpen] = useState(false);
-  const { importList, zoomOut, zoomIn } = useGante();
+  const { zoomOut, zoomIn } = useGante();
 
   const onClickToggle = useCallback(() => {
     setToggleOpen(v => !v);
@@ -18,31 +18,6 @@ function Sidebar({ onExport }) {
   const onClickExport = useCallback(() => {
     onExport();
   }, [onExport]);
-
-  const onClickImport = useCallback(() => {
-    const input = document.createElement('input');
-    input.style.display = 'none';
-    input.accept= ".json";
-    input.type = 'file';
-    input.oninput = (event) => {
-      if (event.target && event.target.files.length) {
-        const reader = new FileReader();
-        reader.readAsText(event.target.files[0], 'UTF-8');
-        reader.addEventListener('load', () => {
-          try {
-            const list = JSON.parse(reader.result);
-            window.localStorage.setItem('save', JSON.stringify(list));
-            importList(list);
-          } catch(err) {
-            console.error(err);
-          }
-        });
-      }
-      document.body.removeChild(input);
-    };
-    document.body.appendChild(input);
-    input.click();
-  }, [importList]);
 
   const onClickToday = useCallback(() => {
   }, []);
@@ -74,10 +49,6 @@ function Sidebar({ onExport }) {
         </div>
       </div>
       <div className={classNames(toggleOpen ? 'w-[300px]' : 'hidden')}>
-        <Button className="ml-2 cursor-pointer inline-flex items-center justify-center text-white text-sm py-1 px-3 rounded-sm bg-blue-500"
-          onClick={onClickImport}>
-          导入
-        </Button>
       </div>
     </div>
   );

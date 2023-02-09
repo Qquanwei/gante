@@ -28,8 +28,6 @@ function Provider({ children, forwardRef }) {
   const list = useRecoilValue(atoms.list);
   const setSpotWidth = useSetRecoilState(atoms.SPOT_WIDTH);
 
-  const importList = actions.useImportList();
-
   const zoomOut = useCallback(() => {
     setSpotWidth(v => Math.max(v - 5, 25));
   }, []);
@@ -44,7 +42,6 @@ function Provider({ children, forwardRef }) {
 
   useImperativeHandle(forwardRef, () => {
     return {
-      importList,
       event,
       zoomOut
     };
@@ -55,10 +52,9 @@ function Provider({ children, forwardRef }) {
       graphRef,
       sinkRef,
       zoomOut,
-      importList,
       zoomIn
     };
-  }, [importList]);
+  }, []);
 
   return (
     <Context.Provider value={contextValue}>
@@ -105,7 +101,9 @@ export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderR
       <Suspense fallback={<div>global loading...</div>}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share`} onError={onError} docId={docId}>
-            <Provider {...props} forwardRef={ref} />
+            <Suspense fallback={<div>loading...</div>}>
+              <Provider {...props} forwardRef={ref} />
+            </Suspense>
           </RecoilSyncShareDB>
 
           <Modal show={show} title="同步发生错误" onClose={onRefresh}>

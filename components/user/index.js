@@ -35,15 +35,13 @@ function User({ user }) {
       <div
         onClick={onClick}
         className={
-        classNames("flex justify-center items-center text-xs select-none cursor-pointer outline outline-gray-500/50 outline-1 outline-offset-2 w-[50px] h-[50px] rounded-full", {
-          'bg-gray-300': !isLogin
-        })
+        classNames("flex justify-center items-center text-xs select-none cursor-pointer hover:outline outline-gray-500/50 outline-1 outline-offset-2 w-[50px] h-[50px] rounded-full")
         }>
         {
           isLogin ? user.userName : '登录'
         }
       </div>
-      <Modal show={showLoginModal} onClose={onModalClose} className="bg-[#003f5c]">
+      <Modal show={showLoginModal} onClose={onModalClose}>
         <h1 className="text-gray-500">
           第三方登录授权
         </h1>
