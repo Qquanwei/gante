@@ -10,8 +10,10 @@ function Header({ children, className, user, side, ganteRef }) {
           <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]"></div>
         </Link>
         <div className="flex flex-col items-center h-full select-none">
-          <ul className="flex mt-10 flex-col text-[12px]">
-            <li className="cursor-pointer" onClick={() =>  ganteRef?.current?.gotoToday()}>回到今天</li>
+          <ul className="flex mt-2 flex-col text-[12px] text-center">
+            <li className="cursor-pointer h-[24px]" onClick={() => ganteRef?.current?.gotoToday()}>回到今天</li>
+            <li className="cursor-pointer h-[24px]" onClick={() => ganteRef?.current?.zoomIn()}>缩小</li>
+            <li className="cursor-pointer h-[24px]" onClick={() => ganteRef?.current?.zoomOut()}>放大</li>
           </ul>
           <div className="mt-auto mb-20">
             <User user={user} />

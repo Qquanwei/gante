@@ -40,7 +40,8 @@ export const _listCore__editor = atom({
   key: 'gante_list_core_editor',
   default: {
     version: '1.0.0',
-    list: []
+    list: [],
+    pin: {}
   },
   effects: [
     effect('list', '<docId>', {
@@ -48,7 +49,10 @@ export const _listCore__editor = atom({
       refine: refine.match(
         refine.object({
           list: refine.array(refine.string()),
-          version: refine.optional(refine.string())
+          version: refine.optional(refine.string()),
+          pin: refine.optional(refine.object({
+            day: refine.number()
+          }))
         }),
         refine.asType(refine.array(refine.string()), list => ({ list }))
       ),

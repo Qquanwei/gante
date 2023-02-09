@@ -50,6 +50,7 @@ const Provider = React.forwardRef(({ children }, forwardRef) => {
     return {
       event,
       zoomOut,
+      zoomIn,
       gotoToday: () => {
         if (impl.gotoTodayImpl) {
           impl.gotoTodayImpl();

@@ -100,7 +100,7 @@ export default function Sink() {
     return () => {
       setGotoTodayImpl(null);
     }
-  }, [setGotoTodayImpl, OFFSET_DAY]);
+  }, [setGotoTodayImpl, OFFSET_DAY, SPOT_WIDTH]);
 
 
   useEffect(() => {
