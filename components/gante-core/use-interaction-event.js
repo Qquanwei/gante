@@ -272,6 +272,8 @@ SortState.prototype.mount = function() {
   });
 
   this.machine.emit('enter-sort');
+
+  this.lastEmitPosition = null;
 }
 
 SortState.prototype.unmount = function() {
@@ -294,6 +296,12 @@ SortState.prototype.onMouseMove = function(event) {
   const position = getPosition(this.machine.getGraphElement(), event);
   this.machine.getElement().classList.add('opacity-0');
   this.clone.style.top = position.y + 'px';
+
+  const newEmit = Math.floor(position.y / this.machine.SINK_HEIGHT);
+  if (newEmit === this.lastEmitPosition) {
+    return;
+  }
+  this.lastEmitPosition = newEmit;
   this.machine.emit('sort', {
     position
   });

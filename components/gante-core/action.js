@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import prop from 'ramda/src/prop';
-import { useConnectionRef } from 'recoil-sharedb';
+import { buildItemKey, useConnectionRef, useArraySwap } from 'recoil-sharedb';
 import * as atoms from './atom';
 import { useRecoilCallback } from 'recoil';
 
@@ -79,16 +79,11 @@ export function useDeleteItem() {
 
 
 export function useSwapItem() {
-  return useRecoilCallback(({ set }) => (fromIndex, toIndex) => {
-    set(atoms._listCore__list, list => {
-      if (list[fromIndex] && list[toIndex]) {
-        const temp = list[fromIndex];
-        const shallowList = [...list];
-        shallowList[fromIndex] = shallowList[toIndex];
-        shallowList[toIndex] = temp;
-        return shallowList;
-      }
-      return list;
-    });
+  const arraySwap = useArraySwap();
+  return useRecoilCallback(({ snapshot }) => (fromIndex, toIndex) => {
+    const list = snapshot.getLoadable(atoms._listCore__list).contents;
+    if (list[fromIndex] && list[toIndex]) {
+      arraySwap(buildItemKey('list', '<docId>'), ['list', fromIndex], ['list', toIndex]);
+    }
   }, []);
 }
