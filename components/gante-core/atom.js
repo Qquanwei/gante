@@ -41,7 +41,7 @@ export const _listCore__editor = atom({
   default: {
     version: '1.0.0',
     list: [],
-    pin: {}
+    pin: []
   },
   effects: [
     effect('list', '<docId>', {
@@ -50,9 +50,7 @@ export const _listCore__editor = atom({
         refine.object({
           list: refine.array(refine.string()),
           version: refine.optional(refine.string()),
-          pin: refine.optional(refine.array(refine.object({
-            day: refine.number()
-          })))
+          pin: refine.optional(refine.array(refine.object({})))
         }),
         refine.asType(refine.array(refine.string()), list => ({ list }))
       ),
