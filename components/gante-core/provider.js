@@ -4,8 +4,9 @@ import React, {
 } from 'react';
 import Events from 'events';
 import dynamic from 'next/dynamic';
-import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState, useRecoilCallback } from 'recoil';
 import { RecoilSyncShareDB } from 'recoil-sharedb';
+import * as R from 'ramda';
 import { ErrorBoundary } from 'react-error-boundary';
 import Modal from '../../components/modal';
 import * as atoms from './atom';
@@ -27,6 +28,7 @@ const Provider = React.forwardRef(({ children }, forwardRef) => {
   const portalRef = useRef(null);
   const list = useRecoilValue(atoms.list);
   const setSpotWidth = useSetRecoilState(atoms.SPOT_WIDTH);
+  const updateItemProperty = actions.useUpdateItemProperty();
 
   const impl = useRef({});
 
@@ -46,9 +48,42 @@ const Provider = React.forwardRef(({ children }, forwardRef) => {
     return new Events();
   }, []);
 
+  const updateItemConnect = useRecoilCallback(({ snapshot }) => async (fromNodeId, toNodeId, isAdd) => {
+    // isAdd = true, append, false, remove
+    const allNodes = await snapshot.getPromise(atoms.allNodes);
+    const nodeMap = R.indexBy(R.prop('id'), allNodes);
+    const fromNode = nodeMap[fromNodeId];
+    const toNode = nodeMap[toNodeId];
+
+    if (!isAdd && fromNode && toNode) {
+      const removeFromIdx = fromNode.connectTo.indexOf(toNode.id);
+      const removeToIdx = toNode.from.indexOf(fromNode.id);
+      if (removeFromIdx !== -1) {
+        const cp1 = [...fromNode.connectTo];
+        cp1[removeFromIdx] = null;
+
+        if (cp1.filter(R.identity).length === 0) {
+          updateItemProperty(fromNode.id, 'connectTo', []);
+        } else {
+          updateItemProperty(fromNode.id, 'connectTo', cp1);
+        }
+      }
+      if (removeToIdx !== -1) {
+        const cp2 = [...toNode.from];
+        cp2[removeToIdx] = null;
+        if (cp2.filter(R.identity).length === 0) {
+          updateItemProperty(toNode.id, 'from', []);
+        } else {
+          updateItemProperty(toNode.id, 'from', cp2);
+        }
+      }
+    }
+  }, []);
+
   useImperativeHandle(forwardRef, () => {
     return {
       event,
+      updateItemConnect,
       zoomOut,
       zoomIn,
       gotoToday: () => {
@@ -63,6 +98,7 @@ const Provider = React.forwardRef(({ children }, forwardRef) => {
     return {
       graphRef,
       setGotoTodayImpl,
+      updateItemConnect,
       sinkRef,
       zoomOut,
       zoomIn

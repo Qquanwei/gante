@@ -81,6 +81,10 @@ export const thatNode = atomFamily({
       effect('item', nodeKey, {
         refine: refine.voidable(refine.object({
           id: refine.string(),
+          type: refine.match(
+            refine.string(),
+            refine.asType(refine.voidable(), () => 'node')
+          ),
           segments: refine.optional(refine.array()),
           remark: refine.optional(refine.string()),
           lock: refine.optional(refine.bool()),
@@ -89,8 +93,8 @@ export const thatNode = atomFamily({
           endTime: refine.number(),
           color: refine.optional(refine.string()),
           fgcolor: refine.optional(refine.string()),
-          connectTo: refine.optional(refine.array(refine.string())),
-          from: refine.optional(refine.array(refine.string()))
+          connectTo: refine.optional(refine.array(refine.nullable(refine.string()))),
+          from: refine.optional(refine.array(refine.nullable(refine.string())))
         }))
       })
     ];
@@ -104,6 +108,16 @@ export const list = selector({
   },
   set: ({ set }, newValue) => {
     set(_listCore__list, newValue.map(prop('id')));
+  }
+});
+
+
+export const allNodes = selector({
+  key: 'all nodes selector',
+  get: ({ get }) => {
+    return get(list).map(nodeId => {
+      return get(thatNode(nodeId));
+    });
   }
 });
 

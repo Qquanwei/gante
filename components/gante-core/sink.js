@@ -1,5 +1,6 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import sortBy from 'ramda/src/sortBy';
+import * as R from 'ramda';
 import { useRecoilValue } from 'recoil';
 import hotkeys from 'hotkeys-js';
 import path from 'ramda/src/path';
@@ -27,6 +28,7 @@ export default function Sink() {
   } = useGante();
   const createNewItem = useCreateNewNode();
   const list = useRecoilValue(atoms.list);
+  const allNodes = useRecoilValue(atoms.allNodes);
   const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
   const currentId = useRecoilValue(atoms.currentNodeId);
@@ -40,7 +42,7 @@ export default function Sink() {
   const todayRectRef = useRef(null);
 
   const getNodeTop = useCallback((item) => {
-    return list.indexOf(item) * SINK_HEIGHT + 3;
+    return list.indexOf(item.id) * SINK_HEIGHT + 3;
   }, [list]);
 
 
@@ -184,8 +186,9 @@ export default function Sink() {
             // 处理connectTo
             (() => {
               let arg = [];
-              for (let i = 0; i < list.length; ++i) {
-                const node = list[i];
+              const nodeMap = R.indexBy(R.prop('id'), allNodes);
+              for (let i = 0; i < allNodes.length; ++i) {
+                const node = allNodes[i];
                 if (node && node.connectTo && node.connectTo.length) {
                   const rect = dayToRect(SPOT_WIDTH, startTime, node.startTime, node.endTime);
                   const left = rect.x;
@@ -199,7 +202,7 @@ export default function Sink() {
 
                   arg = arg.concat(node.connectTo.map((t, idx) => {
                     const k = `${node.id}-${idx}`;
-                    const tNode = null;
+                    const tNode = nodeMap[t];
 
                     if (!tNode) {
                       return null;
@@ -220,7 +223,7 @@ export default function Sink() {
                       currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
                     );
                     // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
-                    arg.push(
+                    return (
                       <path
                         custom-order={selected ? Infinity : arg.length}
                         className={classNames({
