@@ -1,16 +1,8 @@
 import { useRef, useEffect } from 'react';
 import throttle from 'lodash.throttle';
 import StateMachine, { State } from './statemachine';
-import { inherit, getPositionViewport} from './utils';
+import { inherit, getPositionViewport, getScrollingElement } from './utils';
 import useGante from './useGante';
-
-function getScrollingElement(element) {
-  let cur = element;
-  while (cur && !/scroll-container/.test(cur.dataset.role)) {
-    cur = cur.parentElement;
-  }
-  return cur || document.scrollingElement;
-}
 
 var NormalState = inherit(State, function () {
   this.grab = false;

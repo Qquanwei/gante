@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import classNames from 'classnames';
 import qs from 'qs';
 import Header from 'components/header';
@@ -11,12 +11,13 @@ import config from '../config';
 export default dynamic(() => Promise.resolve(
   function Editor({ user }) {
     const query = qs.parse(window.location.search.slice(1));
+    const ganteRef = useRef(null);
 
     return (
       <div>
-        <Header user={user} side="left" />
+        <Header user={user} side="left" ganteRef={ganteRef} />
         <div className="w-full h-full text-black">
-          <GanteProvider docId={query.id}>
+          <GanteProvider docId={query.id} ref={ganteRef}>
             <Container className="h-screen">
               <Content>
                 <GanteGraph />

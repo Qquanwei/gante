@@ -124,3 +124,12 @@ export function addEventOnce(target, event, callback) {
   }
   target.addEventListener(event, cb);
 }
+
+
+export function getScrollingElement(element) {
+  let cur = element;
+  while (cur && !/scroll-container/.test(cur.dataset.role)) {
+    cur = cur.parentElement;
+  }
+  return cur || document.scrollingElement;
+}

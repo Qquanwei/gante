@@ -21,12 +21,14 @@ export {
 };
 
 
-function Provider({ children, forwardRef }) {
+const Provider = React.forwardRef(({ children }, forwardRef) => {
   const graphRef = useRef(null);
   const sinkRef = useRef(null);
   const portalRef = useRef(null);
   const list = useRecoilValue(atoms.list);
   const setSpotWidth = useSetRecoilState(atoms.SPOT_WIDTH);
+
+  const impl = useRef({});
 
   const zoomOut = useCallback(() => {
     setSpotWidth(v => Math.max(v - 5, 25));
@@ -36,6 +38,10 @@ function Provider({ children, forwardRef }) {
     setSpotWidth(v => Math.min(v + 5, 50));
   }, []);
 
+  const setGotoTodayImpl = useCallback((gotoImpl) => {
+    impl.gotoTodayImpl = gotoImpl;
+  }, []);
+
   const event = useMemo(() => {
     return new Events();
   }, []);
@@ -43,13 +49,19 @@ function Provider({ children, forwardRef }) {
   useImperativeHandle(forwardRef, () => {
     return {
       event,
-      zoomOut
+      zoomOut,
+      gotoToday: () => {
+        if (impl.gotoTodayImpl) {
+          impl.gotoTodayImpl();
+        }
+      }
     };
   });
 
   const contextValue = useMemo(() => {
     return {
       graphRef,
+      setGotoTodayImpl,
       sinkRef,
       zoomOut,
       zoomIn
@@ -58,12 +70,10 @@ function Provider({ children, forwardRef }) {
 
   return (
     <Context.Provider value={contextValue}>
-      <Suspense fallback={<div>loading...</div>}>
-        { children }
-      </Suspense>
+      { children }
     </Context.Provider>
   );
-};
+});
 
 function ErrorFallback({ error }) {
   console.log(error);
@@ -76,7 +86,7 @@ function ErrorFallback({ error }) {
   );
 }
 
-export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderRef({docId, ...props}, ref) {
+export default React.forwardRef(function ProviderRef({docId, ...props}, ref) {
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
 
@@ -102,7 +112,7 @@ export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderR
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share`} onError={onError} docId={docId}>
             <Suspense fallback={<div>loading...</div>}>
-              <Provider {...props} forwardRef={ref} />
+              <Provider {...props} ref={ref} />
             </Suspense>
           </RecoilSyncShareDB>
 
@@ -116,6 +126,4 @@ export default dynamic(() => Promise.resolve(React.forwardRef(function ProviderR
       </Suspense>
     </RecoilRoot>
   );
-})), {
-  ssr: false
 });

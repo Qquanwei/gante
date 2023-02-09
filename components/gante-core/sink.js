@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState, useEffect } from 'react';
+import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import sortBy from 'ramda/src/sortBy';
 import { useRecoilValue } from 'recoil';
 import hotkeys from 'hotkeys-js';
@@ -10,7 +10,10 @@ import { connectTo } from './svgtool';
 import useGrabEvent from './use-grab-event';
 import * as atoms from './atom';
 import { useCreateNewNode } from './action';
-import { Position, getPosition, positionToDay, dayToRect, getRangeDays } from './utils';
+import {
+  Position, getPosition, positionToDay, dayToRect, getRangeDays,
+  getScrollingElement
+} from './utils';
 
 /*
   泳道，绘制一个通道, 绘制连线
@@ -19,11 +22,11 @@ export default function Sink() {
   const {
     sinkRef,
     graphRef,
-    updateItemConnect
+    updateItemConnect,
+    setGotoTodayImpl,
   } = useGante();
   const createNewItem = useCreateNewNode();
   const list = useRecoilValue(atoms.list);
-
   const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
   const currentId = useRecoilValue(atoms.currentNodeId);
@@ -34,6 +37,7 @@ export default function Sink() {
   const [currentSelectConnect, setCurrentSelectConnect] = useState(null);
   const startTime = useRecoilValue(atoms.startTime);
   const OFFSET_DAY = getRangeDays(startTime, currentTime);
+  const todayRectRef = useRef(null);
 
   const getNodeTop = useCallback((item) => {
     return list.indexOf(item) * SINK_HEIGHT + 3;
@@ -86,6 +90,20 @@ export default function Sink() {
   }, [startTime, SPOT_WIDTH, createNewItem]);
 
   useEffect(() => {
+    const gotoToday = () => {
+      const scrollElement = getScrollingElement(todayRectRef.current);
+      scrollElement.scrollLeft =  SPOT_WIDTH * (OFFSET_DAY - 15);
+    };
+
+    setGotoTodayImpl(gotoToday);
+
+    return () => {
+      setGotoTodayImpl(null);
+    }
+  }, [setGotoTodayImpl, OFFSET_DAY]);
+
+
+  useEffect(() => {
     hotkeys('delete,backspace', () => {
       if (currentSelectConnect) {
         updateItemConnect(currentSelectConnect[0], currentSelectConnect[1], false);
@@ -104,7 +122,7 @@ export default function Sink() {
         width="100%"
         height="100%"
         onClick={onClickEmptySVG}
-    style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
+        style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
         <g>
           {
             (() => {
@@ -133,6 +151,7 @@ export default function Sink() {
         <rect
           width={SPOT_WIDTH}
           height="100%"
+          ref={todayRectRef}
           x={SPOT_WIDTH * OFFSET_DAY}
           y="0"
           className="fill-red-500/25"
