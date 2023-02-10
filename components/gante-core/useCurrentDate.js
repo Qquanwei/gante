@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 
 export default function useCurrentDate() {
-    const [date, setDate] = useState(() => Date.now());
+  const [date, setDate] = useState(() => Date.now());
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDate(Date.now());
-        }, 60000);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDate(Date.now());
+    }, 60 * 1000);
 
-        return () => {
-            clearTimeout(timer);
-        }
-    }, []);
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
 
-    return date;
+  return date;
 }

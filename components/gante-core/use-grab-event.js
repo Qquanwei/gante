@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import throttle from 'lodash.throttle';
 import StateMachine, { State } from './statemachine';
-import { inherit, getPositionViewport} from './utils';
+import { inherit, getPositionViewport, getScrollingElement } from './utils';
 import useGante from './useGante';
 
 var NormalState = inherit(State, function () {
@@ -21,13 +21,14 @@ NormalState.prototype.onMouseUp = function() {
 
 var GrabMode = inherit(State, function(initPosition) {
   this.initPosition = initPosition;
-  this.initScrollX = window.scrollX;
-  this.initScrollY = window.scrollY;
   this.lastPosition = null;
 });
 
 GrabMode.prototype.mount = function() {
   this.machine.element.style['cursor'] = 'grabbing';
+  this.scrollElement = getScrollingElement(this.machine.element);
+  this.initScrollX = this.scrollElement.scrollLeft;
+  this.initScrollY = this.scrollElement.scrollTop;
 };
 
 GrabMode.prototype.onMouseMove = function(e) {
@@ -35,7 +36,7 @@ GrabMode.prototype.onMouseMove = function(e) {
   const offset = this.currentPosition.diff(this.initPosition);
   // 鼠标抖动
   this.lastPosition = this.currentPosition;
-  window.scroll(
+  this.scrollElement.scroll(
     Math.max(
       this.initScrollX - offset.x,
       0

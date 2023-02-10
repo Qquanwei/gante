@@ -4,11 +4,15 @@ import Node from './node';
 import Timeline from './timeline';
 import TodoList from './todolist';
 import useGante from './useGante';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import * as atoms from './atom';
 
 function Graph({ children }) {
   const { graphRef } = useGante();
+  const { version } = useRecoilValue(atoms._listCore__editor);
+
   return (
-    <div className="relative w-full flex pl-10 pb-20 select-none min-h-[1000px]" >
+    <div className="relative w-full flex pl-10 select-none" >
       <div className="relative inline-flex grow" ref={graphRef}>
         <Timeline >
           <Fragment>
@@ -16,6 +20,9 @@ function Graph({ children }) {
             <Node />
           </Fragment>
         </Timeline>
+        <div className="absolute top-[100px] left-[100px] text-[#ccc]">
+          { version }
+        </div>
       </div>
     </div>
   );

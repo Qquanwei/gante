@@ -1,5 +1,7 @@
-import { useMemo, useCallback, useState, useEffect } from 'react';
+import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import sortBy from 'ramda/src/sortBy';
+import * as R from 'ramda';
+import { useRecoilValue } from 'recoil';
 import hotkeys from 'hotkeys-js';
 import path from 'ramda/src/path';
 import classNames from 'classnames';
@@ -7,55 +9,52 @@ import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
 import { connectTo } from './svgtool';
 import useGrabEvent from './use-grab-event';
-import { Position, getPosition, positionToDay } from './utils';
-import moment from 'moment';
+import * as atoms from './atom';
+import { useCreateNewNode, useEnlargeEditor } from './action';
+import {
+  Position, getPosition, positionToDay, dayToRect, getRangeDays,
+  getScrollingElement
+} from './utils';
 
 /*
   泳道，绘制一个通道, 绘制连线
 */
 export default function Sink() {
   const {
-    list,
     sinkRef,
-    listMap,
     graphRef,
-    currentId,
-    createNewItem,
-    startTime,
-    endTime,
-    SINK_HEIGHT,
-    SPOT_WIDTH,
     updateItemConnect,
-    currentFeatures
+    setGotoTodayImpl,
   } = useGante();
-
+  const createNewItem = useCreateNewNode();
+  const list = useRecoilValue(atoms.list);
+  const allNodes = useRecoilValue(atoms.allNodes);
+  const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
+  const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
+  const currentId = useRecoilValue(atoms.currentNodeId);
+  const currentNode = useRecoilValue(atoms.currentNode);
+  const currentFeatures = useRecoilValue(atoms.currentFeatures);
   const currentTime = useCurrentDate();
   const grabElementRef = useGrabEvent({});
-  const currentNode = listMap[currentId];
   const [currentSelectConnect, setCurrentSelectConnect] = useState(null);
-  const OFFSET_DAY = moment(currentTime).startOf('day').diff(startTime, 'days');
-
-  const getNodeLeft = useCallback((currentNode) => {
-    if (currentNode) {
-      const day = moment(currentNode.startTime).diff(moment(startTime).startOf('day'), 'days');
-      return day * SPOT_WIDTH;
-    }
-    return 0;
-  }, [startTime]);
-
-  const getNodeWidth = useCallback((item) => {
-      const day = moment(item.endTime).diff(moment(item.startTime).startOf('day'), 'days');
-      return day * SPOT_WIDTH;
-  }, []);
+  const startTime = useRecoilValue(atoms.startTime);
+  const OFFSET_DAY = getRangeDays(startTime, currentTime);
+  const todayRectRef = useRef(null);
+  const enlargeEditor = useEnlargeEditor();
 
   const getNodeTop = useCallback((item) => {
-    return list.indexOf(item) * SINK_HEIGHT + 3;
+    return list.indexOf(item.id) * SINK_HEIGHT + 3;
   }, [list]);
 
 
-  const left = useMemo(() => {
-    return getNodeLeft(currentNode);
-  }, [currentNode, getNodeLeft]);
+  const { x: left } = useMemo(() => {
+    if (!currentNode) {
+      return {
+        x: -99
+      };
+    }
+    return dayToRect(SPOT_WIDTH, startTime, currentNode.startTime, currentNode.endTime);
+  }, [currentNode, startTime, SPOT_WIDTH]);
 
   const onClickConnectLine = useCallback((fromNode, toNode) => {
     setCurrentSelectConnect([
@@ -82,16 +81,30 @@ export default function Sink() {
   const onClickEmptySVG = useCallback((event) => {
     // 双击空白创建
     if (event.detail === 2) {
-      const position = getPosition(sinkRef.current, event);
-      const startTime = positionToDay(SPOT_WIDTH, startTime, position.x);
+      const position = getPosition(graphRef.current, event);
+      const beginTime = positionToDay(SPOT_WIDTH, startTime, position.x);
       const idx= Math.ceil(position.y / SINK_HEIGHT);
       createNewItem({
         title: '新建任务',
-        startTime: startTime.valueOf() - 7 * 24 * 60 * 60 * 1000,
-        endTime: startTime.valueOf()
+        startTime: beginTime.valueOf(),
+        endTime: beginTime.valueOf() + 7 * 24 * 60 * 60 * 1000,
       }, Math.max(idx - 1, 0));
     }
   }, [startTime, SPOT_WIDTH, createNewItem]);
+
+  useEffect(() => {
+    const gotoToday = () => {
+      const scrollElement = getScrollingElement(todayRectRef.current);
+      scrollElement.scrollLeft =  SPOT_WIDTH * (OFFSET_DAY - 15);
+    };
+
+    setGotoTodayImpl(gotoToday);
+
+    return () => {
+      setGotoTodayImpl(null);
+    }
+  }, [setGotoTodayImpl, OFFSET_DAY, SPOT_WIDTH]);
+
 
   useEffect(() => {
     hotkeys('delete,backspace', () => {
@@ -102,8 +115,14 @@ export default function Sink() {
 
     return () => {
       hotkeys.unbind('delete,backspace');
-    }
+    };
   }, [currentSelectConnect, updateItemConnect]);
+
+  const onClickEnlarge = useCallback((type) => {
+    return () => {
+      enlargeEditor(type);
+    }
+  }, [enlargeEditor]);
 
   return (
     <div ref={sinkRef} className="relative">
@@ -112,7 +131,7 @@ export default function Sink() {
         width="100%"
         height="100%"
         onClick={onClickEmptySVG}
-        style={{ height: Math.max(list.length, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
+        style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
         <g>
           {
             (() => {
@@ -123,12 +142,12 @@ export default function Sink() {
 
                 arg.push(
                   <line key={index}
-                        x1={0} y1={(index + 1) * SINK_HEIGHT}
-                        x2="100%" y2={(index + 1) * SINK_HEIGHT}
-                        className={classNames(
-                          "stroke",
-                          features.movex ? 'stroke-sky-500 stroke-2' : 'stroke-gray-400/25'
-                        )}
+                    x1={0} y1={(index + 1) * SINK_HEIGHT}
+                    x2="100%" y2={(index + 1) * SINK_HEIGHT}
+                    className={classNames(
+                      "stroke",
+                      features.movex ? 'stroke-sky-500 stroke-2' : 'stroke-gray-400/25'
+                    )}
                   />
                 );
               }
@@ -141,6 +160,7 @@ export default function Sink() {
         <rect
           width={SPOT_WIDTH}
           height="100%"
+          ref={todayRectRef}
           x={SPOT_WIDTH * OFFSET_DAY}
           y="0"
           className="fill-red-500/25"
@@ -155,28 +175,31 @@ export default function Sink() {
 
         <defs>
           <marker id="triangle"
-                  fill="black"
-                  strokeWidth="2px"
-                  viewBox="0 0 10 10"
-                  refX="1" refY="5"
-                  markerUnits="strokeWidth"
-                  markerWidth="10" markerHeight="10"
-                  orient="auto" >
+            fill="black"
+            strokeWidth="2px"
+            viewBox="0 0 10 10"
+            refX="1" refY="5"
+            markerUnits="strokeWidth"
+            markerWidth="10" markerHeight="10"
+            orient="auto" >
           </marker>
         </defs>
 
         <g className="stroke-2 stroke-gray-500"
-           strokeDasharray="5,5"
-           strokeLinejoin="round" fill="transparent">
+          strokeDasharray="5,5"
+          strokeLinejoin="round"
+          fill="transparent">
           {
             // 处理connectTo
             (() => {
               let arg = [];
-              for (let i = 0; i < list.length; ++i) {
-                const node = list[i];
-                if (node.connectTo && node.connectTo.length) {
-                  const left = getNodeLeft(node);
-                  const width = getNodeWidth(node);
+              const nodeMap = R.indexBy(R.prop('id'), allNodes);
+              for (let i = 0; i < allNodes.length; ++i) {
+                const node = allNodes[i];
+                if (node && node.connectTo && node.connectTo.length) {
+                  const rect = dayToRect(SPOT_WIDTH, startTime, node.startTime, node.endTime);
+                  const left = rect.x;
+                  const width = rect.w;
                   const top = getNodeTop(node);
 
                   const fromPoint = new Position(
@@ -186,14 +209,15 @@ export default function Sink() {
 
                   arg = arg.concat(node.connectTo.map((t, idx) => {
                     const k = `${node.id}-${idx}`;
-                    const tNode = listMap[t];
+                    const tNode = nodeMap[t];
 
                     if (!tNode) {
                       return null;
                     }
 
-                    const tLeft = getNodeLeft(tNode);
-                    const tWidth = getNodeWidth(tNode);
+                    const tRect = dayToRect(SPOT_WIDTH, startTime, tNode.startTime, tNode.endTime);
+                    const tLeft = tRect.x;
+                    const tWidth = tRect.w;
                     const tTop = getNodeTop(tNode);
 
                     const toPoint = new Position(
@@ -206,7 +230,7 @@ export default function Sink() {
                       currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
                     );
                     // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
-                    arg.push(
+                    return (
                       <path
                         custom-order={selected ? Infinity : arg.length}
                         className={classNames({
@@ -225,6 +249,9 @@ export default function Sink() {
           }
         </g>
       </svg>
+
+      <div className="absolute top-0 bottom-0 left-0 w-[60px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('left')}></div>
+      <div className="absolute top-0 bottom-0 right-0 w-[30px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('right')}></div>
     </div>
   );
 }

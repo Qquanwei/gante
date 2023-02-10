@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
 import classNames from 'classnames';
-import useGante from './useGante';
 
 
 export default function StatusBar({ className, children }) {
   return (
-    <div className={classNames(className, 'h-5 flex items-center px-3 bg-gray-500/25')}>
+    <div className={classNames(className, 'h-5 flex items-center mx-12 px-2 box-border bg-gray-500/25')}>
       { children }
     </div>
   );

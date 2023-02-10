@@ -1,12 +1,19 @@
 import React, {
-  useReducer, useMemo, useState, useCallback, useRef, useEffect, useImperativeHandle
+  useReducer, useMemo, useState, useCallback, useRef, useEffect, useImperativeHandle,
+  Suspense
 } from 'react';
 import Events from 'events';
-import indexBy from 'ramda/src/indexBy';
-import moment from 'moment';
+import dynamic from 'next/dynamic';
+import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState, useRecoilCallback } from 'recoil';
+import { RecoilSyncShareDB } from 'recoil-sharedb';
+import * as R from 'ramda';
+import { ErrorBoundary } from 'react-error-boundary';
+import Modal from '../../components/modal';
+import * as atoms from './atom';
+import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
-import prop from 'ramda/src/prop';
 import { hasProp } from './utils';
+import * as actions from './action';
 
 const Context = React.createContext();
 
@@ -15,322 +22,145 @@ export {
 };
 
 
-let globalIndex = 10;
-function makeId() {
-  return Math.floor(Math.random() * 1000) + 'rand' + globalIndex++;
-}
-
-function Provider({ children, forwardRef }) {
-  const [STARTTIME, setSTARTTIME] = useState(() => {
-    return Date.now() - 7 * 24 * 60 * 60 * 1000;
-  });
-  const [ENDTIME, setENDTIME] =  useState(() => {
-    return Date.now() + 40 * 24 * 60 * 60 * 1000;
-  });
-
+const Provider = React.forwardRef(({ children }, forwardRef) => {
   const graphRef = useRef(null);
   const sinkRef = useRef(null);
   const portalRef = useRef(null);
-  const [currentId, setCurrentId] = useState(null);
-  // 当前元素开启的辅助特性
-  const [currentFeatures, setCurrentFeatures] = useState(null);
+  const list = useRecoilValue(atoms.list);
+  const setSpotWidth = useSetRecoilState(atoms.SPOT_WIDTH);
+  const updateItemProperty = actions.useUpdateItemProperty();
+
+  const impl = useRef({});
+
+  const zoomOut = useCallback(() => {
+    setSpotWidth(v => Math.max(v - 5, 25));
+  }, []);
+
+  const zoomIn = useCallback(() => {
+    setSpotWidth(v => Math.min(v + 5, 50));
+  }, []);
+
+  const setGotoTodayImpl = useCallback((gotoImpl) => {
+    impl.gotoTodayImpl = gotoImpl;
+  }, []);
 
   const event = useMemo(() => {
     return new Events();
   }, []);
 
-  const [list, setList] = useState([]);
+  const updateItemConnect = useRecoilCallback(({ snapshot }) => async (fromNodeId, toNodeId, isAdd) => {
+    // isAdd = true, append, false, remove
+    const allNodes = await snapshot.getPromise(atoms.allNodes);
+    const nodeMap = R.indexBy(R.prop('id'), allNodes);
+    const fromNode = nodeMap[fromNodeId];
+    const toNode = nodeMap[toNodeId];
 
-  const listMap = useMemo(() => {
-    return indexBy(prop('id'), list);
-  }, [list]);
+    if (!isAdd && fromNode && toNode) {
+      const removeFromIdx = fromNode.connectTo.indexOf(toNode.id);
+      const removeToIdx = toNode.from.indexOf(fromNode.id);
+      if (removeFromIdx !== -1) {
+        const cp1 = [...fromNode.connectTo];
+        cp1[removeFromIdx] = null;
 
-
-  const swapItem = useCallback((fromPosition, toPosition) => {
-    setList((list) => {
-      if (list[fromPosition] && list[toPosition]) {
-        // 不能用moveop, 要用setop
-        const op =[
-          json1.replaceOp([fromPosition], list[fromPosition], list[toPosition]),
-          json1.replaceOp([toPosition], list[toPosition], list[fromPosition])
-        ].reduce(json1.type.compose, null);
-        event.emit('op', op);
-        return json1.type.apply(list, op);
-      }
-      return list;
-    });
-  }, []);
-
-  const updateItemDate = useCallback((id, startTime, endTime) => {
-    setList((list) => {
-      const index = list.findIndex(item => item.id === id);
-      if (list[index].startTime === startTime && list[index].endTime === endTime) {
-        return list;
-      }
-      const op = [
-        json1.replaceOp(
-          [index, 'startTime'],
-          list[index].startTime,
-          startTime
-        ),
-        json1.replaceOp(
-          [index, 'endTime'],
-          list[index].endTime,
-          endTime
-        )
-      ].reduce(json1.type.compose, null);
-
-      event.emit('op', op);
-      return json1.type.apply(list, op);
-    });
-  }, []);
-
-  const updateItemTitle = useCallback((id, title, remark) => {
-    setList(list => {
-      const index = list.findIndex(item => item.id === id);
-      let op = json1.replaceOp(
-        [index, 'title'],
-        list[index].title,
-        title
-      );
-      if (hasProp(list[index], 'remark')) {
-        op = json1.type.compose(op, json1.replaceOp(
-          [index, 'remark'],
-          list[index].remark,
-          remark
-        ));
-      } else {
-        op = json1.type.compose(op, json1.insertOp(
-          [index, 'remark'],
-          remark
-        ));
-      }
-      event.emit('op', op);
-      return json1.type.apply(list, op);
-    });
-  }, []);
-
-  const updateItemLock = useCallback((id, lock) => {
-    setList(list => {
-      const idx = list.findIndex(item => item.id === id);
-      if (!list[idx]) {
-        return list;
-      }
-
-      let op = null;
-      if (hasProp(list[idx], 'lock')) {
-        op = json1.replaceOp(
-          [idx, 'lock'],
-          list[idx].lock,
-          lock
-        );
-      } else {
-        op = json1.insertOp(
-          [idx, 'lock'],
-          lock
-        );
-      }
-      event.emit('op', op);
-      return json1.type.apply(list, op);
-    });
-  }, []);
-
-  const updateItemConnect = useCallback((id, targetId, add  = true) => {
-    const node = listMap[id];
-    const target = listMap[targetId];
-    if (!node || !target) {
-      return;
-    }
-    const sourceIndex = list.indexOf(node);
-    const targetIndex = list.indexOf(target);
-
-    let op = null;
-
-    if (add) {
-      if (!node.connectTo) {
-        op = json1.insertOp(
-          [sourceIndex, 'connectTo'],
-          [targetId]
-        );
-      } else {
-        if (node.connectTo.indexOf(targetId) === -1) {
-          op = json1.insertOp(
-            [sourceIndex, 'connectTo', node.connectTo.length],
-            targetId
-          );
+        if (cp1.filter(R.identity).length === 0) {
+          updateItemProperty(fromNode.id, 'connectTo', []);
+        } else {
+          updateItemProperty(fromNode.id, 'connectTo', cp1);
         }
       }
-
-      if (!target.from) {
-        op = json1.type.compose(op, json1.insertOp(
-          [targetIndex, 'from'],
-          [id]
-        ));
-      } else {
-        op = json1.type.compose(op, json1.insertOp(
-          [targetIndex, 'from', target.from.length],
-          id
-        ));
-      }
-    } else {
-      if (node.connectTo && node.connectTo.indexOf(targetId) !== -1) {
-        op = json1.type.compose(op, json1.removeOp(
-          [sourceIndex, 'connectTo', node.connectTo.indexOf(targetId)],
-          targetId
-        ));
-      }
-      if (target && target.from && target.from.indexOf(id) !== -1) {
-        op = json1.type.compose(op, json1.removeOp(
-          [targetIndex, 'from', target.from.indexOf(id)],
-          id
-        ));
+      if (removeToIdx !== -1) {
+        const cp2 = [...toNode.from];
+        cp2[removeToIdx] = null;
+        if (cp2.filter(R.identity).length === 0) {
+          updateItemProperty(toNode.id, 'from', []);
+        } else {
+          updateItemProperty(toNode.id, 'from', cp2);
+        }
       }
     }
-    event.emit('op', op);
-    setList(json1.type.apply(list, op));
-  }, [list]);
-
-  const updateItemColor = useCallback((id, bgcolor, fgcolor) => {
-    const index = list.findIndex(item => item.id === id);
-    let op = null;
-    if (list[index].color) {
-      op = [
-        json1.replaceOp(
-          [index, 'color'],
-          list[index].color,
-          bgcolor
-        ),
-        json1.replaceOp(
-          [index, 'fgcolor'],
-          list[index].fgcolor,
-          fgcolor
-        )
-      ].reduce(json1.type.compose, null);
-    } else {
-      op = [
-        json1.insertOp(
-          [index, 'color'],
-          bgcolor
-        ),
-        json1.insertOp(
-          [index, 'fgcolor'],
-          fgcolor
-        )
-      ].reduce(json1.type.compose, null);
-    }
-    event.emit('op', op);
-    setList(json1.type.apply(list, op));
-  }, [list]);
-
-  const deleteItem = useCallback((id) => {
-    const node = listMap[id];
-    if (node) {
-      const idx = list.findIndex(i => i.id === id);
-      let op = null;
-
-      if (node.connectTo) {
-        node.connectTo.forEach((toId) => {
-          const toNode = listMap[toId];
-          if (toNode && toNode.from) {
-            op = json1.type.compose(op, json1.removeOp(
-              [list.indexOf(toNode), 'from', toNode.from.indexOf(node.id)],
-              node.id
-            ));
-          }
-        });
-      }
-
-      if (node.from) {
-        node.from.forEach((fromId) => {
-          const fromNode = listMap[fromId];
-          if (fromNode && fromNode.connectTo && fromNode.connectTo.indexOf(node.id) !== -1) {
-            op = json1.type.compose(op, json1.removeOp(
-              [list.indexOf(fromNode), 'connectTo', fromNode.connectTo.indexOf(node.id)],
-              node.id
-            ));
-          }
-        });
-      }
-      // 上面的操作不会改变数组的顺序，所以先执行上面后执行会改变顺序的操作
-      op = json1.type.compose(op, json1.removeOp([idx], list[idx]));
-      event.emit('op', op);
-      setList(json1.type.apply(list, op));
-    }
-  }, [list, listMap]);
-
-  // swapIndex 创建后立即定位到指定位置
-  const createNewItem = useCallback(({ title, startTime, endTime }, swapIndex) => {
-    const newItem = {
-      id: makeId(),
-      title,
-      startTime,
-      endTime
-    };
-    const op = json1.insertOp([list.length], newItem);
-
-    if (Number.isInteger(swapIndex)) {
-      event.emit('op', op);
-      setList(json1.type.apply(list, op));
-      swapItem(list.length, swapIndex);
-    }
-  }, [list, swapItem]);
+  }, []);
 
   useImperativeHandle(forwardRef, () => {
     return {
-      createNewItem,
-      list,
-      setList,
-      event
+      event,
+      updateItemConnect,
+      zoomOut,
+      zoomIn,
+      gotoToday: () => {
+        if (impl.gotoTodayImpl) {
+          impl.gotoTodayImpl();
+        }
+      }
     };
   });
+
   const contextValue = useMemo(() => {
     return {
-      // 每个甬道的高度
-      SINK_HEIGHT: 41,
-      // 每个时间节点的宽度
-      SPOT_WIDTH: 50,
       graphRef,
-      sinkRef,
-      // 开始时间
-      startTime: moment(STARTTIME).startOf('day'),
-      // 结束时间
-      endTime: moment(ENDTIME).startOf('day'),
-      swapItem,
-      currentId,
+      setGotoTodayImpl,
       updateItemConnect,
-      updateItemDate,
-      updateItemTitle,
-      updateItemLock,
-      createNewItem,
-      deleteItem,
-      updateItemColor,
-      setCurrentId,
-      list,
-      listMap,
-      currentFeatures,
-      setCurrentFeatures
+      sinkRef,
+      zoomOut,
+      zoomIn
     };
-  }, [
-    list,
-    createNewItem,
-    currentFeatures,
-    setCurrentFeatures,
-    currentId,
-    deleteItem,
-    updateItemConnect,
-    updateItemColor,
-    listMap,
-    updateItemTitle,
-    updateItemDate
-  ]);
+  }, []);
 
   return (
     <Context.Provider value={contextValue}>
       { children }
     </Context.Provider>
   );
-};
+});
 
-export default React.forwardRef(function ProviderRef(props, ref) {
-  return <Provider {...props} forwardRef={ref} />;
+function ErrorFallback({ error }) {
+  console.log(error);
+  return (
+    <div>
+      {
+        JSON.stringify(error)
+      }
+    </div>
+  );
+}
+
+export default React.forwardRef(function ProviderRef({docId, ...props}, ref) {
+  const [error, setError] = useState(null);
+  const [show, setShow] = useState(false);
+
+  const onError = useCallback((err) => {
+    setError(err);
+    setShow(true);
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const protocol = useMemo(() => {
+    if (window.location.protocol === 'https:') {
+      return 'wss://';
+    }
+    return 'ws://';
+  }, []);
+
+  return (
+    <RecoilRoot>
+      <Suspense fallback={<div>global loading...</div>}>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share`} onError={onError} docId={docId}>
+            <Suspense fallback={<div>loading...</div>}>
+              <Provider {...props} ref={ref} />
+            </Suspense>
+          </RecoilSyncShareDB>
+
+          <Modal show={show} title="同步发生错误" onClose={onRefresh}>
+            <h1>
+              { error?.message }
+            </h1>
+            <div>请刷新</div>
+          </Modal>
+        </ErrorBoundary>
+      </Suspense>
+    </RecoilRoot>
+  );
 });
