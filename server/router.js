@@ -60,9 +60,9 @@ router.get('/cb/login/github', async (ctx, next) => {
         Authorization: `Bearer ${tokenReq.data.access_token}`
       }
     });
-  } catch((e) => {
+  } catch(e) {
     throw new Error('服务器访问github发生错误: ' + e.message );
-  });
+  };
 
   console.log('get user success', userReq.data);
   const User = ctx.db.collection('users');
