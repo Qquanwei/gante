@@ -1,21 +1,40 @@
 const crypto = require('crypto');
-const sessions = {};
-const userMap = {};
 
 // in memory session
 module.exports = {
-  getUserIdBySession(ctx) {
+  getUserIdBySession: async (ctx) => {
     const ud = ctx.cookies.get('ud');
-    console.log('ud->', ud);
+
     if (!ud) {
       return null;
     }
-    return sessions[ud];
+
+    const session = await ctx.db.collection('session');
+    const data = await session.findOne({
+      token: ud
+    });
+
+    if (data && data.uid) {
+      if (data.expire < Date.now()) {
+        return data.uid;
+      } else {
+        return null;
+      }
+    }
+    return null;
   },
 
-  generateSessionByUser(id) {
+  generateSessionByUser: async (ctx, id) => {
+    const session = await ctx.db.collection('session');
+
     const rid = crypto.randomUUID();
-    sessions[rid] = id;
+
+    await session.insertOne({
+      token: rid,
+      uid: id,
+      expire: Date.now() + 24 * 60 * 60 * 1000
+    });
+
     return rid;
   }
 };
