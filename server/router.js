@@ -50,13 +50,18 @@ router.get('/cb/login/github', async (ctx, next) => {
   });
 
   console.log('get token success', tokenReq.data);
+  let userReq = null;
 
-  const userReq = await axios({
-    url: 'https://api.github.com/user',
-    method: 'get',
-    headers: {
-      Authorization: `Bearer ${tokenReq.data.access_token}`
-    }
+  try {
+    userReq = await axios({
+      url: 'https://api.github.com/user',
+      method: 'get',
+      headers: {
+        Authorization: `Bearer ${tokenReq.data.access_token}`
+      }
+    });
+  } catch((e) => {
+    throw new Error('服务器访问github发生错误: ' + e.message );
   });
 
   console.log('get user success', userReq.data);
