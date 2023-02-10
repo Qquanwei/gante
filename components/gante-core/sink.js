@@ -10,7 +10,7 @@ import useCurrentDate from './useCurrentDate';
 import { connectTo } from './svgtool';
 import useGrabEvent from './use-grab-event';
 import * as atoms from './atom';
-import { useCreateNewNode } from './action';
+import { useCreateNewNode, useEnlargeEditor } from './action';
 import {
   Position, getPosition, positionToDay, dayToRect, getRangeDays,
   getScrollingElement
@@ -40,6 +40,7 @@ export default function Sink() {
   const startTime = useRecoilValue(atoms.startTime);
   const OFFSET_DAY = getRangeDays(startTime, currentTime);
   const todayRectRef = useRef(null);
+  const enlargeEditor = useEnlargeEditor();
 
   const getNodeTop = useCallback((item) => {
     return list.indexOf(item.id) * SINK_HEIGHT + 3;
@@ -117,6 +118,12 @@ export default function Sink() {
     };
   }, [currentSelectConnect, updateItemConnect]);
 
+  const onClickEnlarge = useCallback((type) => {
+    return () => {
+      enlargeEditor(type);
+    }
+  }, [enlargeEditor]);
+
   return (
     <div ref={sinkRef} className="relative">
       <svg
@@ -135,12 +142,12 @@ export default function Sink() {
 
                 arg.push(
                   <line key={index}
-                        x1={0} y1={(index + 1) * SINK_HEIGHT}
-                        x2="100%" y2={(index + 1) * SINK_HEIGHT}
-                        className={classNames(
-                          "stroke",
-                          features.movex ? 'stroke-sky-500 stroke-2' : 'stroke-gray-400/25'
-                        )}
+                    x1={0} y1={(index + 1) * SINK_HEIGHT}
+                    x2="100%" y2={(index + 1) * SINK_HEIGHT}
+                    className={classNames(
+                      "stroke",
+                      features.movex ? 'stroke-sky-500 stroke-2' : 'stroke-gray-400/25'
+                    )}
                   />
                 );
               }
@@ -168,20 +175,20 @@ export default function Sink() {
 
         <defs>
           <marker id="triangle"
-                  fill="black"
-                  strokeWidth="2px"
-                  viewBox="0 0 10 10"
-                  refX="1" refY="5"
-                  markerUnits="strokeWidth"
-                  markerWidth="10" markerHeight="10"
-                  orient="auto" >
+            fill="black"
+            strokeWidth="2px"
+            viewBox="0 0 10 10"
+            refX="1" refY="5"
+            markerUnits="strokeWidth"
+            markerWidth="10" markerHeight="10"
+            orient="auto" >
           </marker>
         </defs>
 
         <g className="stroke-2 stroke-gray-500"
-           strokeDasharray="5,5"
-           strokeLinejoin="round"
-           fill="transparent">
+          strokeDasharray="5,5"
+          strokeLinejoin="round"
+          fill="transparent">
           {
             // 处理connectTo
             (() => {
@@ -242,6 +249,9 @@ export default function Sink() {
           }
         </g>
       </svg>
+
+      <div className="absolute top-0 bottom-0 left-0 w-[60px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('left')}></div>
+      <div className="absolute top-0 bottom-0 right-0 w-[30px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('right')}></div>
     </div>
   );
 }

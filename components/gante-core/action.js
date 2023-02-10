@@ -87,3 +87,19 @@ export function useSwapItem() {
     }
   }, []);
 }
+
+import dayjs from 'dayjs';
+export function useEnlargeEditor() {
+  return useRecoilCallback(({ set }) => (type) => {
+    if (type === 'right') {
+      set(atoms.endTime, (oldValue) => {
+        return oldValue.add(15, 'day');
+      });
+    }
+    if (type === 'left') {
+      set(atoms.startTime, (oldValue) => {
+        return oldValue.subtract(15, 'day');
+      });
+    }
+  }, []);
+}

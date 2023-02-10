@@ -24,24 +24,16 @@ export const SPOT_WIDTH = atom({
   default: 40
 });
 
-// 整个甘特图起始时间
-export const startTime = atom({
-  key: 'gante global starttime',
-  default: dayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day')
-});
 
-// 整个甘特图结束时间
-export const endTime = atom({
-  key: 'gante global endtime',
-  default: dayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day')
-});
 
 export const _listCore__editor = atom({
   key: 'gante_list_core_editor',
   default: {
     version: '1.0.0',
     list: [],
-    pin: []
+    pin: [],
+    endTime: dayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day'),
+    startTime:  dayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day')
   },
   effects: [
     effect('list', '<docId>', {
@@ -50,13 +42,53 @@ export const _listCore__editor = atom({
         refine.object({
           list: refine.array(refine.string()),
           version: refine.optional(refine.string()),
-          pin: refine.optional(refine.array(refine.object({})))
+          pin: refine.optional(refine.array(refine.object({}))),
+          endTime: refine.optional(refine.string()),
+          startTime: refine.optional(refine.string())
         }),
         refine.asType(refine.array(refine.string()), list => ({ list }))
       ),
       syncDefault: false
     })
   ]
+});
+
+// 整个甘特图起始时间
+export const startTime = selector({
+  key: 'gante global starttime',
+  get: ({ get }) => {
+    const def = dayjs(get(_listCore__editor).startTime);
+    const cur = dayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day');
+    if (def.isBefore(cur)) {
+      return def;
+    }
+    return cur;
+  },
+  set: ({ set }, newValue) => {
+    set(_listCore__editor, oldValue => ({
+      ...oldValue,
+      startTime: newValue.toString()
+    }));
+  }
+});
+
+// 整个甘特图结束时间
+export const endTime = selector({
+  key: 'gante global endtime',
+  get: ({ get }) => {
+    const def = dayjs(get(_listCore__editor).endTime);
+    const cur = dayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day');
+    if (def.isBefore(cur)) {
+      return cur;
+    }
+    return def;
+  },
+  set: ({ set }, newValue) => {
+    set(_listCore__editor, oldValue => ({
+      ...oldValue,
+      endTime: newValue.toString()
+    }));
+  }
 });
 
 export const _listCore__list = selector({
