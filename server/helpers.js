@@ -15,7 +15,7 @@ module.exports = {
     });
 
     if (data && data.uid) {
-      if (data.expire < Date.now()) {
+      if (data.expire >= Date.now()) {
         return data.uid;
       } else {
         return null;
