@@ -27,18 +27,14 @@ export default function Timeline({ children }) {
   // dayjs string
   const [previewPin, setPreviewPin] = useState(false);
 
-  const timelinePins = useMemo(() => {
-    return R.filter(R.propEq('type', 'timeline'), pins || []);
-  }, [pins]);
-
   // 这一天是否有pin
   const isThisDayPinIdx = useCallback((day) => {
     const idx = R.findIndex((pin) => {
       return day.isSame(pin?.day);
-    }, timelinePins);
+    }, pins);
 
     return idx;
-  }, [timelinePins]);
+  }, [pins]);
 
   const inRange = useCallback((ts) => {
     if (!currentNode) {

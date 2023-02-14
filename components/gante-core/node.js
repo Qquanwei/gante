@@ -36,7 +36,6 @@ function Node({id, index }) {
 
   const ref = useInteractionEvent(id, {
     onChange: (event, args) => {
-      console.log(event);
       switch(event) {
         case 'dragenter':
           setDragMode(true);

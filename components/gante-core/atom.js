@@ -46,7 +46,8 @@ export const _listCore__editor = atom({
             type: refine.string(),
             content: refine.optional(refine.string()),
             preview: refine.optional(refine.bool()),
-            day: refine.optional(refine.string())
+            day: refine.optional(refine.string()),
+            fixed: refine.optional(refine.nullable(refine.string()))
           }))),
           endTime: refine.optional(refine.string()),
           startTime: refine.optional(refine.string())
@@ -61,7 +62,7 @@ export const _listCore__editor = atom({
 export const pins = selector({
   key: 'gante global pins',
   get: ({ get }) => {
-    return get(_listCore__editor).pin;
+    return get(_listCore__editor).pin || [];
   },
   set: ({ set }, newValue) => {
     return set(_listCore__editor, oldValue => ({

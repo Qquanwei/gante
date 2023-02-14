@@ -3,13 +3,14 @@ import ReactDOM from 'react-dom';
 import useGante from '../useGante';
 import { getPosition, Position, getEleRect } from '../utils';
 
-export default function Popup({ children, content, disable }) {
+export default function Popup({ children, content, disable, showPreview, previewContent }) {
   const [showContent, setShowContent] = useState(false);
   const positionRef = useRef(null);
   const { graphRef } = useGante();
   const popupContainerRef = useRef(null);
   const elementRef = useRef(null);
   const focusRef = useRef(false);
+  const [_, forceUpdate] = useState({});
 
   const onClick = useCallback((event) => {
     const position = getPosition(graphRef.current, event);
@@ -54,6 +55,26 @@ export default function Popup({ children, content, disable }) {
       {
         React.cloneElement(children, {
           ref: elementRef,
+          children: (
+            <Fragment>
+              <Fragment>
+                {
+                  showPreview && (
+                    <div
+                      style={{
+                        top: 20,
+                        left: 10
+                      }}
+                      id="preview"
+                      className="text-left select-text relative bg-yellow-100/80 p-2 rounded min-w-[100px] min-h-[50px]">
+                      { previewContent }
+                    </div>
+                  )
+                }
+              </Fragment>
+              { children.props.children }
+            </Fragment>
+          ),
           onClick: (e) => {
             if (!disable) {
               onClick(e);
@@ -70,15 +91,18 @@ export default function Popup({ children, content, disable }) {
             ReactDOM.createPortal(
               <div
                 className="bg-yellow-100 border border-sky-500 p-2 rounded min-w-[200px] min-h-[50px] absolute z-10" style={{
-                     top: positionRef.current?.y || 0,
-                     left: positionRef.current?.x || 0
-                   }}>
+                  top: positionRef.current?.y || 0,
+                  left: positionRef.current?.x || 0
+                }}>
                 { typeof content === 'function' ? content({ close: onHidden }) : content }
               </div>,
               popupContainerRef.current
             )
           )
         }
+      </Fragment>
+      <Fragment>
+
       </Fragment>
     </Fragment>
   );

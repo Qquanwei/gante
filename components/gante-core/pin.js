@@ -10,13 +10,17 @@ export default React.memo(function Pin({ className, pinIdx, dragMode }) {
   const updatePin = actions.useUpdatePinContent();
   const removePin = actions.useRemovePin();
   const data = useRecoilValue(atoms.pins)[pinIdx];
-  const iptRef = useRef(null);
+  const formRef = useRef(null);
   const [hiddenIcon, setHiddenIcon] = useState(false);
+
+  const fixed = data?.fixed === 'enable';
 
   const onClickSave = useCallback((close) => {
     return () => {
+      const data = new FormData(formRef.current);
       updatePin(pinIdx, {
-        content: iptRef.current.value
+        content: data.get('content'),
+        fixed: data.get('fixed')
       });
       close();
     }
@@ -33,7 +37,7 @@ export default React.memo(function Pin({ className, pinIdx, dragMode }) {
     if (dragMode === 'move') {
       setHiddenIcon(true);
     }
-  }, [dragMode]);
+  }, [dragMode, pinIdx]);
 
   const onDragPinEnd = useCallback(() => {
     if (hiddenIcon) {
@@ -44,9 +48,17 @@ export default React.memo(function Pin({ className, pinIdx, dragMode }) {
   return (
     <Popup
       disable={pinIdx === -1}
+      showPreview={fixed}
+      previewContent={data?.content }
       content={({ close }) => (
         <div>
-          <textarea ref={iptRef} className="p-1" name="" type="text" defaultValue={data?.content} />
+          <form ref={formRef}>
+            <div className="flex items-center">
+              <label className="mr-2">pin</label>
+              <input name="fixed" type="checkbox" value="enable" defaultChecked={data?.fixed === 'enable'} />
+            </div>
+            <textarea name="content" className="p-1" type="text" defaultValue={data?.content} />
+          </form>
           <div className="flex justify-between">
             <Button className="w-[90px] border rounded flex justify-center items-center bg-rose-300 text-white" onClick={onClickDelete}>删除</Button>
             <Button className="w-[100px] border rounded flex justify-center items-center bg-white" onClick={onClickSave(close)}>
