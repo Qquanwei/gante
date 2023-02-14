@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import dayjs from 'dayjs';
 import { useRecoilValue } from 'recoil';
 import * as atoms from './atom';
@@ -7,8 +7,10 @@ import classNames from 'classnames';
 import useCurrentDate from './useCurrentDate';
 import useGante from './useGante';
 import * as utils from './utils';
+import * as R from 'ramda';
 import TimelineStatusBar from './timeline-status-bar';
-
+import * as actions from './action';
+import Pin from './pin';
 dayjs.extend(isBetween);
 /*
    展示时间轴，横轴
@@ -21,6 +23,22 @@ export default function Timeline({ children }) {
   const todayRef = useRef(null);
   const endTime = useRecoilValue(atoms.endTime);
   const currentTime = useCurrentDate();
+  const pins = useRecoilValue(atoms.pins);
+  // dayjs string
+  const [previewPin, setPreviewPin] = useState(false);
+
+  const timelinePins = useMemo(() => {
+    return R.filter(R.propEq('type', 'timeline'), pins || []);
+  }, [pins]);
+
+  // 这一天是否有pin
+  const isThisDayHasPin = useCallback((day) => {
+    const idx = R.findIndex((pin) => {
+      return day.isSame(pin.day);
+    }, timelinePins);
+
+    return timelinePins[idx];
+  }, [timelinePins]);
 
   const inRange = useCallback((ts) => {
     if (!currentNode) {
@@ -48,10 +66,15 @@ export default function Timeline({ children }) {
 
   const getDayTitle = useCallback((time) => {
     const isStart = dayjs(time).date() === 1;
+    const hasPin = isThisDayHasPin(dayjs(time));
 
     if (isStart) {
       return (
-          <div className="font-bold text-orange-500 whitespace-nowrap text-[15px] px-1">{ dayjs(time).month() + 1}月</div>
+        <div className="font-bold relative text-orange-500 whitespace-nowrap text-[15px] px-1">
+          { dayjs(time).month() + 1}
+          月
+          { hasPin && <Pin data={hasPin} className="absolute top-[10px] left-[10px]" />}
+        </div>
       );
     }
 
@@ -61,12 +84,39 @@ export default function Timeline({ children }) {
     } else {
       title = dayjs(time).format('D');
     }
-    return title;
-  }, [SPOT_WIDTH]);
+    return (
+      <span className="relative">
+        { title }
+        { hasPin && <Pin data={hasPin} className="absolute left-0 top-0" />}
+      </span>
+    );
+  }, [SPOT_WIDTH, isThisDayHasPin]);
 
   useEffect(() => {
     if (todayRef.current) {
       todayRef.current.scrollIntoView();
+    }
+  }, []);
+
+  const onDragEnter = useCallback((e) => {
+    setPreviewPin(e.currentTarget.dataset.day);
+  }, []);
+
+  const onDragLeave = useCallback((e) => {
+    setPreviewPin(oldValue => {
+      if (e.currentTarget && e.currentTarget.dataset.day === oldValue) {
+        return null;
+      }
+      return oldValue;
+    });
+  }, []);
+
+  const addPin = actions.useAddPin();
+  const onDrop = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (e.currentTarget && e.currentTarget.dataset.day) {
+      addPin('timeline', e.currentTarget.dataset.day);
     }
   }, []);
 
@@ -84,13 +134,21 @@ export default function Timeline({ children }) {
               const weekend = day.day() === 6 || day.day() === 0;
 
               ans.push(
-                <div ref={today ? todayRef : null} className={classNames("box-border text-[13px] shrink-0 flex-col h-10 text-center items-center flex justify-center", {
-                  ["bg-sky-200/75"]: range,
-                  ["bg-gray-300/25"]: weekend && !range,
-                  ["bg-sky-200/20"]: weekend && range
-                })} style={{
-                  width: SPOT_WIDTH,
-                }} key={i}>
+                <div ref={today ? todayRef : null}
+                  className={classNames("box-border text-[13px] shrink-0 flex-col h-10 text-center items-center flex justify-center", {
+                    ["bg-sky-200/75"]: range,
+                    ["bg-gray-300/25"]: weekend && !range,
+                    ["bg-sky-200/20"]: weekend && range,
+                    ['bg-sky-200/70']: previewPin === day.toString()
+                  })}
+                  data-day={day.toString()}
+                  onDragOver={e => e.preventDefault()}
+                  onDragEnter={onDragEnter}
+                  onDragLeave={onDragLeave}
+                  onDrop={onDrop}
+                  style={{
+                    width: SPOT_WIDTH,
+                  }} key={i}>
                   {
                     getDayTitle(dayjs(startTime).add(i, 'days'))
                   }

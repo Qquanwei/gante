@@ -103,3 +103,21 @@ export function useEnlargeEditor() {
     }
   }, []);
 }
+
+import * as R from 'ramda';
+export function useAddPin() {
+  return useRecoilCallback(({ set }) => (type, payload) => {
+    if (type === 'timeline') {
+      const day = payload;
+      set(atoms._listCore__editor, (oldValue) => {
+        return {
+          ...oldValue,
+          pin: [].concat(oldValue.pin || [], {
+            type,
+            day: payload
+          })
+        };
+      });
+    }
+  }, []);
+}

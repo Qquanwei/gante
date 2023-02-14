@@ -42,7 +42,10 @@ export const _listCore__editor = atom({
         refine.object({
           list: refine.array(refine.string()),
           version: refine.optional(refine.string()),
-          pin: refine.optional(refine.array(refine.object({}))),
+          pin: refine.optional(refine.array(refine.object({
+            type: refine.string(),
+            day: refine.optional(refine.string())
+          }))),
           endTime: refine.optional(refine.string()),
           startTime: refine.optional(refine.string())
         }),
@@ -51,6 +54,13 @@ export const _listCore__editor = atom({
       syncDefault: false
     })
   ]
+});
+
+export const pins = selector({
+  key: 'gante global pins',
+  get: ({ get }) => {
+    return get(_listCore__editor).pin;
+  }
 });
 
 // 整个甘特图起始时间

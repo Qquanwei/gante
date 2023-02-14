@@ -15,6 +15,7 @@ import {
   Position, getPosition, positionToDay, dayToRect, getRangeDays,
   getScrollingElement
 } from './utils';
+import useSinkDrop from './use-sink-drop';
 
 /*
   泳道，绘制一个通道, 绘制连线
@@ -41,6 +42,7 @@ export default function Sink() {
   const todayRectRef = useRef(null);
   const enlargeEditor = useEnlargeEditor();
   const connections = useRecoilValue(atoms.connections);
+  const autoGotoTodayFlagRef = useRef(false);
 
   const { x: left } = useMemo(() => {
     if (!currentNode) {
@@ -95,10 +97,17 @@ export default function Sink() {
 
     setGotoTodayImpl(gotoToday);
 
+    if (!autoGotoTodayFlagRef.current) {
+      gotoToday();
+      autoGotoTodayFlagRef.current = true;
+    }
+
     return () => {
       setGotoTodayImpl(null);
     }
   }, [setGotoTodayImpl, OFFSET_DAY, SPOT_WIDTH]);
+
+
 
 
   useEffect(() => {
@@ -119,8 +128,11 @@ export default function Sink() {
     }
   }, [enlargeEditor]);
 
+
+  useSinkDrop(sinkRef);
+
   return (
-    <div ref={sinkRef} className="relative">
+    <div ref={sinkRef} className="relative" >
       <svg
         ref={grabElementRef}
         width="100%"

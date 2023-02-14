@@ -207,11 +207,11 @@ ResizeState.prototype.onMouseMove = function(e) {
       width: this.initWidth + x
     });
   }
-}
+};
 
 var MoveState = inherit(State, function(initPosition) {
   this.initPosition = initPosition;
-})
+});
 
 MoveState.prototype.mount = function() {
   const element = this.machine.getElement();
