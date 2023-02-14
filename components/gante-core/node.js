@@ -1,4 +1,5 @@
 import { Suspense, useState, useRef, useCallback, useMemo } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import useGante from './useGante';
@@ -8,7 +9,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import useInteractionEvent from './use-interaction-event';
 import NodeControlPanel from './node-control-panel';
 import NodeFormModal from './node-form-modal';
-import { positionToDay } from './utils';
+import { positionToDay, getRangeDays } from './utils';
 import DraggleBar from './draggle-bar';
 
 function Node({id, index }) {
@@ -20,6 +21,8 @@ function Node({id, index }) {
   const startTime = useRecoilValue(atoms.startTime);
   const setCurrentId = useSetRecoilState(atoms.currentNodeId);
   const setCurrentFeatures = useSetRecoilState(atoms.currentFeatures);
+  const [dragMode, setDragMode] = useState(false);
+
   const [contextInfo, setContextInfo] = useState({
     show: false,
     point: null
@@ -33,7 +36,16 @@ function Node({id, index }) {
 
   const ref = useInteractionEvent(id, {
     onChange: (event, args) => {
+      console.log(event);
       switch(event) {
+        case 'dragenter':
+          setDragMode(true);
+          break;
+
+        case 'dragleave':
+          setDragMode(false);
+          break;
+
         case 'hover':
           setHover(args);
           setCurrentFeatures({});
@@ -165,9 +177,9 @@ function Node({id, index }) {
     <div ref={ref}
       className={classNames("absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all duration-350 cursor-pointer", {
         'rounded': !item.lock,
-        "z-10": hover,
-        'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock,
-        'outline outline-white': !hover && !item.lock
+        "z-10": hover && !dragMode,
+        'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock && !dragMode,
+        'outline outline-white': !hover && !item.lock && !dragMode
       })}
       style={{
         left,
@@ -178,16 +190,38 @@ function Node({id, index }) {
         background: item.color || '#eee'
       }}>
       <div className={classNames("flex-start h-full", {
-        'opacity-0': !hover || item.lock
+        'opacity-0': !hover || item.lock,
+        hidden: dragMode
       })}
         data-role="left-dragger">
         <DraggleBar />
       </div>
-      <span className="grow px-2 sticky overflow-hidden right-[2px] left-[2px]">
+
+      {
+        dragMode && (
+          (() => {
+            const totalDays = getRangeDays(item.startTime, item.endTime) + 1;
+            const ans = [];
+            for (let i = 0; i < totalDays; ++i) {
+              const curDay = dayjs(item.startTime).add(i, 'days');
+              ans.push(
+                <div className="h-full rounded pointer-events-none box-border border bg-sky-300/20 border-white/30"
+                  style={{ width: SPOT_WIDTH }}
+                  key={i}></div>
+              )
+            }
+            return ans;
+          })()
+        )
+      }
+
+      <span className={classNames("grow px-2 sticky overflow-hidden right-[2px] left-[2px]", {
+        hidden: dragMode
+      })}>
         { item.title }
       </span>
 
-      <div data-role="ignore-events">
+      <div data-role="ignore-events" className={classNames({ hidden: dragMode })}>
         <NodeControlPanel node={item} contextInfo={contextInfo} left={left} hover={hover}/>
 
         <NodeFormModal node={item} contextInfo={contextInfo} top={top} left={left} hover={hover}/>
@@ -200,11 +234,16 @@ function Node({id, index }) {
 
 
       </div>
-      <div className={classNames("ml-auto sticky right-[2px] text-xs mr-2", { hidden: !item.lock })}>
+      <div className={classNames("ml-auto sticky right-[2px] text-xs mr-2", {
+        hidden: !item.lock || dragMode,
+      })}>
         锁定
       </div>
 
-      <div className={classNames("flex-end h-full",{ 'opacity-0': !hover || item.lock })}
+      <div className={classNames("flex-end h-full",{
+        'opacity-0': !hover || item.lock,
+        hidden: dragMode
+      })}
         data-role="right-dragger">
         <DraggleBar />
       </div>
@@ -212,7 +251,7 @@ function Node({id, index }) {
   );
 }
 
-export default function Nodes() {
+export default React.memo(function Nodes() {
   const list = useRecoilValue(atoms.list);
   const [showNodeContext, setShowNodeContext] = useState(null);
 
@@ -229,7 +268,7 @@ export default function Nodes() {
       }
     </div>
   );
-}
+});
 
 
 export function getStaticProps() {

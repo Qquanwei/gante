@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import useGante from '../useGante';
 import { getPosition, Position, getEleRect } from '../utils';
 
-export default function Popup({ children, content }) {
+export default function Popup({ children, content, disable }) {
   const [showContent, setShowContent] = useState(false);
   const positionRef = useRef(null);
   const { graphRef } = useGante();
@@ -55,7 +55,9 @@ export default function Popup({ children, content }) {
         React.cloneElement(children, {
           ref: elementRef,
           onClick: (e) => {
-            onClick(e);
+            if (!disable) {
+              onClick(e);
+            }
             if (children.props.onClick) {
               return children.props.onClick(e);
             }

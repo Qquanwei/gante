@@ -74,6 +74,7 @@ export default function Timeline({ children }) {
           { dayjs(time).month() + 1}
           月
           { (pinIdx !== -1) && <Pin
+                                 dragMode="move"
                                  pinIdx={pinIdx} className="absolute top-[10px] left-[10px]" />}
         </div>
       );
@@ -88,7 +89,7 @@ export default function Timeline({ children }) {
     return (
       <span className="relative">
         { title }
-        { (pinIdx !== -1) && <Pin pinIdx={pinIdx} className="absolute left-0 top-0" />}
+        { (pinIdx !== -1) && <Pin dragMode="move" pinIdx={pinIdx} className="absolute left-0 top-0" />}
       </span>
     );
   }, [SPOT_WIDTH, isThisDayPinIdx]);
@@ -113,15 +114,32 @@ export default function Timeline({ children }) {
   }, []);
 
   const addPin = actions.useAddPin();
+  const updatePin = actions.useUpdatePinContent();
   const onDrop = useCallback((e) => {
     e.stopPropagation();
     e.preventDefault();
-    if (e.currentTarget && e.currentTarget.dataset.day) {
-      const idx = isThisDayPinIdx(dayjs(e.currentTarget.dataset.day));
-      if (idx === -1) {
-        addPin('timeline', e.currentTarget.dataset.day);
+    const transferDataString = e.dataTransfer.getData('text/plain');
+
+    try {
+      const transferObject = JSON.parse(transferDataString);
+      if (transferObject.type === 'pin') {
+        if (e.currentTarget && e.currentTarget.dataset.day) {
+          const idx = isThisDayPinIdx(dayjs(e.currentTarget.dataset.day));
+          if (idx === -1) {
+            if (transferObject.pinIdx === -1) {
+              addPin('timeline', e.currentTarget.dataset.day);
+            } else {
+              updatePin(transferObject.pinIdx, {
+                day: e.currentTarget.dataset.day
+              });
+            }
+          }
+        }
       }
+    } catch(e) {
+      return null;
     }
+
   }, [isThisDayPinIdx]);
 
   return (

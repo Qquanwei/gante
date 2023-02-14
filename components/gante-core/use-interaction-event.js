@@ -41,6 +41,15 @@ State.prototype.onMouseOver = () => {
 State.prototype.onMouseLeave = () => {
 }
 
+State.prototype.onDrop = () => {
+}
+
+State.prototype.onDragEnter = () => {
+}
+
+State.prototype.onDragLeave = () => {
+}
+
 // 当任意一个元素mouseover触发(不仅仅是自己)
 State.prototype.onInteractionMouseOver = () => {
 }
@@ -85,6 +94,18 @@ NormalState.prototype.mount = function() {
 
   this.ignoreEventsEles = element.querySelectorAll('[data-role=ignore-events]');
 }
+
+NormalState.prototype.onDragEnter = function(event) {
+  this.machine.emit('dragenter', event);
+};
+
+NormalState.prototype.onDragLeave = function(event) {
+  this.machine.emit('dragleave', event);
+};
+
+NormalState.prototype.onDrop = function(event) {
+  this.machine.emit('drop', event);
+};
 
 
 NormalState.prototype.unmount = function() {
@@ -416,6 +437,19 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
     this.currentState.onDragEnd(e);
   };
 
+  this.onDragEnter = (e) => {
+    this.currentState.onDragEnter(e);
+  };
+
+  this.onDragLeave = (e) => {
+    this.currentState.onDragLeave(e);
+  };
+
+  this.onDrop = (e) => {
+    this.currentState.onDrop(e);
+  };
+
+
   this.onInteractionMouseOver = (e) => {
     this.currentState.onInteractionMouseOver(e);
   };
@@ -424,6 +458,9 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
     this.currentState.onInteractionMouseLeave(e);
   };
 
+  this.element.addEventListener('dragenter', this.onDragEnter);
+  this.element.addEventListener('dragleave', this.onDragLeave);
+  this.element.addEventListener('drop', this.onDrop);
   this.element.addEventListener('click', this.onClick);
   this.element.addEventListener('mouseover', this.onMouseOver);
   this.element.addEventListener('mouseleave', this.onMouseLeave);
@@ -439,6 +476,9 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
 }
 
 StateMachine.prototype.dispose = function() {
+  this.element.removeEventListener('dragenter', this.onDragEnter);
+  this.element.removeEventListener('dragleave', this.onDragLeave);
+  this.element.removeEventListener('drop', this.onDrop);
   this.element.removeEventListener('click', this.onClick);
   this.element.removeEventListener('mouseover', this.onMouseOver);
   this.element.removeEventListener('mouseleave', this.onMouseLeave);
