@@ -60,7 +60,7 @@ export default function Timeline({ children }) {
     }
   }, [SPOT_WIDTH]);
 
-  const getDayTitle = useCallback((time) => {
+  const getDayTitle = useCallback((time, { showPin }) => {
     const isStart = dayjs(time).date() === 1;
     const pinIdx = isThisDayPinIdx(dayjs(time));
 
@@ -69,7 +69,7 @@ export default function Timeline({ children }) {
         <div className="font-bold relative text-orange-500 whitespace-nowrap text-[15px] px-1">
           { dayjs(time).month() + 1}
           月
-          { (pinIdx !== -1) && <Pin
+          { (pinIdx !== -1) && showPin && <Pin
                                  dragMode="move"
                                  pinIdx={pinIdx} className="absolute top-[10px] left-[10px]" />}
         </div>
@@ -85,7 +85,7 @@ export default function Timeline({ children }) {
     return (
       <span className="relative">
         { title }
-        { (pinIdx !== -1) && <Pin dragMode="move" pinIdx={pinIdx} className="absolute left-0 top-0" />}
+        { (pinIdx !== -1) && (showPin) && <Pin dragMode="move" pinIdx={pinIdx} className="absolute left-0 top-0" />}
       </span>
     );
   }, [SPOT_WIDTH, isThisDayPinIdx]);
@@ -168,7 +168,9 @@ export default function Timeline({ children }) {
                     width: SPOT_WIDTH,
                   }} key={i}>
                   {
-                    getDayTitle(dayjs(startTime).add(i, 'days'))
+                    getDayTitle(dayjs(startTime).add(i, 'days'), {
+                      showPin: !range
+                    })
                   }
                   <span className="text-xs">{ getDaySubtitle(dayjs(startTime).add(i, 'day'))}</span>
                 </div>
