@@ -121,3 +121,24 @@ export function useAddPin() {
     }
   }, []);
 }
+
+
+export function useUpdatePinContent() {
+  return useRecoilCallback(({ set }) => (pinIdx, pinProperty) => {
+    set(atoms.pins, oldPinList => {
+      if (oldPinList && Array.isArray(oldPinList)) {
+        if (pinIdx >= 0 && pinIdx <= oldPinList.length) {
+          const copyOldPinList = [...oldPinList];
+          copyOldPinList[pinIdx] = {
+            ...copyOldPinList[pinIdx],
+            ...pinProperty
+          };
+          return copyOldPinList;
+        }
+        return oldPinList;
+      } else {
+        return oldPinList;
+      }
+    });
+  }, []);
+}

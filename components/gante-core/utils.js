@@ -10,6 +10,13 @@ Position.prototype.diff = function(a) {
     );
 }
 
+Position.prototype.add = function(a) {
+  return new Position(
+    this.x + a.x,
+    this.y + a.y
+  );
+}
+
 /* 仅用来表示距离的程度，没有绝对意义，仅在小范围内有相对意义 */
 Position.prototype.Edistance = function(a) {
   return Math.abs(this.x - a.x) + Math.abs(this.y - a.y);

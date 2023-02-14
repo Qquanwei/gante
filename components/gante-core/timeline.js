@@ -32,12 +32,12 @@ export default function Timeline({ children }) {
   }, [pins]);
 
   // 这一天是否有pin
-  const isThisDayHasPin = useCallback((day) => {
+  const isThisDayPinIdx = useCallback((day) => {
     const idx = R.findIndex((pin) => {
       return day.isSame(pin.day);
     }, timelinePins);
 
-    return timelinePins[idx];
+    return idx;
   }, [timelinePins]);
 
   const inRange = useCallback((ts) => {
@@ -66,14 +66,15 @@ export default function Timeline({ children }) {
 
   const getDayTitle = useCallback((time) => {
     const isStart = dayjs(time).date() === 1;
-    const hasPin = isThisDayHasPin(dayjs(time));
+    const pinIdx = isThisDayPinIdx(dayjs(time));
 
     if (isStart) {
       return (
         <div className="font-bold relative text-orange-500 whitespace-nowrap text-[15px] px-1">
           { dayjs(time).month() + 1}
           月
-          { hasPin && <Pin data={hasPin} className="absolute top-[10px] left-[10px]" />}
+          { (pinIdx !== -1) && <Pin
+                                 pinIdx={pinIdx} className="absolute top-[10px] left-[10px]" />}
         </div>
       );
     }
@@ -87,10 +88,10 @@ export default function Timeline({ children }) {
     return (
       <span className="relative">
         { title }
-        { hasPin && <Pin data={hasPin} className="absolute left-0 top-0" />}
+        { (pinIdx !== -1) && <Pin pinIdx={pinIdx} className="absolute left-0 top-0" />}
       </span>
     );
-  }, [SPOT_WIDTH, isThisDayHasPin]);
+  }, [SPOT_WIDTH, isThisDayPinIdx]);
 
   useEffect(() => {
     if (todayRef.current) {
@@ -116,9 +117,12 @@ export default function Timeline({ children }) {
     e.stopPropagation();
     e.preventDefault();
     if (e.currentTarget && e.currentTarget.dataset.day) {
-      addPin('timeline', e.currentTarget.dataset.day);
+      const idx = isThisDayPinIdx(dayjs(e.currentTarget.dataset.day));
+      if (idx === -1) {
+        addPin('timeline', e.currentTarget.dataset.day);
+      }
     }
-  }, []);
+  }, [isThisDayPinIdx]);
 
   return (
     <div>
