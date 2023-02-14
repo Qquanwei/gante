@@ -34,7 +34,7 @@ export default function Timeline({ children }) {
   // 这一天是否有pin
   const isThisDayPinIdx = useCallback((day) => {
     const idx = R.findIndex((pin) => {
-      return day.isSame(pin.day);
+      return day.isSame(pin?.day);
     }, timelinePins);
 
     return idx;

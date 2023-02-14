@@ -142,3 +142,19 @@ export function useUpdatePinContent() {
     });
   }, []);
 }
+
+
+export function useRemovePin() {
+  return useRecoilCallback(({ set }) => (pinIdx) => {
+    set(atoms.pins, oldPinList => {
+      if (pinIdx >=0 && pinIdx < oldPinList.length) {
+        const newPinList = [...oldPinList];
+        newPinList[pinIdx] = {
+          type: 'remove'
+        };
+        return newPinList;
+      }
+      return oldPinList;
+    });
+  }, []);
+}
