@@ -140,3 +140,17 @@ export function getScrollingElement(element) {
   }
   return cur || document.scrollingElement;
 }
+
+export function throttle(fn, ms) {
+  let timer = null;
+  return function(...args) {
+    if (timer) {
+      return;
+    } else {
+      timer = setTimeout(() => {
+        fn.apply(this, args);
+        timer = null;
+      }, ms);
+    }
+  };
+}

@@ -22,7 +22,7 @@ export {
 };
 
 
-const Provider = React.forwardRef(({ children }, forwardRef) => {
+const Provider = React.forwardRef(({ children, user }, forwardRef) => {
   const graphRef = useRef(null);
   const sinkRef = useRef(null);
   const portalRef = useRef(null);
@@ -101,7 +101,8 @@ const Provider = React.forwardRef(({ children }, forwardRef) => {
       updateItemConnect,
       sinkRef,
       zoomOut,
-      zoomIn
+      zoomIn,
+      user
     };
   }, []);
 

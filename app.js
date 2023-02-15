@@ -72,7 +72,10 @@ async function startApp() {
 /* SHAREDB BEGIN */
 const { parse } = require('url');
 ShareDB.types.register(json1.type);
-const backend = new ShareDB({ db });
+const backend = new ShareDB({
+  db,
+  presence: true
+});
 
 const Url = require('url');
 const queryString = require('querystring');

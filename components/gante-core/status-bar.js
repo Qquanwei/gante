@@ -47,7 +47,7 @@ export default React.memo(function StatusBar({ className, children }) {
     }
     function receiveChange(message) {
       setTimeout(() => {
-        setHasPending(v => v-1);
+        setHasPending(v => Math.max(v-1, 0));
       }, 200);
     }
 
@@ -56,8 +56,8 @@ export default React.memo(function StatusBar({ className, children }) {
     }
 
     con.on('state', stateChange);
-    con.on('send', sendChange);
-    con.on('receive', receiveChange);
+    // con.on('send', sendChange);
+    // con.on('receive', receiveChange);
 
     return () => {
       con.off('state', stateChange);
@@ -67,7 +67,6 @@ export default React.memo(function StatusBar({ className, children }) {
   return (
     <div className={classNames(className, 'h-[30px] px-[80px] bg-[#f0f0f0] flex items-center border-t-white border box-border')}>
       { iconMap[state] }
-      { pendingMap[hasPending !== 0]}
     </div>
   );
 })

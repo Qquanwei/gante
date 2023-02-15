@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import sortBy from 'ramda/src/sortBy';
 import * as R from 'ramda';
 import { useRecoilValue } from 'recoil';
@@ -19,7 +19,7 @@ import {
 /*
   泳道，绘制一个通道, 绘制连线
 */
-export default function Sink() {
+export default React.memo(function Sink() {
   const {
     sinkRef,
     graphRef,
@@ -222,4 +222,4 @@ export default function Sink() {
       <div className="absolute top-0 bottom-0 right-0 w-[30px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('right')}></div>
     </div>
   );
-}
+});

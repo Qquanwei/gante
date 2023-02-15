@@ -23,7 +23,7 @@ export default dynamic(() => Promise.resolve(
     return (
       <div>
         <div className="w-full h-full text-black">
-          <GanteProvider docId={query.id} ref={ganteRef}>
+          <GanteProvider user={user} docId={query.id} ref={ganteRef}>
             <Header user={user} side="left" ganteRef={ganteRef} />
             <Container className="h-screen">
               <Content>
