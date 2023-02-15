@@ -28,7 +28,26 @@ export default React.memo(function CursorCanvas() {
 
     let domMap = {};
     let length = 0;
+    let mouseDown = false;
     const local = presence.create(localPresenceId);
+
+    const onMouseDown = () => {
+      mouseDown = true;
+    };
+
+    const onMouseUp = () => {
+      mouseDown = false;
+    };
+
+    const onMouseMove = throttle((e) => {
+      if (!mouseDown) {
+        local.submit({
+          user: user?.name,
+          position: getPosition(graphRef.current, e),
+          count: 1
+        });
+      }
+    }, 10);
 
     const onReceive = (presenceId, update) => {
       if (presenceId === local.presenceId) {
@@ -68,20 +87,17 @@ export default React.memo(function CursorCanvas() {
 
     presence.on('receive', onReceive);
 
-    const listener = throttle((e) => {
-      local.submit({
-        user: user?.name,
-        position: getPosition(graphRef.current, e),
-        count: 1
-      });
-    }, 10);
-    document.addEventListener('mousemove', listener);
+    document.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mouseup', onMouseUp);
 
     return () => {
       presence.off('receive', onReceive);
       presence.destroy();
       local.destroy();
-      document.removeEventListener('mousemove', listener);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('mousemove', onMouseMove);
     }
   }, [user]);
 

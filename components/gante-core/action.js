@@ -50,9 +50,15 @@ export function useCreateNewNode() {
           reject(err);
         } else {
           const list = await snapshot.getPromise(atoms._listCore__list);
-          if (list.length >= newPosition) {
+          if (!listDoc.type) {
+            listDoc.create({ list: [] }, 'json1', () => {
+              listDoc.submitOp(
+                json1.insertOp(['list', Math.min(list.length, Math.max(newPosition - 1, 0))], newId)
+              );
+            });
+          } else {
             listDoc.submitOp(
-              json1.insertOp(['list', Math.max(newPosition - 1, 0)], newId)
+                json1.insertOp(['list', Math.min(list.length, Math.max(newPosition - 1, 0))], newId)
             );
           }
           resolve(doc);
