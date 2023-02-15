@@ -58,7 +58,6 @@ export default React.memo(function CursorCanvas() {
           domMap[presenceId].style.transform = `translateX(${update.position.x}px) translateY(${update.position.y - 60}px)`;
         } else {
           if (length < 10) {
-            console.log('new id', presenceId, local.presenceId);
             domMap[presenceId] = document.createElement('div');
             const ns = document.createElementNS('http://www.w3.org/2000/svg', "svg");
             ns.setAttribute('viewBox', "0 0 16 16");
