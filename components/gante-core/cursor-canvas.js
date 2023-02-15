@@ -42,7 +42,7 @@ export default React.memo(function CursorCanvas() {
     const onMouseMove = throttle((e) => {
       if (!mouseDown) {
         local.submit({
-          user: user?.name,
+          user: user?.userName,
           position: getPosition(graphRef.current, e),
           count: 1
         });
