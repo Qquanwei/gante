@@ -1,58 +1,60 @@
 import { useContext } from 'react';
 import prop from 'ramda/src/prop';
-import { buildItemKey, useConnectionRef, useArraySwap } from 'recoil-sharedb';
+import { useGetDoc } from 'recoil-sharedb';
 import * as atoms from './atom';
+import * as json1 from 'ot-json1';
 import { useRecoilCallback } from 'recoil';
 
 export function useUpdateItemProperty() {
-  return useRecoilCallback(({ set }) => (id, ...args) => {
+  const getDoc = useGetDoc();
+  return useRecoilCallback(({ set, snapshot }) => async (id, ...args) => {
     let prevK = null;
-    const prop = {};
-
-    if (args.length > 1 || typeof args[0] !== 'function') {
-      for (let i = 0; i < args.length; ++i) {
-        if (prevK === null) {
-          prevK = args[i];
+    const doc = getDoc('item', id);
+    const node = await snapshot.getPromise(atoms.thatNode(id));
+    let op = null;
+    for (let i = 0; i < args.length; ++i) {
+      if (prevK === null) {
+        prevK = args[i];
+      } else {
+        if (!op) {
+          op = json1.replaceOp([prevK], node[prevK], args[i]);
         } else {
-          prop[prevK] = args[i];
-          prevK = null;
+          op = json1.type.compose(op, json1.replaceOp([prevK], node[prevK], args[i]));
         }
+        prevK = null;
       }
-      set(atoms.thatNode(id), value => ({
-        ...value,
-        ...prop
-      }));
-    } else {
-      // args[0] is function
-      set(atoms.thatNode(id), value => args[0](value));
     }
+    doc.submitOp(op);
   }, []);
 }
 
+import crypto from 'crypto';
+import qs from 'qs';
 
-function makeId() {
-  return Math.floor(Math.random() * 10000000) + 'rand';
+function makeId(listId) {
+  const query = qs.parse(window.location.search.slice(1));
+  return query.id + '.' + crypto.randomBytes(12).toString('hex');
 }
 
 export function useCreateNewNode() {
-  const conRef = useConnectionRef();
+  const getDoc = useGetDoc();
 
-  return useRecoilCallback(({ set }) => (nodeInitProperty, newPosition) => {
+  return useRecoilCallback(({ set, snapshot}) => (nodeInitProperty, newPosition) => {
     const newId = makeId();
-    const doc = conRef.current.get('item', newId);
+    const doc = getDoc('item', newId);
+    const listDoc = getDoc('list', '<docId>');
+
     return new Promise((resolve, reject) => {
-      doc.create({...nodeInitProperty, id: newId }, 'json1', (err) => {
+      doc.create({...nodeInitProperty, id: newId }, 'json1', async (err) => {
         if (err) {
           reject(err);
         } else {
-          set(atoms._listCore__list, list => {
-            if (newPosition >= list.length) {
-              return list.concat(newId);
-            }
-            const a = [...list];
-            a.splice(newPosition - 1, 0, newId);
-            return a;
-          });
+          const list = await snapshot.getPromise(atoms._listCore__list);
+          if (list.length >= newPosition) {
+            listDoc.submitOp(
+              json1.insertOp(['list', Math.max(newPosition - 1, 0)], newId)
+            );
+          }
           resolve(doc);
         }
       });
@@ -67,9 +69,9 @@ export function useExportList() {
 }
 
 export function useDeleteItem() {
-  const conRef = useConnectionRef();
+  const getDoc = useGetDoc();
   return useRecoilCallback(({ set }) => (nodeId) => {
-    const doc = conRef.current.get('item', nodeId);
+    const doc = getDoc('item', nodeId);
     set(atoms._listCore__list, list => {
       return list.filter(v => v !== nodeId);
     });
@@ -79,11 +81,12 @@ export function useDeleteItem() {
 
 
 export function useSwapItem() {
-  const arraySwap = useArraySwap();
+  const getDoc = useGetDoc();
   return useRecoilCallback(({ snapshot }) => (fromIndex, toIndex) => {
+    const listDoc = getDoc('list', '<docId>');
     const list = snapshot.getLoadable(atoms._listCore__list).contents;
     if (list[fromIndex] && list[toIndex]) {
-      arraySwap(buildItemKey('list', '<docId>'), ['list', fromIndex], ['list', toIndex]);
+      listDoc.submitOp(json1.moveOp(['list', fromIndex], ['list', toIndex]));
     }
   }, []);
 }

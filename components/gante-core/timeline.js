@@ -69,7 +69,8 @@ export default function Timeline({ children }) {
         <div className="font-bold relative text-orange-500 whitespace-nowrap text-[15px] px-1">
           { dayjs(time).month() + 1}
           月
-          { (pinIdx !== -1) && showPin && <Pin
+          { (pinIdx !== -1) && <Pin
+                                 showPin={showPin}
                                  dragMode="move"
                                  pinIdx={pinIdx} className="absolute top-[10px] left-[10px]" />}
         </div>
@@ -85,7 +86,8 @@ export default function Timeline({ children }) {
     return (
       <span className="relative">
         { title }
-        { (pinIdx !== -1) && (showPin) && <Pin dragMode="move" pinIdx={pinIdx} className="absolute left-0 top-0" />}
+        { (pinIdx !== -1) && <Pin showPin={showPin}
+                               dragMode="move" pinIdx={pinIdx} className="absolute left-0 top-0" />}
       </span>
     );
   }, [SPOT_WIDTH, isThisDayPinIdx]);

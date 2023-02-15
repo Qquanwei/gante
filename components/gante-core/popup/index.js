@@ -40,7 +40,9 @@ export default function Popup({ children, content, disable, showPreview, preview
     return () => {
       document.removeEventListener('click', onClickOutside);
       if (popupContainerRef.current && graphRef.current) {
-        graphRef.current.removeChild(popupContainerRef.current);
+        if (graphRef.current.contains(popupContainerRef.current)) {
+          graphRef.current.removeChild(popupContainerRef.current);
+        }
         popupContainerRef.current = null;
       }
     };

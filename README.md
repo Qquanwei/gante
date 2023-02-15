@@ -1,6 +1,7 @@
 配置文件
 
 config/config.dev.js
+
 config/config.online.js
 
 开发
@@ -11,6 +12,7 @@ npm run dev
 部署生产(需要设置环境变量)
 
 npm run build
+
 npm run start
 
 
@@ -20,3 +22,4 @@ npm run start
 2. GANTE_GITHUB_CLIENT_SECRET
 3. GANTE_MONGO_UNAME
 4. GANTE_MONGO_PASS
+5. PORT 启动端口号

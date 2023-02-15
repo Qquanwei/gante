@@ -15,7 +15,6 @@ import {
   Position, getPosition, positionToDay, dayToRect, getRangeDays,
   getScrollingElement
 } from './utils';
-import useSinkDrop from './use-sink-drop';
 
 /*
   泳道，绘制一个通道, 绘制连线
@@ -128,8 +127,6 @@ export default function Sink() {
     }
   }, [enlargeEditor]);
 
-
-  useSinkDrop(sinkRef);
 
   return (
     <div ref={sinkRef} className="relative" >

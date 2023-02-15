@@ -22,6 +22,8 @@ function Node({id, index }) {
   const setCurrentId = useSetRecoilState(atoms.currentNodeId);
   const setCurrentFeatures = useSetRecoilState(atoms.currentFeatures);
   const [dragMode, setDragMode] = useState(false);
+  const addPin = actions.useAddPin();
+  const updatePin = actions.useUpdatePinContent();
 
   const [contextInfo, setContextInfo] = useState({
     show: false,
@@ -43,6 +45,25 @@ function Node({id, index }) {
 
         case 'dragleave':
           setDragMode(false);
+          break;
+
+        case 'drop':
+          try {
+            const data = JSON.parse(args.dataTransfer.getData('text/plain'));
+            if (data.type === 'pin') {
+              const pinTime = positionToDay(SPOT_WIDTH, startTime, args.offsetX);
+              if (data.pinIdx) {
+                updatePin(data.pinIdx, {
+                  type: 'node',
+                  nodeId: item.id,
+                  day: pinTime.toString()
+                });
+              }
+            }
+
+          } catch(e) {
+            //
+          }
           break;
 
         case 'hover':

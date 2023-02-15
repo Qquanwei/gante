@@ -6,7 +6,7 @@ import Popup from './popup';
 import Button from '../button';
 import * as actions from './action';
 
-export default React.memo(function Pin({ className, pinIdx, dragMode }) {
+export default React.memo(function Pin({ className, pinIdx, dragMode, showPin }) {
   const updatePin = actions.useUpdatePinContent();
   const removePin = actions.useRemovePin();
   const data = useRecoilValue(atoms.pins)[pinIdx];
@@ -48,7 +48,7 @@ export default React.memo(function Pin({ className, pinIdx, dragMode }) {
   return (
     <Popup
       disable={pinIdx === -1}
-      showPreview={fixed}
+      showPreview={fixed && showPin}
       previewContent={data?.content }
       content={({ close }) => (
         <div>

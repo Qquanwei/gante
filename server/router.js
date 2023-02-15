@@ -115,6 +115,31 @@ router.post('/login', async (ctx, next) => {
   }
 });
 
+router.get('/count', async (ctx) => {
+  const { listId } = ctx.query;
+  const col = ctx.db.collection('mem');
+
+  if (!listId) {
+    ctx.status = 400;
+    return;
+  }
+
+  const doc = await col.findOne({
+    listId
+  });
+  if (!doc) {
+    ctx.body = {
+      count: 0,
+      exceed: false
+    }
+  } else {
+    ctx.body = {
+      count: doc.count,
+      exceed: doc.count >=  5
+    }
+  }
+});
+
 router.get('/user', async (ctx) => {
   const uid = await helper.getUserIdBySession(ctx);
 
