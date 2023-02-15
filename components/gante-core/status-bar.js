@@ -18,10 +18,10 @@ export default React.memo(function StatusBar({ className, children }) {
 
   const iconMap = {
     [CONNECTED]: (
-      <div className="text-yellow-500 text-[12px]">连接中</div>
+      <div className="text-yellow-500 text-[12px] cursor-pointer">连接中</div>
     ),
     [DISCONNECTED]: (
-      <div className="text-red-500 text-[12px]">重连中...</div>
+      <div className="text-red-500 text-[12px] cursor-pointer">重连中...</div>
     ),
     [CONNECTED]: (
       <div className="text-green-500 text-[12px] cursor-pointer">已连接</div>
