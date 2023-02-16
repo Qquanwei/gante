@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import sortBy from 'ramda/src/sortBy';
 import * as R from 'ramda';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValueMemo as useRecoilValue } from 'recoil-enhance';
 import hotkeys from 'hotkeys-js';
 import path from 'ramda/src/path';
 import classNames from 'classnames';

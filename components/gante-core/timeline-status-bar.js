@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import * as utils from './utils';
 import useGante from './useGante';
 import * as atoms from './atom';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValueMemo as useRecoilValue } from 'recoil-enhance';
 import useCurrentDate from './useCurrentDate';
 import Image from 'next/image';
 /*
