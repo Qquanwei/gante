@@ -11,20 +11,18 @@ function Header({ children, className, user, side, ganteRef }) {
         <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]" onClick={() => ganteRef?.current?.gotoToday()}></div>
         <div className="flex flex-col items-center h-full select-none">
           <ul className="flex mt-2 flex-col text-[12px] text-center">
-            <li className="cursor-pointer h-[24px]">
-              <Link href="/">
-                回到主页
-              </Link>
-            </li>
-            <li className="cursor-pointer h-[24px]" onClick={() => ganteRef?.current?.zoomIn()}>缩小</li>
-            <li className="cursor-pointer h-[24px]" onClick={() => ganteRef?.current?.zoomOut()}>放大</li>
+            <Link href="/">
+              <li className="cursor-pointer h-[24px] bg-[url(/house.png)] bg-no-repeat bg-contain bg-center" />
+            </Link>
+            <li className="cursor-pointer h-[24px] mt-[20px] bg-center bg-[url(/zoom-in.png)] bg-contain bg-no-repeat" onClick={() => ganteRef?.current?.zoomIn()}></li>
+            <li className="cursor-pointer h-[24px] mt-[20px] bg-center bg-[url(/zoom-out.png)] bg-contain bg-no-repeat" onClick={() => ganteRef?.current?.zoomOut()}></li>
             <li className="cursor-pointer hidden h-[24px] flex justify-center mt-[10px]">
               <div className="h-[24px] w-[24px] border borer-1 border-black border-box flex items-center justify-center">组</div>
             </li>
-            <li className="cursor-pointer hidden h-[24px] flex justify-center items-center mt-[10px]">
+            <li className="cursor-pointer hidden h-[24px] flex justify-center items-center mt-[20px]">
               <div className="h-[18px] w-[24px] border borer-1 border-black border-box flex items-center justify-center"></div>
             </li>
-            <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[10px]">
+            <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]">
               <Pin pinIdx={-1} dragMode="copy" />
             </li>
           </ul>

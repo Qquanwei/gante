@@ -54,12 +54,15 @@ Rect.prototype.leftCenter = function() {
 
 // 将鼠标坐标系转化成基于甘特图的坐标系
 export function getPosition(graphEle, event) {
-    const rect = graphEle.getBoundingClientRect();
+  if (!graphEle) {
+    return new Position(0, 0);
+  }
+  const rect = graphEle.getBoundingClientRect();
 
-    return new Position(
-        event.pageX - (rect.left + window.scrollX),
-        event.pageY - (rect.top + window.scrollY)
-    );
+  return new Position(
+    event.pageX - (rect.left + window.scrollX),
+    event.pageY - (rect.top + window.scrollY)
+  );
 }
 
 export function getPositionViewport(event) {
