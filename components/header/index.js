@@ -39,7 +39,12 @@ function Header({ children, className, user, side, ganteRef }) {
     <div className="z-10  text-[#f0f0f0] left-0 absolute right-0 pr-2 pt-2">
       <div className="flex items-center">
         <ul className="flex ml-10">
-          <li>首页</li>
+          <li className="cursor-pointer">首页</li>
+          <li className="ml-[15px] cursor-pointer">
+            <Link href="https://github.com/Qquanwei/gante">
+              Github
+            </Link>
+          </li>
         </ul>
         <div className="ml-auto">
           <User user={user} />
