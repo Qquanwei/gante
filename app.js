@@ -60,7 +60,11 @@ async function startApp() {
     if (pathname === '/share') {
       wsServer.handleUpgrade(request, socket, head, (ws) => {
         const stream = new WebSocketJSONStream(ws);
-        backend.listen(stream, request);
+        const agent = backend.listen(stream, request);
+        // 当连接中断，中断stream
+        ws.on('error', (error) => {
+          agent.close(error);
+        });
       });
     }
   });
