@@ -89,7 +89,7 @@ backend.use('connect', async (ctx, next) => {
     const mem = mongoClient.db().collection('mem');
 
     const memList = await mem.findOne({ listId });
-    if (memList && memList.count >= 5) {
+    if (memList && memList.count >= 50) {
       throw new Error('连接数量超过最大限制');
     }
 

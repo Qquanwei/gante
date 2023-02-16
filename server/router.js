@@ -135,7 +135,7 @@ router.get('/count', async (ctx) => {
   } else {
     ctx.body = {
       count: doc.count,
-      exceed: doc.count >=  5
+      exceed: doc.count >=  50
     }
   }
 });

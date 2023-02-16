@@ -47,7 +47,7 @@ export default React.memo(function CursorCanvas() {
           count: 1
         });
       }
-    }, 10);
+    }, 50);
 
     const onReceive = (presenceId, update) => {
       if (presenceId === local.presenceId) {
@@ -70,7 +70,7 @@ export default React.memo(function CursorCanvas() {
             name.innerText = update.user || '匿名用户';
             domMap[presenceId].appendChild(name);
 
-            domMap[presenceId].className='absolute whitespace-nowrap text-[12px] left-0 pointer-events-none  bg-contain top-0 w-[20px] h-[20px] z-10';
+            domMap[presenceId].className='transition-all ease-out duration-75 absolute whitespace-nowrap text-[12px] left-0 pointer-events-none  bg-contain top-0 w-[20px] h-[20px] z-10';
             containerRef.current.appendChild(domMap[presenceId]);
             length ++;
           }
