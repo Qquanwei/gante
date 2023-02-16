@@ -2,6 +2,7 @@ import { Suspense, useState, useRef, useCallback, useMemo } from 'react';
 import React from 'react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
+import * as json1 from 'ot-json1';
 import useGante from './useGante';
 import * as atoms from './atom';
 import * as actions from './action';
@@ -93,10 +94,13 @@ function Node({id, index }) {
         case 'connect':
           {
             updateItemProperty(item.id, 'connectTo', [].concat(item.connectTo || [], args.targetNodeId));
-            updateItemProperty(args.targetNodeId, (target) => {
-              return {
-                ...target,
-                from: [].concat(target.from || [], item.id)
+            updateItemProperty(args.targetNodeId, (target, doc) => {
+              if (target.from) {
+                if (target?.from?.indexOf(item.id) === -1) {
+                  doc.submitOp(json1.repalceOp(['from', target?.from?.length || 0], item.id));
+                }
+              } else {
+                doc.submitOp(json1.insertOp(['from'], [item.id]));
               }
             });
             break;

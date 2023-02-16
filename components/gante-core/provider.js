@@ -56,8 +56,8 @@ const Provider = React.forwardRef(({ children, user }, forwardRef) => {
     const toNode = nodeMap[toNodeId];
 
     if (!isAdd && fromNode && toNode) {
-      const removeFromIdx = fromNode.connectTo.indexOf(toNode.id);
-      const removeToIdx = toNode.from.indexOf(fromNode.id);
+      const removeFromIdx = (fromNode.connectTo||[]).indexOf(toNode.id);
+      const removeToIdx = (toNode.from||[]).indexOf(fromNode.id);
       if (removeFromIdx !== -1) {
         const cp1 = [...fromNode.connectTo];
         cp1[removeFromIdx] = null;

@@ -12,6 +12,12 @@ export function useUpdateItemProperty() {
     const doc = getDoc('item', id);
     const node = await snapshot.getPromise(atoms.thatNode(id));
     let op = null;
+    if (typeof args[0] === 'function') {
+      return snapshot.getPromise(atoms.thatNode(id)).then((oldValue) => {
+        const newArgs = args[0](oldValue, doc);
+      });
+    }
+
     for (let i = 0; i < args.length; ++i) {
       if (prevK === null) {
         prevK = args[i];
