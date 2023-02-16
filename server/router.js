@@ -18,8 +18,8 @@ router.use(mongo({
   min: 1
 }));
 
-function login(ctx, user) {
-  const session = helper.generateSessionByUser(user._id);
+async function login(ctx, user) {
+  const session = await helper.generateSessionByUser(ctx, user._id);
   // 一天过期时间
   ctx.cookies.set('ud', session, {
     httpOnly: true,
@@ -50,14 +50,19 @@ router.get('/cb/login/github', async (ctx, next) => {
   });
 
   console.log('get token success', tokenReq.data);
+  let userReq = null;
 
-  const userReq = await axios({
-    url: 'https://api.github.com/user',
-    method: 'get',
-    headers: {
-      Authorization: `Bearer ${tokenReq.data.access_token}`
-    }
-  });
+  try {
+    userReq = await axios({
+      url: 'https://api.github.com/user',
+      method: 'get',
+      headers: {
+        Authorization: `Bearer ${tokenReq.data.access_token}`
+      }
+    });
+  } catch(e) {
+    throw new Error('服务器访问github发生错误: ' + e.message );
+  };
 
   console.log('get user success', userReq.data);
   const User = ctx.db.collection('users');
@@ -79,7 +84,7 @@ router.get('/cb/login/github', async (ctx, next) => {
     });
   }
 
-  return login(ctx, await User.findOne({
+  return await login(ctx, await User.findOne({
     githubUserId: userReq.data.id
   }));
 });
@@ -95,7 +100,7 @@ router.post('/login', async (ctx, next) => {
   });
 
   if (user) {
-    const session = helper.generateSessionByUser(user._id);
+    const session = await helper.generateSessionByUser(ctx, user._id);
     ctx.cookies.set('ud', session, {
       httpOnly: true,
       expires: new Date(60 * 60 * 24 * 1000 + Date.now())
@@ -110,8 +115,33 @@ router.post('/login', async (ctx, next) => {
   }
 });
 
+router.get('/count', async (ctx) => {
+  const { listId } = ctx.query;
+  const col = ctx.db.collection('mem');
+
+  if (!listId) {
+    ctx.status = 400;
+    return;
+  }
+
+  const doc = await col.findOne({
+    listId
+  });
+  if (!doc) {
+    ctx.body = {
+      count: 0,
+      exceed: false
+    }
+  } else {
+    ctx.body = {
+      count: doc.count,
+      exceed: doc.count >=  50
+    }
+  }
+});
+
 router.get('/user', async (ctx) => {
-  const uid = helper.getUserIdBySession(ctx);
+  const uid = await helper.getUserIdBySession(ctx);
 
   if (!uid) {
     ctx.status = 401;
@@ -151,7 +181,7 @@ router.post('/reg', async (ctx, next) => {
       defaultTableId: uuid
     });
     // 设置cookie
-    const session = helper.generateSessionByUser(u._id);
+    const session = await helper.generateSessionByUser(ctx, u._id);
     ctx.cookies.set('ud', session, {
       httpOnly: true,
       expires: new Date(60 * 60 * 24 * 1000 + Date.now())

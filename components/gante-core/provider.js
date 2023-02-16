@@ -5,7 +5,7 @@ import React, {
 import Events from 'events';
 import dynamic from 'next/dynamic';
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState, useRecoilCallback } from 'recoil';
-import { RecoilSyncShareDB } from 'recoil-sharedb';
+import { RecoilSyncShareDB, useConnectionRef } from 'recoil-sharedb';
 import * as R from 'ramda';
 import { ErrorBoundary } from 'react-error-boundary';
 import Modal from '../../components/modal';
@@ -22,7 +22,7 @@ export {
 };
 
 
-const Provider = React.forwardRef(({ children }, forwardRef) => {
+const Provider = React.forwardRef(({ children, user }, forwardRef) => {
   const graphRef = useRef(null);
   const sinkRef = useRef(null);
   const portalRef = useRef(null);
@@ -56,8 +56,8 @@ const Provider = React.forwardRef(({ children }, forwardRef) => {
     const toNode = nodeMap[toNodeId];
 
     if (!isAdd && fromNode && toNode) {
-      const removeFromIdx = fromNode.connectTo.indexOf(toNode.id);
-      const removeToIdx = toNode.from.indexOf(fromNode.id);
+      const removeFromIdx = (fromNode.connectTo||[]).indexOf(toNode.id);
+      const removeToIdx = (toNode.from||[]).indexOf(fromNode.id);
       if (removeFromIdx !== -1) {
         const cp1 = [...fromNode.connectTo];
         cp1[removeFromIdx] = null;
@@ -101,7 +101,8 @@ const Provider = React.forwardRef(({ children }, forwardRef) => {
       updateItemConnect,
       sinkRef,
       zoomOut,
-      zoomIn
+      zoomIn,
+      user
     };
   }, []);
 
@@ -147,7 +148,7 @@ export default React.forwardRef(function ProviderRef({docId, ...props}, ref) {
     <RecoilRoot>
       <Suspense fallback={<div>global loading...</div>}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share`} onError={onError} docId={docId}>
+          <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share?id=${docId}`} onError={onError} docId={docId}>
             <Suspense fallback={<div>loading...</div>}>
               <Provider {...props} ref={ref} />
             </Suspense>

@@ -42,7 +42,15 @@ export const _listCore__editor = atom({
         refine.object({
           list: refine.array(refine.string()),
           version: refine.optional(refine.string()),
-          pin: refine.optional(refine.array(refine.object({}))),
+          pin: refine.optional(refine.array(refine.object({
+            type: refine.string(),
+            content: refine.optional(refine.string()),
+            preview: refine.optional(refine.bool()),
+            day: refine.optional(refine.string()),
+            nodeId: refine.optional(refine.string()),
+            offset: refine.optional(refine.number()),
+            fixed: refine.optional(refine.nullable(refine.string()))
+          }))),
           endTime: refine.optional(refine.string()),
           startTime: refine.optional(refine.string())
         }),
@@ -51,6 +59,34 @@ export const _listCore__editor = atom({
       syncDefault: false
     })
   ]
+});
+
+export const pins = selector({
+  key: 'gante global pins',
+  get: ({ get }) => {
+    const list = get(_listCore__editor).pin || [];
+    return list.map((item, index) => {
+      return {
+        ...item,
+        pinIdx: index
+      };
+    });
+  },
+  set: ({ set }, newValue) => {
+    return set(_listCore__editor, oldValue => ({
+      ...oldValue,
+      pin: newValue
+    }));
+  }
+});
+
+import * as R from 'ramda';
+export const thatNodePins = selectorFamily({
+  key: 'that node pins',
+  get: (nodeId) => ({ get }) => {
+    const pinsList = get(pins) || [];
+    return pinsList.filter(R.propEq('nodeId', nodeId));
+  }
 });
 
 // 整个甘特图起始时间
@@ -217,4 +253,63 @@ export const currentNode = selector({
 export const currentFeatures = atom({
   key: 'gante current features',
   default: null
+});
+
+
+import { dayToRect, Position } from './utils';
+// 当前所有的连线
+export const connections = selector({
+  key: 'connections',
+  get: ({ get }) => {
+    const list = get(_listCore__list);
+
+    const getNodeTop = (item) => {
+      return list.indexOf(item.id) * get(SINK_HEIGHT) + 3;
+    };
+
+    const nodeMap = R.indexBy(R.prop('id'), get(allNodes));
+
+    return R.filter(R.identity, R.flatten(get(allNodes).map((node) => {
+      if (node && node.connectTo && node.connectTo.length) {
+        const rect = dayToRect(get(SPOT_WIDTH), get(startTime), node.startTime, node.endTime);
+        const left = rect.x;
+        const width = rect.w;
+        const top = getNodeTop(node);
+        const fromPoint = new Position(
+          left + width + 24,
+          top + (get(SINK_HEIGHT) - 6)/ 2,
+        );
+
+        const lines = node.connectTo.map((t, idx) => {
+          const k = `${node.id}-${idx}`;
+          const tNode = nodeMap[t];
+
+          if (!tNode) {
+            return null;
+          }
+
+          const tRect = dayToRect(get(SPOT_WIDTH), get(startTime), tNode.startTime, tNode.endTime);
+          const tLeft = tRect.x;
+          const tWidth = tRect.w;
+          const tTop = getNodeTop(tNode);
+
+          const toPoint = new Position(
+            tLeft,
+            tTop + (get(SINK_HEIGHT) - 6) / 2
+          );
+
+          return {
+            fromPoint,
+            toPoint,
+            node,
+            tNode
+          };
+        });
+
+        const identityLines = lines.filter(R.identity);
+        return identityLines;
+      }
+      return null;
+    })));
+  }
 });

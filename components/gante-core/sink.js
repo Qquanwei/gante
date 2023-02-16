@@ -1,7 +1,7 @@
-import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import sortBy from 'ramda/src/sortBy';
 import * as R from 'ramda';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValueMemo as useRecoilValue } from 'recoil-enhance';
 import hotkeys from 'hotkeys-js';
 import path from 'ramda/src/path';
 import classNames from 'classnames';
@@ -19,7 +19,7 @@ import {
 /*
   泳道，绘制一个通道, 绘制连线
 */
-export default function Sink() {
+export default React.memo(function Sink() {
   const {
     sinkRef,
     graphRef,
@@ -28,7 +28,6 @@ export default function Sink() {
   } = useGante();
   const createNewItem = useCreateNewNode();
   const list = useRecoilValue(atoms.list);
-  const allNodes = useRecoilValue(atoms.allNodes);
   const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
   const currentId = useRecoilValue(atoms.currentNodeId);
@@ -41,11 +40,8 @@ export default function Sink() {
   const OFFSET_DAY = getRangeDays(startTime, currentTime);
   const todayRectRef = useRef(null);
   const enlargeEditor = useEnlargeEditor();
-
-  const getNodeTop = useCallback((item) => {
-    return list.indexOf(item.id) * SINK_HEIGHT + 3;
-  }, [list]);
-
+  const connections = useRecoilValue(atoms.connections);
+  const autoGotoTodayFlagRef = useRef(false);
 
   const { x: left } = useMemo(() => {
     if (!currentNode) {
@@ -100,10 +96,17 @@ export default function Sink() {
 
     setGotoTodayImpl(gotoToday);
 
+    if (!autoGotoTodayFlagRef.current) {
+      gotoToday();
+      autoGotoTodayFlagRef.current = true;
+    }
+
     return () => {
       setGotoTodayImpl(null);
     }
   }, [setGotoTodayImpl, OFFSET_DAY, SPOT_WIDTH]);
+
+
 
 
   useEffect(() => {
@@ -124,8 +127,9 @@ export default function Sink() {
     }
   }, [enlargeEditor]);
 
+
   return (
-    <div ref={sinkRef} className="relative">
+    <div ref={sinkRef} className="relative" >
       <svg
         ref={grabElementRef}
         width="100%"
@@ -192,59 +196,32 @@ export default function Sink() {
           {
             // 处理connectTo
             (() => {
-              let arg = [];
-              const nodeMap = R.indexBy(R.prop('id'), allNodes);
-              for (let i = 0; i < allNodes.length; ++i) {
-                const node = allNodes[i];
-                if (node && node.connectTo && node.connectTo.length) {
-                  const rect = dayToRect(SPOT_WIDTH, startTime, node.startTime, node.endTime);
-                  const left = rect.x;
-                  const width = rect.w;
-                  const top = getNodeTop(node);
-
-                  const fromPoint = new Position(
-                    left + width + 24 + 45,
-                    top + (SINK_HEIGHT - 6)/ 2,
-                  );
-
-                  arg = arg.concat(node.connectTo.map((t, idx) => {
-                    const k = `${node.id}-${idx}`;
-                    const tNode = nodeMap[t];
-
-                    if (!tNode) {
-                      return null;
-                    }
-
-                    const tRect = dayToRect(SPOT_WIDTH, startTime, tNode.startTime, tNode.endTime);
-                    const tLeft = tRect.x;
-                    const tWidth = tRect.w;
-                    const tTop = getNodeTop(tNode);
-
-                    const toPoint = new Position(
-                      tLeft,
-                      tTop + (SINK_HEIGHT - 6) / 2
-                    );
-
-                    const d = connectTo(fromPoint, toPoint);
-                    const selected = (
-                      currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
-                    );
-                    // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
-                    return (
-                      <path
-                        custom-order={selected ? Infinity : arg.length}
-                        className={classNames({
-                          ['stroke-sky-500 ring ring-gray-100 ring-offset-gray-500 ring-offset-2']: selected
-                        })}
-                        onMouseLeave={() => onMouseLeaveConnectLine(node, tNode)}
-                        onMouseOver={() => onMouseOverConnectLine(node, tNode)}
-                        onClick={() => onClickConnectLine(node, tNode)} key={k} d={d} markerEnd="url(#triangle)" ></path>
-                    );
-                  }));
+              return R.sortBy(R.prop('weight'))(connections.map(({ fromPoint, toPoint, node, tNode}, index) => {
+                const selected = (
+                  currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
+                );
+                return {
+                  fromPoint,
+                  toPoint,
+                  node,
+                  tNode,
+                  selected,
+                  weight: selected ? Infinity : index
                 }
-              }
-
-              return sortBy(path(['props', 'custom-order']), arg);
+              })).map(({ selected, fromPoint, toPoint, node, tNode}, index) => {
+                const d = connectTo(fromPoint, toPoint);
+                // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
+                return (
+                  <path
+                    custom-order={selected ? Infinity : index}
+                    className={classNames({
+                      ['stroke-sky-500 ring ring-gray-100 ring-offset-gray-500 ring-offset-2']: selected
+                    })}
+                    onMouseLeave={() => onMouseLeaveConnectLine(node, tNode)}
+                    onMouseOver={() => onMouseOverConnectLine(node, tNode)}
+                    onClick={() => onClickConnectLine(node, tNode)} key={index} d={d} markerEnd="url(#triangle)" ></path>
+                );
+              });
             })()
           }
         </g>
@@ -254,4 +231,4 @@ export default function Sink() {
       <div className="absolute top-0 bottom-0 right-0 w-[30px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('right')}></div>
     </div>
   );
-}
+});

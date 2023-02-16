@@ -41,6 +41,17 @@ State.prototype.onMouseOver = () => {
 State.prototype.onMouseLeave = () => {
 }
 
+State.prototype.onDrop = () => {
+}
+
+State.prototype.onDragEnter = () => {
+}
+
+State.prototype.onDragLeave = () => {
+}
+
+State.prototype.onDragOver = () => {};
+
 // 当任意一个元素mouseover触发(不仅仅是自己)
 State.prototype.onInteractionMouseOver = () => {
 }
@@ -84,6 +95,23 @@ NormalState.prototype.mount = function() {
   this.anchor.addEventListener('mousedown', this.anchorClick);
 
   this.ignoreEventsEles = element.querySelectorAll('[data-role=ignore-events]');
+}
+
+NormalState.prototype.onDragEnter = function(event) {
+  event.preventDefault();
+  this.machine.emit('dragenter', event);
+};
+
+NormalState.prototype.onDragLeave = function(event) {
+  this.machine.emit('dragleave', event);
+};
+
+NormalState.prototype.onDrop = function(event) {
+  this.machine.emit('drop', event);
+};
+
+NormalState.prototype.onDragOver = function(event) {
+  event.preventDefault();
 }
 
 
@@ -207,11 +235,11 @@ ResizeState.prototype.onMouseMove = function(e) {
       width: this.initWidth + x
     });
   }
-}
+};
 
 var MoveState = inherit(State, function(initPosition) {
   this.initPosition = initPosition;
-})
+});
 
 MoveState.prototype.mount = function() {
   const element = this.machine.getElement();
@@ -408,13 +436,22 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
     this.currentState.onMouseLeave(e);
   };
 
-  this.onDragStart = (e) => {
-    this.currentState.onDragStart(e);
+  this.onDragEnter = (e) => {
+    this.currentState.onDragEnter(e);
   };
 
-  this.onDragEnd = (e) => {
-    this.currentState.onDragEnd(e);
+  this.onDragLeave = (e) => {
+    this.currentState.onDragLeave(e);
   };
+
+  this.onDrop = (e) => {
+    this.currentState.onDrop(e);
+  };
+
+  this.onDragOver = (e) => {
+    this.currentState.onDragOver(e);
+  };
+
 
   this.onInteractionMouseOver = (e) => {
     this.currentState.onInteractionMouseOver(e);
@@ -424,6 +461,12 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
     this.currentState.onInteractionMouseLeave(e);
   };
 
+  if (this.featuresRef.drop) {
+    this.element.addEventListener('dragover', this.onDragOver);
+    this.element.addEventListener('dragenter', this.onDragEnter);
+    this.element.addEventListener('dragleave', this.onDragLeave);
+    this.element.addEventListener('drop', this.onDrop);
+  }
   this.element.addEventListener('click', this.onClick);
   this.element.addEventListener('mouseover', this.onMouseOver);
   this.element.addEventListener('mouseleave', this.onMouseLeave);
@@ -439,6 +482,10 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
 }
 
 StateMachine.prototype.dispose = function() {
+  this.element.removeEventListener('dragover', this.onDragOver);
+  this.element.removeEventListener('dragenter', this.onDragEnter);
+  this.element.removeEventListener('dragleave', this.onDragLeave);
+  this.element.removeEventListener('drop', this.onDrop);
   this.element.removeEventListener('click', this.onClick);
   this.element.removeEventListener('mouseover', this.onMouseOver);
   this.element.removeEventListener('mouseleave', this.onMouseLeave);

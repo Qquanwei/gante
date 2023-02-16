@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Transition } from '@headlessui/react';
+import Link from 'next/link';
 import { Bars4Icon } from '@heroicons/react/24/solid';
 import { HomeIcon, ArrowDownOnSquareIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from '@material-tailwind/react';
@@ -19,7 +20,7 @@ function Sidebar({ onExport }) {
     onExport();
   }, [onExport]);
 
-  const onClickToday = useCallback(() => {
+  const onClickHome = useCallback(() => {
   }, []);
 
   const onClickZoomIn = useCallback(() => {
@@ -37,9 +38,11 @@ function Sidebar({ onExport }) {
       </div>
       <div className={classNames({ hidden: toggleOpen })}>
         <div>
-          <Tooltip className="z-20" content="回到今天" placement="right">
-            <HomeIcon className="cursor-pointer w-[24px]" onClick={onClickToday} />
-          </Tooltip>
+          <Link href="/">
+            <Tooltip className="z-20" content="回到主页" placement="right">
+              <HomeIcon className="cursor-pointer w-[24px]" onClick={onClickHome} />
+            </Tooltip>
+          </Link>
         </div>
         <div>
           <MagnifyingGlassPlusIcon className="mt-4 cursor-pointer w-[24px] h-[24px]" onClick={onClickZoomIn} />

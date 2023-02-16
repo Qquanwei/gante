@@ -1,6 +1,8 @@
 import { Suspense, useState, useRef, useCallback, useMemo } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
+import * as json1 from 'ot-json1';
 import useGante from './useGante';
 import * as atoms from './atom';
 import * as actions from './action';
@@ -8,7 +10,8 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import useInteractionEvent from './use-interaction-event';
 import NodeControlPanel from './node-control-panel';
 import NodeFormModal from './node-form-modal';
-import { positionToDay } from './utils';
+import { positionToDay, getRangeDays } from './utils';
+import Pin from './pin';
 import DraggleBar from './draggle-bar';
 
 function Node({id, index }) {
@@ -20,6 +23,11 @@ function Node({id, index }) {
   const startTime = useRecoilValue(atoms.startTime);
   const setCurrentId = useSetRecoilState(atoms.currentNodeId);
   const setCurrentFeatures = useSetRecoilState(atoms.currentFeatures);
+  const pins = useRecoilValue(atoms.thatNodePins(id));
+  const [dragMode, setDragMode] = useState(false);
+  const addPin = actions.useAddPin();
+  const updatePin = actions.useUpdatePinContent();
+
   const [contextInfo, setContextInfo] = useState({
     show: false,
     point: null
@@ -34,6 +42,39 @@ function Node({id, index }) {
   const ref = useInteractionEvent(id, {
     onChange: (event, args) => {
       switch(event) {
+        case 'dragenter':
+          setDragMode(true);
+          break;
+
+        case 'dragleave':
+          setDragMode(false);
+          break;
+
+        case 'drop':
+          try {
+            setDragMode(false);
+            const data = JSON.parse(args.dataTransfer.getData('text/plain'));
+            if (data.type === 'pin') {
+              const pinTime = positionToDay(SPOT_WIDTH, startTime, args.offsetX);
+              if (data.pinIdx !== -1) {
+                updatePin(data.pinIdx, {
+                  type: 'node',
+                  nodeId: item.id,
+                  offset: dayjs(pinTime).diff(startTime, 'day')
+                });
+              } else {
+                addPin('node', {
+                  nodeId: item.id,
+                  offset: dayjs(pinTime).diff(startTime, 'day')
+                });
+              }
+            }
+
+          } catch(e) {
+            //
+          }
+          break;
+
         case 'hover':
           setHover(args);
           setCurrentFeatures({});
@@ -61,10 +102,13 @@ function Node({id, index }) {
         case 'connect':
           {
             updateItemProperty(item.id, 'connectTo', [].concat(item.connectTo || [], args.targetNodeId));
-            updateItemProperty(args.targetNodeId, (target) => {
-              return {
-                ...target,
-                from: [].concat(target.from || [], item.id)
+            updateItemProperty(args.targetNodeId, (target, doc) => {
+              if (target.from) {
+                if (target?.from?.indexOf(item.id) === -1) {
+                  doc.submitOp(json1.repalceOp(['from', target?.from?.length || 0], item.id));
+                }
+              } else {
+                doc.submitOp(json1.insertOp(['from'], [item.id]));
               }
             });
             break;
@@ -156,7 +200,8 @@ function Node({id, index }) {
       }
     }
   }, {
-    move: !item.lock
+    move: !item.lock,
+    drop: false
   });
 
   const top = index * SINK_HEIGHT + 7;
@@ -165,9 +210,9 @@ function Node({id, index }) {
     <div ref={ref}
       className={classNames("absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all duration-350 cursor-pointer", {
         'rounded': !item.lock,
-        "z-10": hover,
-        'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock,
-        'outline outline-white': !hover && !item.lock
+        "z-10": hover && !dragMode,
+        'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock && !dragMode,
+        'outline outline-white': !hover && !item.lock && !dragMode
       })}
       style={{
         left,
@@ -178,16 +223,20 @@ function Node({id, index }) {
         background: item.color || '#eee'
       }}>
       <div className={classNames("flex-start h-full", {
-        'opacity-0': !hover || item.lock
+        'opacity-0': !hover || item.lock,
+        hidden: dragMode
       })}
         data-role="left-dragger">
         <DraggleBar />
       </div>
-      <span className="grow px-2 sticky overflow-hidden right-[2px] left-[2px]">
+
+      <span className={classNames("grow px-2 sticky overflow-hidden right-[2px] left-[2px]", {
+        hidden: dragMode
+      })}>
         { item.title }
       </span>
 
-      <div data-role="ignore-events">
+      <div data-role="ignore-events" className={classNames({ hidden: dragMode })}>
         <NodeControlPanel node={item} contextInfo={contextInfo} left={left} hover={hover}/>
 
         <NodeFormModal node={item} contextInfo={contextInfo} top={top} left={left} hover={hover}/>
@@ -200,11 +249,26 @@ function Node({id, index }) {
 
 
       </div>
-      <div className={classNames("ml-auto sticky right-[2px] text-xs mr-2", { hidden: !item.lock })}>
+      <div className={classNames("ml-auto sticky right-[2px] text-xs mr-2", {
+        hidden: !item.lock || dragMode,
+      })}>
         锁定
       </div>
 
-      <div className={classNames("flex-end h-full",{ 'opacity-0': !hover || item.lock })}
+      {
+        pins.map((pin, index) => {
+          return (
+            <Pin pinIdx={pin.pinIdx} className="absolute top-[-20px]" style={{
+              left: (pin.offset * SPOT_WIDTH) + 'px'
+            }} key={index} />
+          )
+        })
+      }
+
+      <div className={classNames("flex-end h-full",{
+        'opacity-0': !hover || item.lock,
+        hidden: dragMode
+      })}
         data-role="right-dragger">
         <DraggleBar />
       </div>
@@ -212,7 +276,7 @@ function Node({id, index }) {
   );
 }
 
-export default function Nodes() {
+export default React.memo(function Nodes() {
   const list = useRecoilValue(atoms.list);
   const [showNodeContext, setShowNodeContext] = useState(null);
 
@@ -229,7 +293,7 @@ export default function Nodes() {
       }
     </div>
   );
-}
+});
 
 
 export function getStaticProps() {

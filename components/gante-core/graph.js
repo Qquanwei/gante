@@ -1,9 +1,10 @@
-import { Fragment } from 'react';
+import React, { Fragment } from 'react';
 import Sink from './sink';
 import Node from './node';
 import Timeline from './timeline';
 import TodoList from './todolist';
 import useGante from './useGante';
+import CursorCanvas from './cursor-canvas';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import * as atoms from './atom';
 
@@ -16,6 +17,9 @@ function Graph({ children }) {
       <div className="relative inline-flex grow" ref={graphRef}>
         <Timeline >
           <Fragment>
+            <Fragment>
+              <CursorCanvas />
+            </Fragment>
             <Sink />
             <Node />
           </Fragment>
@@ -28,4 +32,4 @@ function Graph({ children }) {
   );
 }
 
-export default Graph;
+export default React.memo(Graph);

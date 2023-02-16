@@ -22,7 +22,7 @@ function Button({ className, onClick, ...props }) {
   }, [onClick]);
 
   return (
-      <div onClick={onClickAsyncButton} className={classNames(className, 'cursor-pointer', {
+      <div onClick={onClickAsyncButton} className={classNames(className, 'cursor-pointer hover:scale-[.95] transition-all', {
         'opacity-50 pointer-events-none': pending
       })} {...props} />
   );

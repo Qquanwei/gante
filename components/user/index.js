@@ -41,18 +41,15 @@ function User({ user }) {
           isLogin ? user.userName : '登录'
         }
       </div>
-      <Modal show={showLoginModal} onClose={onModalClose}>
-        <h1 className="text-gray-500">
-          第三方登录授权
-        </h1>
+      <Modal show={showLoginModal} onClose={onModalClose} title="第三方登录授权">
         <div className="flex items-center justify-center flex-col mx-auto mt-[20px] w-[300px]">
-          <div className="g-signin2 h-[36px]" data-onsuccess="onGoogleSignIn"></div>
-          <a className="github-login block border flex items-center justify-center hover:bg-gray-300 w-full mt-[10px] h-[36px]" noreferer="true" href="https://github.com/login/oauth/authorize?login&client_id=c7b4ad0b9f7f6b38da81&scope=user" >
+          登录后即可创建专属甘特图空间
+          <a className="github-login block border flex items-center justify-center hover:bg-gray-300 w-full mt-[20px] h-[60px]" noreferer="true" href={`https://github.com/login/oauth/authorize?login&client_id=${process.env.GANTE_GITHUB_CLIENT_ID}&scope=user`} >
+            <i className="w-[36px] h-[36px] bg-[url(/github-mark.png)] bg-contain bg-no-repeat mr-[10px]"></i>
             Github
           </a>
         </div>
       </Modal>
-      <Script src="https://apis.google.com/js/platform.js" async defer></Script>
     </div>
   );
 }

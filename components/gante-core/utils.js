@@ -10,6 +10,13 @@ Position.prototype.diff = function(a) {
     );
 }
 
+Position.prototype.add = function(a) {
+  return new Position(
+    this.x + a.x,
+    this.y + a.y
+  );
+}
+
 /* 仅用来表示距离的程度，没有绝对意义，仅在小范围内有相对意义 */
 Position.prototype.Edistance = function(a) {
   return Math.abs(this.x - a.x) + Math.abs(this.y - a.y);
@@ -47,12 +54,15 @@ Rect.prototype.leftCenter = function() {
 
 // 将鼠标坐标系转化成基于甘特图的坐标系
 export function getPosition(graphEle, event) {
-    const rect = graphEle.getBoundingClientRect();
+  if (!graphEle) {
+    return new Position(0, 0);
+  }
+  const rect = graphEle.getBoundingClientRect();
 
-    return new Position(
-        event.pageX - (rect.left + window.scrollX),
-        event.pageY - (rect.top + window.scrollY)
-    );
+  return new Position(
+    event.pageX - (rect.left + window.scrollX),
+    event.pageY - (rect.top + window.scrollY)
+  );
 }
 
 export function getPositionViewport(event) {
@@ -132,4 +142,18 @@ export function getScrollingElement(element) {
     cur = cur.parentElement;
   }
   return cur || document.scrollingElement;
+}
+
+export function throttle(fn, ms) {
+  let timer = null;
+  return function(...args) {
+    if (timer) {
+      return;
+    } else {
+      timer = setTimeout(() => {
+        fn.apply(this, args);
+        timer = null;
+      }, ms);
+    }
+  };
 }
