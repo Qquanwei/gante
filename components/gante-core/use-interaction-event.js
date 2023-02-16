@@ -461,10 +461,12 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
     this.currentState.onInteractionMouseLeave(e);
   };
 
-  this.element.addEventListener('dragover', this.onDragOver);
-  this.element.addEventListener('dragenter', this.onDragEnter);
-  this.element.addEventListener('dragleave', this.onDragLeave);
-  this.element.addEventListener('drop', this.onDrop);
+  if (this.featuresRef.drop) {
+    this.element.addEventListener('dragover', this.onDragOver);
+    this.element.addEventListener('dragenter', this.onDragEnter);
+    this.element.addEventListener('dragleave', this.onDragLeave);
+    this.element.addEventListener('drop', this.onDrop);
+  }
   this.element.addEventListener('click', this.onClick);
   this.element.addEventListener('mouseover', this.onMouseOver);
   this.element.addEventListener('mouseleave', this.onMouseLeave);

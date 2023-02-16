@@ -6,7 +6,10 @@ import Popup from './popup';
 import Button from '../button';
 import * as actions from './action';
 
-export default React.memo(function Pin({ className, pinIdx, dragMode, showPin }) {
+// pin 有两种模式，一种依附在 timeline 上，一种依附在 node 上。
+// timeline 为绝对位置， day 属性有效
+// node 为相对位置，offset 属性有效
+export default React.memo(function Pin({ className, pinIdx, dragMode, showPin, style }) {
   const updatePin = actions.useUpdatePinContent();
   const removePin = actions.useRemovePin();
   const data = useRecoilValue(atoms.pins)[pinIdx];
@@ -45,6 +48,11 @@ export default React.memo(function Pin({ className, pinIdx, dragMode, showPin })
     }
   }, [hiddenIcon]);
 
+  const onClick = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  }, []);
+
   return (
     <Popup
       disable={pinIdx === -1}
@@ -69,7 +77,9 @@ export default React.memo(function Pin({ className, pinIdx, dragMode, showPin })
       )}>
       <div
         draggable="true"
+        style={style}
         title={data?.content}
+        onClick={onClick}
         onDragStart={onDragPinStart}
         onDragEnd={onDragPinEnd}
         className={classNames("cursor-pointer w-[20px] bg-transparent translate-x-0 h-[20px] bg-[url(/tuding.png)] bg-contain", className, {

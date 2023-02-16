@@ -67,7 +67,6 @@ export default function Popup({ children, content, disable, showPreview, preview
                         top: 20,
                         left: 10
                       }}
-                      id="preview"
                       className="text-left select-text relative bg-yellow-100/80 p-2 rounded min-w-[100px] min-h-[50px]">
                       { previewContent }
                     </div>

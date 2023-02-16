@@ -11,6 +11,7 @@ import useInteractionEvent from './use-interaction-event';
 import NodeControlPanel from './node-control-panel';
 import NodeFormModal from './node-form-modal';
 import { positionToDay, getRangeDays } from './utils';
+import Pin from './pin';
 import DraggleBar from './draggle-bar';
 
 function Node({id, index }) {
@@ -22,6 +23,7 @@ function Node({id, index }) {
   const startTime = useRecoilValue(atoms.startTime);
   const setCurrentId = useSetRecoilState(atoms.currentNodeId);
   const setCurrentFeatures = useSetRecoilState(atoms.currentFeatures);
+  const pins = useRecoilValue(atoms.thatNodePins(id));
   const [dragMode, setDragMode] = useState(false);
   const addPin = actions.useAddPin();
   const updatePin = actions.useUpdatePinContent();
@@ -50,14 +52,20 @@ function Node({id, index }) {
 
         case 'drop':
           try {
+            setDragMode(false);
             const data = JSON.parse(args.dataTransfer.getData('text/plain'));
             if (data.type === 'pin') {
               const pinTime = positionToDay(SPOT_WIDTH, startTime, args.offsetX);
-              if (data.pinIdx) {
+              if (data.pinIdx !== -1) {
                 updatePin(data.pinIdx, {
                   type: 'node',
                   nodeId: item.id,
-                  day: pinTime.toString()
+                  offset: dayjs(pinTime).diff(startTime, 'day')
+                });
+              } else {
+                addPin('node', {
+                  nodeId: item.id,
+                  offset: dayjs(pinTime).diff(startTime, 'day')
                 });
               }
             }
@@ -192,7 +200,8 @@ function Node({id, index }) {
       }
     }
   }, {
-    move: !item.lock
+    move: !item.lock,
+    drop: false
   });
 
   const top = index * SINK_HEIGHT + 7;
@@ -221,24 +230,6 @@ function Node({id, index }) {
         <DraggleBar />
       </div>
 
-      {
-        dragMode && (
-          (() => {
-            const totalDays = getRangeDays(item.startTime, item.endTime) + 1;
-            const ans = [];
-            for (let i = 0; i < totalDays; ++i) {
-              const curDay = dayjs(item.startTime).add(i, 'days');
-              ans.push(
-                <div className="h-full rounded pointer-events-none box-border border bg-sky-300/20 border-white/30"
-                  style={{ width: SPOT_WIDTH }}
-                  key={i}></div>
-              )
-            }
-            return ans;
-          })()
-        )
-      }
-
       <span className={classNames("grow px-2 sticky overflow-hidden right-[2px] left-[2px]", {
         hidden: dragMode
       })}>
@@ -263,6 +254,16 @@ function Node({id, index }) {
       })}>
         锁定
       </div>
+
+      {
+        pins.map((pin, index) => {
+          return (
+            <Pin pinIdx={pin.pinIdx} className="absolute top-[-20px]" style={{
+              left: (pin.offset * SPOT_WIDTH) + 'px'
+            }} key={index} />
+          )
+        })
+      }
 
       <div className={classNames("flex-end h-full",{
         'opacity-0': !hover || item.lock,

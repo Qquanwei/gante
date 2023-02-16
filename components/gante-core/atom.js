@@ -47,6 +47,8 @@ export const _listCore__editor = atom({
             content: refine.optional(refine.string()),
             preview: refine.optional(refine.bool()),
             day: refine.optional(refine.string()),
+            nodeId: refine.optional(refine.string()),
+            offset: refine.optional(refine.number()),
             fixed: refine.optional(refine.nullable(refine.string()))
           }))),
           endTime: refine.optional(refine.string()),
@@ -62,13 +64,28 @@ export const _listCore__editor = atom({
 export const pins = selector({
   key: 'gante global pins',
   get: ({ get }) => {
-    return get(_listCore__editor).pin || [];
+    const list = get(_listCore__editor).pin || [];
+    return list.map((item, index) => {
+      return {
+        ...item,
+        pinIdx: index
+      };
+    });
   },
   set: ({ set }, newValue) => {
     return set(_listCore__editor, oldValue => ({
       ...oldValue,
       pin: newValue
     }));
+  }
+});
+
+import * as R from 'ramda';
+export const thatNodePins = selectorFamily({
+  key: 'that node pins',
+  get: (nodeId) => ({ get }) => {
+    const pinsList = get(pins) || [];
+    return pinsList.filter(R.propEq('nodeId', nodeId));
   }
 });
 
@@ -240,7 +257,6 @@ export const currentFeatures = atom({
 
 
 import { dayToRect, Position } from './utils';
-import * as R from 'ramda';
 // 当前所有的连线
 export const connections = selector({
   key: 'connections',

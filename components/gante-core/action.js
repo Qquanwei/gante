@@ -134,6 +134,18 @@ export function useAddPin() {
         };
       });
     }
+    if (type === 'node') {
+      const property = payload;
+      set(atoms._listCore__editor, (oldValue) => {
+        return {
+          ...oldValue,
+          pin: [].concat(oldValue.pin || [], {
+            ...property,
+            type
+          })
+        };
+      });
+    }
   }, []);
 }
 
