@@ -74,7 +74,8 @@ const { parse } = require('url');
 ShareDB.types.register(json1.type);
 const backend = new ShareDB({
   db,
-  presence: true
+  presence: true,
+  doNotForwardSendPresenceErrorsToClient: true
 });
 
 const Url = require('url');
