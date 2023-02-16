@@ -196,11 +196,20 @@ export default React.memo(function Sink() {
           {
             // 处理connectTo
             (() => {
-              return connections.map(({ fromPoint, toPoint, node, tNode}, index) => {
-                const d = connectTo(fromPoint, toPoint);
+              return R.sortBy(R.prop('weight'))(connections.map(({ fromPoint, toPoint, node, tNode}, index) => {
                 const selected = (
                   currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
                 );
+                return {
+                  fromPoint,
+                  toPoint,
+                  node,
+                  tNode,
+                  selected,
+                  weight: selected ? Infinity : index
+                }
+              })).map(({ selected, fromPoint, toPoint, node, tNode}, index) => {
+                const d = connectTo(fromPoint, toPoint);
                 // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
                 return (
                   <path
@@ -211,8 +220,8 @@ export default React.memo(function Sink() {
                     onMouseLeave={() => onMouseLeaveConnectLine(node, tNode)}
                     onMouseOver={() => onMouseOverConnectLine(node, tNode)}
                     onClick={() => onClickConnectLine(node, tNode)} key={index} d={d} markerEnd="url(#triangle)" ></path>
-                )
-                  });
+                );
+              });
             })()
           }
         </g>
