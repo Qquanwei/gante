@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import Sink from './sink';
 import Node from './node';
 import Timeline from './timeline';
@@ -12,7 +12,7 @@ function Graph({ children }) {
   const { graphRef } = useGante();
   const { version } = useRecoilValue(atoms._listCore__editor);
 
-  return (
+  return useMemo(() => (
     <div className="relative w-full flex pl-10 select-none" >
       <div className="relative inline-flex grow" ref={graphRef}>
         <Timeline >
@@ -29,7 +29,7 @@ function Graph({ children }) {
         </div>
       </div>
     </div>
-  );
+  ), [version]);
 }
 
 export default React.memo(Graph);

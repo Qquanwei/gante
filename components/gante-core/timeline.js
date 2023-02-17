@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import dayjs from 'dayjs';
 import { useRecoilValue } from 'recoil';
 import * as atoms from './atom';
@@ -12,14 +12,16 @@ import TimelineStatusBar from './timeline-status-bar';
 import * as actions from './action';
 import Pin from './pin';
 dayjs.extend(isBetween);
+
 /*
    展示时间轴，横轴
  */
-export default function Timeline({ children }) {
+export default React.memo(function Timeline({ children }) {
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
   const list = useRecoilValue(atoms.list);
   const currentNode = useRecoilValue(atoms.currentNode);
   const startTime = useRecoilValue(atoms.startTime);
+
   const todayRef = useRef(null);
   const endTime = useRecoilValue(atoms.endTime);
   const currentTime = useCurrentDate();
@@ -61,13 +63,17 @@ export default function Timeline({ children }) {
   }, [SPOT_WIDTH]);
 
   const getDayTitle = useCallback((time, { showPin }) => {
-    const isStart = dayjs(time).date() === 1;
-    const pinIdx = isThisDayPinIdx(dayjs(time));
+    if (!dayjs.isDayjs(time)) {
+      throw new Error('time is not dayjs instance');
+    }
+
+    const isStart = time.date() === 1;
+    const pinIdx = isThisDayPinIdx(time);
 
     if (isStart) {
       return (
         <div className="font-bold relative text-orange-500 whitespace-nowrap text-[15px] px-1">
-          { dayjs(time).month() + 1}
+          { time.month() + 1}
           月
           { (pinIdx !== -1) && <Pin
                                  showPin={showPin}
@@ -79,9 +85,9 @@ export default function Timeline({ children }) {
 
     let title = null;
     if (SPOT_WIDTH >= 50) {
-      title = dayjs(time).format('M.DD');
+      title = time.format('M.DD');
     } else {
-      title = dayjs(time).format('D');
+      title = time.format('D');
     }
     return (
       <span className="relative">
@@ -140,47 +146,47 @@ export default function Timeline({ children }) {
 
   }, [isThisDayPinIdx]);
 
+  const memoizeChild = useMemo(() => {
+    let ans = [];
+    const totalDays = utils.getRangeDays(startTime, endTime) + 1;
+    for (let i = 0; i < totalDays ; ++i) {
+      const day = startTime.add(i, 'days');
+      const range = inRange(day);
+      const today = day.isSame(currentTime, 'day');
+      const weekend = day.day() === 6 || day.day() === 0;
+
+      ans.push(
+        <div ref={today ? todayRef : null}
+          className={classNames("box-border text-[13px] shrink-0 flex-col h-10 text-center items-center flex justify-center", {
+            ["bg-sky-200/75"]: range,
+            ["bg-gray-300/25"]: weekend && !range,
+            ["bg-sky-200/20"]: weekend && range,
+            ['bg-sky-200/70']: previewPin === day.toString()
+          })}
+          data-day={day.toString()}
+          onDragOver={e => e.preventDefault()}
+          onDragEnter={onDragEnter}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          style={{
+            width: SPOT_WIDTH,
+          }} key={i}>
+          {
+            getDayTitle(startTime.add(i, 'days'), {
+              showPin: !range
+            })
+          }
+          <span className="text-xs">{ getDaySubtitle(startTime.add(i, 'day'))}</span>
+        </div>
+      );
+    }
+    return ans;
+  }, [startTime, endTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin]);
+
   return (
     <div>
       <div className="sticky shadow flex flex-nowrap top-0 z-10 bg-white pb-5">
-        {
-          (() => {
-            let ans = [];
-            const totalDays = utils.getRangeDays(startTime, endTime) + 1;
-            for (let i = 0; i < totalDays ; ++i) {
-              const day = dayjs(startTime).add(i, 'days');
-              const range = inRange(day);
-              const today = day.isSame(dayjs(currentTime), 'day');
-              const weekend = day.day() === 6 || day.day() === 0;
-
-              ans.push(
-                <div ref={today ? todayRef : null}
-                  className={classNames("box-border text-[13px] shrink-0 flex-col h-10 text-center items-center flex justify-center", {
-                    ["bg-sky-200/75"]: range,
-                    ["bg-gray-300/25"]: weekend && !range,
-                    ["bg-sky-200/20"]: weekend && range,
-                    ['bg-sky-200/70']: previewPin === day.toString()
-                  })}
-                  data-day={day.toString()}
-                  onDragOver={e => e.preventDefault()}
-                  onDragEnter={onDragEnter}
-                  onDragLeave={onDragLeave}
-                  onDrop={onDrop}
-                  style={{
-                    width: SPOT_WIDTH,
-                  }} key={i}>
-                  {
-                    getDayTitle(dayjs(startTime).add(i, 'days'), {
-                      showPin: !range
-                    })
-                  }
-                  <span className="text-xs">{ getDaySubtitle(dayjs(startTime).add(i, 'day'))}</span>
-                </div>
-              );
-            }
-            return ans;
-          })()
-        }
+        { memoizeChild }
         <TimelineStatusBar />
       </div>
       <div className="relative">
@@ -190,4 +196,4 @@ export default function Timeline({ children }) {
       </div>
     </div>
   );
-}
+});

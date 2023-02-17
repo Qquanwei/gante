@@ -127,6 +127,57 @@ export default React.memo(function Sink() {
     }
   }, [enlargeEditor]);
 
+  const memLinEle = useMemo(() => {
+    const length = list.length;
+    const arg = [];
+    for (let index = 0; index < Math.max(length, 20); ++index) {
+      const features = (list[index] || {}).id === currentId ? (currentFeatures || {}) : {};
+
+      arg.push(
+        <line key={index}
+          x1={0} y1={(index + 1) * SINK_HEIGHT}
+          x2="100%" y2={(index + 1) * SINK_HEIGHT}
+          className={classNames(
+            "stroke",
+            features.movex ? 'stroke-sky-500 stroke-2' : 'stroke-gray-400/25'
+          )}
+        />
+      );
+    }
+
+    return arg;
+  }, [list.length, currentFeatures, SINK_HEIGHT]);
+
+  // 处理connectTo
+  const connectToEle = useMemo(() => {
+    return R.sortBy(R.prop('weight'))(connections.map(({ fromPoint, toPoint, node, tNode}, index) => {
+      const selected = (
+        currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
+      );
+      return {
+        fromPoint,
+        toPoint,
+        node,
+        tNode,
+        selected,
+        weight: selected ? Infinity : index
+      }
+    })).map(({ selected, fromPoint, toPoint, node, tNode}, index) => {
+      const d = connectTo(fromPoint, toPoint);
+      // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
+      return (
+        <path
+          custom-order={selected ? Infinity : index}
+          className={classNames({
+            ['stroke-sky-500 ring ring-gray-100 ring-offset-gray-500 ring-offset-2']: selected
+          })}
+          onMouseLeave={() => onMouseLeaveConnectLine(node, tNode)}
+          onMouseOver={() => onMouseOverConnectLine(node, tNode)}
+          onClick={() => onClickConnectLine(node, tNode)} key={index} d={d} markerEnd="url(#triangle)" ></path>
+      );
+    });
+  }, [currentSelectConnect, connections, onMouseLeaveConnectLine, onMouseOverConnectLine, onClickConnectLine]);
+
 
   return (
     <div ref={sinkRef} className="relative" >
@@ -138,26 +189,7 @@ export default React.memo(function Sink() {
         style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
         <g>
           {
-            (() => {
-              const length = list.length;
-              const arg = [];
-              for (let index = 0; index < Math.max(length, 20); ++index) {
-                const features = (list[index] || {}).id === currentId ? (currentFeatures || {}) : {};
-
-                arg.push(
-                  <line key={index}
-                    x1={0} y1={(index + 1) * SINK_HEIGHT}
-                    x2="100%" y2={(index + 1) * SINK_HEIGHT}
-                    className={classNames(
-                      "stroke",
-                      features.movex ? 'stroke-sky-500 stroke-2' : 'stroke-gray-400/25'
-                    )}
-                  />
-                );
-              }
-
-              return arg;
-            })()
+            memLinEle
           }
         </g>
         {/* 今天的区域 */}
@@ -194,35 +226,7 @@ export default React.memo(function Sink() {
           strokeLinejoin="round"
           fill="transparent">
           {
-            // 处理connectTo
-            (() => {
-              return R.sortBy(R.prop('weight'))(connections.map(({ fromPoint, toPoint, node, tNode}, index) => {
-                const selected = (
-                  currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
-                );
-                return {
-                  fromPoint,
-                  toPoint,
-                  node,
-                  tNode,
-                  selected,
-                  weight: selected ? Infinity : index
-                }
-              })).map(({ selected, fromPoint, toPoint, node, tNode}, index) => {
-                const d = connectTo(fromPoint, toPoint);
-                // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
-                return (
-                  <path
-                    custom-order={selected ? Infinity : index}
-                    className={classNames({
-                      ['stroke-sky-500 ring ring-gray-100 ring-offset-gray-500 ring-offset-2']: selected
-                    })}
-                    onMouseLeave={() => onMouseLeaveConnectLine(node, tNode)}
-                    onMouseOver={() => onMouseOverConnectLine(node, tNode)}
-                    onClick={() => onClickConnectLine(node, tNode)} key={index} d={d} markerEnd="url(#triangle)" ></path>
-                );
-              });
-            })()
+            connectToEle
           }
         </g>
       </svg>

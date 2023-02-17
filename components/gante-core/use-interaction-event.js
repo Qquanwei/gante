@@ -12,7 +12,7 @@
 */
 
 import ReactDOM from 'react-dom';
-import { useRef, useEffect} from 'react';
+import { useRef, useEffect, startTransition } from 'react';
 import { inherit, getPosition, hasProp, getEleRect } from './utils';
 import useGante from './useGante';
 
@@ -302,7 +302,7 @@ SortState.prototype.mount = function() {
   this.machine.emit('enter-sort');
 
   this.lastEmitPosition = null;
-}
+};
 
 SortState.prototype.unmount = function() {
   const graph = this.machine.getGraphElement();
@@ -310,7 +310,9 @@ SortState.prototype.unmount = function() {
   this.machine.getElement().classList.remove('opacity-0');
   globalHoverLock = false;
   this.machine.emit('leave-sort');
-}
+
+
+};
 
 SortState.prototype.onMouseUp = function(e) {
   this.machine.emit('lock-item', {
@@ -330,7 +332,7 @@ SortState.prototype.onMouseMove = function(event) {
     return;
   }
   this.lastEmitPosition = newEmit;
-  this.machine.emit('sort', {
+  this.machine.emitTransition('sort', {
     position
   });
 }
@@ -516,6 +518,13 @@ StateMachine.prototype.switchMode = function(newMode) {
 
 StateMachine.prototype.getGraphElement = function() {
   return this.graphElement;
+};
+
+
+StateMachine.prototype.emitTransition = function(type, args) {
+  startTransition(() => {
+    this.onChange(type, args);
+  });
 };
 
 StateMachine.prototype.emit = function(type, args) {

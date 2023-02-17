@@ -4,7 +4,6 @@ import * as utils from './utils';
 import useGante from './useGante';
 import * as atoms from './atom';
 import { useRecoilValueMemo as useRecoilValue } from 'recoil-enhance';
-import useCurrentDate from './useCurrentDate';
 import Image from 'next/image';
 /*
    timeline下方展示的一条信息bar
