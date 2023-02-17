@@ -61,6 +61,9 @@ async function startApp() {
       wsServer.handleUpgrade(request, socket, head, (ws) => {
         const stream = new WebSocketJSONStream(ws);
         const agent = backend.listen(stream, request);
+        stream.on('error', (error) => {
+          agent.close(error);
+        });
         // 当连接中断，中断stream
         ws.on('error', (error) => {
           agent.close(error);
