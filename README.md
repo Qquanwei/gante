@@ -1,3 +1,14 @@
+## GANTE
+
+目标是打造一款纯粹的个人效率管理软件。
+
+在线访问地址，浏览器打开 https://gante.link
+
+![image](https://user-images.githubusercontent.com/9263655/219541219-dded8681-4e2c-4fab-addc-e543ff9d767c.png)
+
+
+### Developer 
+
 配置文件
 
 config/config.dev.js
