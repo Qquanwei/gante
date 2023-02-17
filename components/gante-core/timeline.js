@@ -181,7 +181,7 @@ export default React.memo(function Timeline({ children }) {
       );
     }
     return ans;
-  }, [startTime, endTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin]);
+  }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin]);
 
   return (
     <div>
