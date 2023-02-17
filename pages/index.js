@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export default function Home({ user }) {
   return (
-    <div >
+    <div>
       <Head>
         <title>Gante! 高效的项目管理，流程图在线工具</title>
         <meta name="description" content="Gante是一款稳定高效的项目管理工具, 可靠，稳定，高效，免费！" />

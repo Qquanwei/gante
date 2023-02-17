@@ -1,4 +1,5 @@
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, Fragment } from 'react';
+import Head from 'next/head';
 import classNames from 'classnames';
 import qs from 'qs';
 import Header from 'components/header';
@@ -7,8 +8,7 @@ import { GanteProvider, GanteGraph, StatusBar } from '../components/gante-core';
 import dynamic from 'next/dynamic';
 import config from '../config';
 
-// 左边是一个TODO，右边是一个Gante
-export default dynamic(() => Promise.resolve(
+const Editor = dynamic(() => Promise.resolve(
   function Editor({ user, count, exceed }) {
     console.log('count:', count);
     const query = qs.parse(window.location.search.slice(1));
@@ -22,6 +22,7 @@ export default dynamic(() => Promise.resolve(
 
     return (
       <div>
+
         <div className="w-full h-full text-black">
           <GanteProvider user={user} docId={query.id} ref={ganteRef}>
             <Header user={user} side="left" ganteRef={ganteRef} />
@@ -38,6 +39,20 @@ export default dynamic(() => Promise.resolve(
 }), {
   ssr: false
 });
+
+function EditorPage(props) {
+  return (
+    <Fragment>
+      <Head>
+        <title>Gante! 高效的项目管理，流程图在线工具</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Editor {...props}/>
+    </Fragment>
+  );
+}
+
+export default EditorPage;
 
 import axios from 'axios';
 import url from 'url';
