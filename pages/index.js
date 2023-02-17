@@ -13,6 +13,7 @@ export default function Home({ user }) {
         <meta name="description" content="Gante是一款稳定高效的项目管理工具, 可靠，稳定，高效，免费！" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="google-signin-client_id" content="499253238732-j69pk534uht0ce1h8vg1ts8epak5rgm8.apps.googleusercontent.com" />
+        <meta name="keywords" content="甘特图,个人甘特图,甘特图工具,在线甘特图,项目管理工具" />
       </Head>
       <main className="overflow-hidden min-h-[100vh] text-[#eee] bg-gradient-to-r from-[#03254c] to-[#03254c]/80 text-[#f0f0f0]">
         <Header user={user} />
@@ -39,7 +40,7 @@ export default function Home({ user }) {
             <div className="max-w-full w-[900px] h-[450px] bg-[url('/gante-first.png')] bg-cover"></div>
           </div>
 
-          <div className="flex w-full justify-center mt-[100px] border-box">
+          <div className="flex w-full justify-center mt-[100px] border-box flex-col sm:flex-row">
             <div className="text-white w-[500px] text-center shrink-0 items-center">
               <div className="text-left pt-10 text-[14px] text-[#eee] pl-[20px] items-center">
                 优雅地进行个人项目管理, 在线甘特图工具。
@@ -58,7 +59,7 @@ export default function Home({ user }) {
 
               </div>
             </div>
-            <div className="w-[1766px] h-[976px] bg-[url(/gante2.png)] bg-cover bg-no-repeat"></div>
+            <div className="mt-[50px] sm:mt-0 w-[1766px] h-[976px] bg-[url(/gante2.png)] bg-cover bg-no-repeat"></div>
           </div>
         </div>
       </main>
