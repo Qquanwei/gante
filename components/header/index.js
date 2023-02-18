@@ -7,7 +7,7 @@ import Pin from '../gante-core/pin';
 function Header({ children, className, user, side, ganteRef }) {
   if (side === 'left') {
     return (
-      <div className="z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white">
+      <div className="z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block">
         <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]" onClick={() => ganteRef?.current?.gotoToday()}></div>
         <div className="flex flex-col items-center h-full select-none">
           <ul className="flex mt-2 flex-col text-[12px] text-center">
@@ -27,6 +27,11 @@ function Header({ children, className, user, side, ganteRef }) {
             </li>
           </ul>
           <div className="mt-auto mb-20">
+            <div className="flex justify-center">
+              <Link href="https://github.com/Qquanwei/gante" target="_blank">
+                <div className="mb-[30px] w-[30px] h-[30px] bg-contain bg-[url(/github-mark.png)]"></div>
+              </Link>
+            </div>
             <User user={user} />
             { children }
           </div>

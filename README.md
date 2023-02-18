@@ -24,3 +24,4 @@ npm run start
 4. GANTE_MONGO_PASS
 5. PORT 启动端口号
 6. NODE_ENV 生产环境 development, production
+7. GANTE_PUBLIC_PATH cdn加速配置

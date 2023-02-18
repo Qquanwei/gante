@@ -2,7 +2,7 @@
 
 const nextConfig = {
   reactStrictMode: true,
-  assertPrefix: process.env.GANTE_PUBLIC_PATH || '',
+  assetPrefix: process.env.GANTE_PUBLIC_PATH || '',
   eslint: {
     ignoreDuringBuilds: true,
   },
