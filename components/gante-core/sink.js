@@ -231,6 +231,14 @@ export default React.memo(function Sink() {
         </g>
       </svg>
 
+      <div>
+        {
+          list.length === 0 ? (
+            <div className="fixed top-[100px] left-[100px] text-[#aaa]">小tip: 双击空白区域创建一条任务</div>
+          ) : null
+        }
+      </div>
+
       <div className="absolute top-0 bottom-0 left-0 w-[60px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('left')}></div>
       <div className="absolute top-0 bottom-0 right-0 w-[30px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('right')}></div>
     </div>

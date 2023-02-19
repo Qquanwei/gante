@@ -12,6 +12,7 @@ import Modal from '../../components/modal';
 import * as atoms from './atom';
 import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
+import Loading from './loading';
 import { hasProp } from './utils';
 import * as actions from './action';
 
@@ -149,7 +150,7 @@ export default React.forwardRef(function ProviderRef({docId, ...props}, ref) {
       <Suspense fallback={<div>global loading...</div>}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share?id=${docId}`} onError={onError} docId={docId}>
-            <Suspense fallback={<div>loading...</div>}>
+            <Suspense fallback={<Loading />}>
               <Provider {...props} ref={ref} />
             </Suspense>
           </RecoilSyncShareDB>
