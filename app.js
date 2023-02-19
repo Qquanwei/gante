@@ -96,7 +96,7 @@ backend.use('connect', async (ctx, next) => {
     const listId = qs.id;
     const mem = mongoClient.db().collection('mem');
 
-    const cookieObj = cookie.parse(ctx.req.headers.cookie);
+    const cookieObj = cookie.parse(ctx.req.headers.cookie || '');
 
 
     const user = helpers.getUserByUD(cookieObj.ud, mongoClient.db());
