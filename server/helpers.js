@@ -8,12 +8,15 @@ module.exports = {
       return null;
     }
     const session = await db.collection('session');
+    const user = await db.collection('users');
     const data = await session.findOne({
       token: ud
     });
     if (data && data.uid) {
       if (data.expire >= Date.now()) {
-        return data;
+        return await user.findOne({
+          _id: data.uid
+        });
       }
       return null;
     }
