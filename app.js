@@ -99,7 +99,7 @@ backend.use('connect', async (ctx, next) => {
     const cookieObj = cookie.parse(ctx.req.headers.cookie || '');
 
 
-    const user = helpers.getUserByUD(cookieObj.ud, mongoClient.db());
+    const user = await helpers.getUserByUD(cookieObj.ud, mongoClient.db());
 
     if (listId && (listId === 'guest' || listId === user?.defaultTableId)) {
       // 允许
