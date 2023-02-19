@@ -2,6 +2,24 @@ const crypto = require('crypto');
 
 // in memory session
 module.exports = {
+  // 给websocket使用
+  getUserByUD: async (ud, db) => {
+    if (!ud || !db) {
+      return null;
+    }
+    const session = await db.collection('session');
+    const data = await session.findOne({
+      token: ud
+    });
+    if (data && data.uid) {
+      if (data.expire >= Date.now()) {
+        return data;
+      }
+      return null;
+    }
+    return null;
+  },
+
   getUserIdBySession: async (ctx) => {
     const ud = ctx.cookies.get('ud');
 

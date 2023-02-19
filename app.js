@@ -87,7 +87,7 @@ const backend = new ShareDB({
 
 const Url = require('url');
 const queryString = require('querystring');
-
+const helpers = require('./server/helpers');
 backend.use('connect', async (ctx, next) => {
   console.log('新连接接入', ctx.req.url);
 
@@ -95,6 +95,19 @@ backend.use('connect', async (ctx, next) => {
     const qs = queryString.parse(Url.parse(ctx.req.url).query);
     const listId = qs.id;
     const mem = mongoClient.db().collection('mem');
+
+    const cookieObj = cookie.parse(ctx.req.headers.cookie);
+
+
+    const user = helpers.getUserByUD(cookieObj.ud, mongoClient.db());
+
+    if (listId && (listId === 'guest' || listId === user?.defaultTableId)) {
+      // 允许
+      // pass
+    } else {
+      // 不允许访问
+      throw new Error('无权限访问');
+    }
 
     const memList = await mem.findOne({ listId });
     if (memList && memList.count >= 50) {
@@ -113,6 +126,7 @@ backend.use('connect', async (ctx, next) => {
     });
     // 注入 listId, 所有操作的item必须在listId下.
     ctx.agent.custom.listId = listId;
+    ctx.agent.custom.user = user;
 
     ctx.stream.on('close', () => {
       mem.updateOne({ listId }, {

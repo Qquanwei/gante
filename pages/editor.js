@@ -1,5 +1,6 @@
 import { useRef, useCallback, useState, Fragment } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import classNames from 'classnames';
 import qs from 'qs';
 import Header from 'components/header';
@@ -9,7 +10,7 @@ import dynamic from 'next/dynamic';
 import config from '../config';
 
 const Editor = dynamic(() => Promise.resolve(
-  function Editor({ user, count, exceed }) {
+  function Editor({ user, count, exceed, hasPrivilege }) {
     console.log('count:', count);
     const query = qs.parse(window.location.search.slice(1));
     const ganteRef = useRef(null);
@@ -17,6 +18,19 @@ const Editor = dynamic(() => Promise.resolve(
     if (exceed) {
       return (
         <div>当前文档已超过最大同时在线人数 { count }</div>
+      );
+    }
+
+    if (!hasPrivilege) {
+      return (
+        <div className="fixed left-0 top-0 bottom-0 right-0 bg-[#ccc] flex items-center justify-center">
+          <div>
+            <Link href="/">
+              <div className="hover:border-sky-500 hover:border rounded border-box transition cursor-pointer bg-[url(/logo.png)] w-[100px] h-[100px] bg-center bg-contain bg-no-repeat"></div>
+            </Link>
+            无权限访问哦
+          </div>
+        </div>
       );
     }
 
@@ -59,8 +73,9 @@ import url from 'url';
 import querystring from 'querystring';
 export async function getServerSideProps({ res, req }) {
   const query = querystring.parse((url.parse(req.url).search || '').slice(1));
+
   const countReq = await axios({
-    url: `http://localhost:8088/api/count?listId=${query.id}`,
+    url: `http://localhost:8088/api/count?listId=${query.id || 0}`,
     headers: {
       cookie: req.headers.cookie
     }
@@ -72,8 +87,12 @@ export async function getServerSideProps({ res, req }) {
         cookie: req.headers.cookie
       }
     });
+
+    const hasPrivilege = query.id === 'guest' || query.id === userReq.data.defaultTableId;
+
     return {
       props: {
+        hasPrivilege,
         exceed: countReq.data.exceed,
         count: countReq.data.count,
         user: userReq.data
@@ -82,6 +101,7 @@ export async function getServerSideProps({ res, req }) {
   } catch(error) {
     return {
       props: {
+        hasPrivilege: query.id === 'guest',
         exceed: countReq.data.exceed,
         count: countReq.data.count,
       }
