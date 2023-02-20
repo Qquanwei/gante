@@ -96,10 +96,14 @@ backend.use('connect', async (ctx, next) => {
     const listId = qs.id;
     const mem = mongoClient.db().collection('mem');
 
+    // 这里可能会出现cookie失效的情况，例如页面一直打开超过24h，此时页面未刷新，ws会自动重连
+    // 当重连时会发生cookie失效问题，此时页面就会一直处在连接中状态
+    // 此时，允许cookie过期，即便cookie过期ws依然可以连接，但是页面不可以。
     const cookieObj = cookie.parse(ctx.req.headers.cookie || '');
 
-
-    const user = await helpers.getUserByUD(cookieObj.ud, mongoClient.db());
+    const user = await helpers.getUserByUD(cookieObj.ud, mongoClient.db(), {
+      allowExpire: true
+    });
 
     if (listId && (listId === 'guest' || listId === user?.defaultTableId)) {
       // 允许

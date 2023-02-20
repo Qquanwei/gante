@@ -3,7 +3,7 @@ const crypto = require('crypto');
 // in memory session
 module.exports = {
   // 给websocket使用
-  getUserByUD: async (ud, db) => {
+  getUserByUD: async (ud, db, { allowExpire = false}) => {
     if (!ud || !db) {
       return null;
     }
@@ -13,7 +13,7 @@ module.exports = {
       token: ud
     });
     if (data && data.uid) {
-      if (data.expire >= Date.now()) {
+      if (data.expire >= Date.now() || allowExpire) {
         return await user.findOne({
           _id: data.uid
         });
