@@ -48,7 +48,7 @@ GrabMode.prototype.onMouseMove = function(e) {
   );
 };
 GrabMode.prototype.onMouseLeave = function() {
-  this.machine.switchMode(new NormalState());
+  // this.machine.switchMode(new NormalState());
 }
 
 GrabMode.prototype.onMouseUp = function() {
@@ -76,7 +76,7 @@ function useGrabEvent({ onGrab }) {
 
     return () => {
       machine.dispose();
-    }
+    };
   }, []);
 
   return elementRef;
