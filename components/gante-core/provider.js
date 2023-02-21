@@ -125,6 +125,22 @@ function ErrorFallback({ error }) {
   );
 }
 
+import ReactDOM from 'react-dom/client';
+function SmartLoading() {
+  useEffect(() => {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'fixed top-0 bottom-0 left-0 right-0 flex justify-center items-center transition-all duration-[1s] opacity-1';
+    document.body.appendChild(loadingDiv);
+    ReactDOM.createRoot(loadingDiv).render(<Loading />);
+    return () => {
+      loadingDiv.classList.add('opacity-0');
+      setTimeout(() => {
+        document.body.removeChild(loadingDiv);
+      }, 1000);
+    }
+  }, []);
+}
+
 export default React.forwardRef(function ProviderRef({docId, ...props}, ref) {
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
@@ -150,7 +166,7 @@ export default React.forwardRef(function ProviderRef({docId, ...props}, ref) {
       <Suspense fallback={<div>global loading...</div>}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share?id=${docId}`} onError={onError} docId={docId}>
-            <Suspense fallback={<Loading />}>
+            <Suspense fallback={<SmartLoading />}>
               <Provider {...props} ref={ref} />
             </Suspense>
           </RecoilSyncShareDB>
