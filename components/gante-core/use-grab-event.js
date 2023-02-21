@@ -48,7 +48,7 @@ GrabMode.prototype.onMouseMove = function(e) {
   );
 };
 GrabMode.prototype.onMouseLeave = function() {
-  // this.machine.switchMode(new NormalState());
+  this.machine.switchMode(new NormalState());
 }
 
 GrabMode.prototype.onMouseUp = function() {
@@ -64,7 +64,7 @@ function useGrabEvent({ onGrab }) {
 
   useEffect(() => {
     const machine = new StateMachine({
-      element: elementRef.current,
+      element: graphRef.current,
       graphElement: graphRef.current,
       graph: graphRef.current,
       onChange: (...args) => {
