@@ -22,6 +22,9 @@ State.prototype.onMouseOver = () => {
 State.prototype.onMouseLeave = () => {
 }
 
+State.prototype.onGraphMouseLeave = () => {
+}
+
 // 当任意一个元素mouseover触发(不仅仅是自己)
 State.prototype.onInteractionMouseOver = () => {
 }
@@ -89,6 +92,12 @@ function StateMachine({
   );
 
   this.subscription.add(
+    createEventListener(this.graph, 'mouseleave', (e) => {
+      this.currentState.onGraphMouseLeave(e);
+    })
+  );
+
+  this.subscription.add(
     createEventListener(this.element, 'mousedown', (e) => {
       this.currentState.onMouseDown(e);
     })
@@ -144,7 +153,10 @@ StateMachine.prototype.getGraphElement = function() {
 
 StateMachine.prototype.emit = function(type, args) {
   ReactDOM.unstable_batchedUpdates(() => {
+    window?.performance?.mark(type + '-start');
     this.onChange(type, args);
+    window?.performance?.mark(type + '-end');
+    window?.performance?.measure(type, type + '-start', type + '-end');
   });
 };
 

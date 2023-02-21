@@ -60,7 +60,14 @@ async function startApp() {
     if (pathname === '/share') {
       wsServer.handleUpgrade(request, socket, head, (ws) => {
         const stream = new WebSocketJSONStream(ws);
-        backend.listen(stream, request);
+        const agent = backend.listen(stream, request);
+        stream.on('error', (error) => {
+          agent.close(error);
+        });
+        // 当连接中断，中断stream
+        ws.on('error', (error) => {
+          agent.close(error);
+        });
       });
     }
   });
@@ -80,7 +87,7 @@ const backend = new ShareDB({
 
 const Url = require('url');
 const queryString = require('querystring');
-
+const helpers = require('./server/helpers');
 backend.use('connect', async (ctx, next) => {
   console.log('新连接接入', ctx.req.url);
 
@@ -88,6 +95,23 @@ backend.use('connect', async (ctx, next) => {
     const qs = queryString.parse(Url.parse(ctx.req.url).query);
     const listId = qs.id;
     const mem = mongoClient.db().collection('mem');
+
+    // 这里可能会出现cookie失效的情况，例如页面一直打开超过24h，此时页面未刷新，ws会自动重连
+    // 当重连时会发生cookie失效问题，此时页面就会一直处在连接中状态
+    // 此时，允许cookie过期，即便cookie过期ws依然可以连接，但是页面不可以。
+    const cookieObj = cookie.parse(ctx.req.headers.cookie || '');
+
+    const user = await helpers.getUserByUD(cookieObj.ud, mongoClient.db(), {
+      allowExpire: true
+    });
+
+    if (listId && (listId === 'guest' || listId === user?.defaultTableId)) {
+      // 允许
+      // pass
+    } else {
+      // 不允许访问
+      throw new Error('无权限访问');
+    }
 
     const memList = await mem.findOne({ listId });
     if (memList && memList.count >= 50) {
@@ -106,6 +130,7 @@ backend.use('connect', async (ctx, next) => {
     });
     // 注入 listId, 所有操作的item必须在listId下.
     ctx.agent.custom.listId = listId;
+    ctx.agent.custom.user = user;
 
     ctx.stream.on('close', () => {
       mem.updateOne({ listId }, {

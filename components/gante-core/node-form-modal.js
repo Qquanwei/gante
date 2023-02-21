@@ -1,4 +1,4 @@
-import { useState, useCallback, useId, Fragment, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useId, Fragment, useMemo, useRef, useEffect } from 'react';
 import { Transition } from '@headlessui/react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
@@ -96,4 +96,4 @@ function NodeFormModal({ node, top, hover, left, contextInfo }) {
   );
 }
 
-export default NodeFormModal;
+export default React.memo(NodeFormModal);

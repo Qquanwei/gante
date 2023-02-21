@@ -12,13 +12,15 @@
 */
 
 import ReactDOM from 'react-dom';
-import { useRef, useEffect} from 'react';
+import { useRef, useEffect, startTransition } from 'react';
 import { inherit, getPosition, hasProp, getEleRect } from './utils';
 import useGante from './useGante';
 
 // 如果 globalHoverLock = true, 表示此时全局禁用hover事件。
 let globalHoverLock = false;
 let globalDropLock = false;
+
+export let busy = false;
 
 function State() {
 }
@@ -70,6 +72,7 @@ State.prototype.unmount = () => {
 // 监听模式
 const NormalState = inherit(State, function() {
   this.mousedown = false;
+  this.hover = false;
 });
 
 NormalState.prototype.mount = function() {
@@ -154,8 +157,9 @@ NormalState.prototype.onMouseUp = function(e) {
 };
 
 NormalState.prototype.onMouseOver = function() {
-  if (!globalHoverLock) {
-    this.machine.emit('hover', true);
+  if (!globalHoverLock && !this.hover) {
+    this.hover = true;
+    this.machine.emitTransition('hover', true);
   }
   const e = new CustomEvent('interaction-mouseover', {
     detail: {
@@ -167,7 +171,10 @@ NormalState.prototype.onMouseOver = function() {
 };
 
 NormalState.prototype.onMouseLeave = function() {
-  this.machine.emit('hover', false);
+  if (!globalHoverLock) {
+    this.machine.emitTransition('hover', false);
+    this.hover = false;
+  }
   const e = new CustomEvent('interaction-mouseleave', {
     detail: {
       target: this.machine.getElement()
@@ -208,10 +215,12 @@ ResizeState.prototype.mount = function() {
   this.machine.emit('lock-item', {
     lock: true
   });
+  busy = true;
 };
 
 ResizeState.prototype.unmount = function() {
   globalHoverLock = false;
+  busy = false;
 };
 
 ResizeState.prototype.onMouseUp = function(e) {
@@ -227,11 +236,11 @@ ResizeState.prototype.onMouseMove = function(e) {
   const { x } = currentPosition.diff(this.initPosition);
   const element = this.machine.getElement();
   if (this.mode === 'left') {
-    this.machine.emit('resize', {
+    this.machine.emitTransition('resize', {
       left: this.initLeft + x
     });
   } else {
-    this.machine.emit('resize', {
+    this.machine.emitTransition('resize', {
       width: this.initWidth + x
     });
   }
@@ -302,7 +311,8 @@ SortState.prototype.mount = function() {
   this.machine.emit('enter-sort');
 
   this.lastEmitPosition = null;
-}
+  busy = true;
+};
 
 SortState.prototype.unmount = function() {
   const graph = this.machine.getGraphElement();
@@ -310,7 +320,8 @@ SortState.prototype.unmount = function() {
   this.machine.getElement().classList.remove('opacity-0');
   globalHoverLock = false;
   this.machine.emit('leave-sort');
-}
+  busy = false;
+};
 
 SortState.prototype.onMouseUp = function(e) {
   this.machine.emit('lock-item', {
@@ -330,7 +341,7 @@ SortState.prototype.onMouseMove = function(event) {
     return;
   }
   this.lastEmitPosition = newEmit;
-  this.machine.emit('sort', {
+  this.machine.emitTransition('sort', {
     position
   });
 }
@@ -518,9 +529,22 @@ StateMachine.prototype.getGraphElement = function() {
   return this.graphElement;
 };
 
+
+StateMachine.prototype.emitTransition = function(type, args) {
+  startTransition(() => {
+    window?.performance?.mark(type + '-start');
+    this.onChange(type, args);
+    window?.performance?.mark(type + '-end');
+    window?.performance?.measure(type, type + '-start', type + '-end');
+  });
+};
+
 StateMachine.prototype.emit = function(type, args) {
   ReactDOM.unstable_batchedUpdates(() => {
+    window?.performance?.mark(type + '-start');
     this.onChange(type, args);
+    window?.performance?.mark(type + '-end');
+    window?.performance?.measure(type, type + '-start', type + '-end');
   });
 };
 

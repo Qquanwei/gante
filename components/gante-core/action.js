@@ -80,13 +80,27 @@ export function useExportList() {
   }, []);
 }
 
+import * as R from 'ramda';
+
 export function useDeleteItem() {
   const getDoc = useGetDoc();
-  return useRecoilCallback(({ set }) => (nodeId) => {
+  return useRecoilCallback(({ set, snapshot }) => async (nodeId) => {
     const doc = getDoc('item', nodeId);
-    set(atoms._listCore__list, list => {
-      return list.filter(v => v !== nodeId);
+    const listDoc = getDoc('list', '<docId>');
+    const editor = await snapshot.getPromise(atoms._listCore__editor);
+    const allNodes = await snapshot.getPromise(atoms.allNodes);
+
+    allNodes.map((n) => {
+      if (R.includes(nodeId, n.connectTo || [])) {
+        const doc = getDoc('item', n.id);
+        const removeIdx = n.connectTo.indexOf(nodeId);
+        doc.submitOp(json1.removeOp(['connectTo', removeIdx], nodeId));
+      }
     });
+
+    const removeIdx = editor.list.indexOf(nodeId);
+    const op = json1.removeOp(['list', removeIdx], nodeId);
+    listDoc.submitOp(op);
     doc.del();
   }, []);
 }
@@ -119,7 +133,6 @@ export function useEnlargeEditor() {
   }, []);
 }
 
-import * as R from 'ramda';
 export function useAddPin() {
   return useRecoilCallback(({ set }) => (type, payload) => {
     if (type === 'timeline') {

@@ -3,6 +3,7 @@ import React, { useEffect, Fragment, useRef } from 'react';
 import crypto from 'crypto';
 import { getPosition, throttle } from './utils';
 import useGante from './useGante';
+import { busy } from './use-interaction-event';
 
 const colors = [
   { fill: 'red' },
@@ -40,6 +41,9 @@ export default React.memo(function CursorCanvas() {
     };
 
     const onMouseMove = throttle((e) => {
+      if (busy) {
+        return;
+      }
       if (!mouseDown) {
         local.submit({
           user: user?.userName,

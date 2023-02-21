@@ -1,3 +1,5 @@
+import React from 'react';
+
 function DraggleBar() {
   return (
     <div className="h-full w-2.5 flex items-center justify-center bg-gray-300 rounded">
@@ -6,4 +8,4 @@ function DraggleBar() {
   );
 }
 
-export default DraggleBar;
+export default React.memo(DraggleBar);

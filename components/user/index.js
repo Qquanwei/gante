@@ -1,6 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import classNames from 'classnames';
 import Modal from 'components/modal';
+import { Menu, MenuItem, MenuHeader, MenuDivider, MenuButton } from '@szhsin/react-menu';
+import '@szhsin/react-menu/dist/index.css';
+import '@szhsin/react-menu/dist/transitions/slide.css';
+
 import Script from 'next/script'
 
 
@@ -33,12 +38,24 @@ function User({ user }) {
   return (
     <div>
       <div
-        onClick={onClick}
         className={
-        classNames("flex justify-center items-center text-xs select-none cursor-pointer hover:outline outline-gray-500/50 outline-1 outline-offset-2 w-[50px] h-[50px] rounded-full")
+        classNames("flex justify-center items-center text-xs select-none cursor-pointer w-[50px] h-[50px] rounded-full")
         }>
         {
-          isLogin ? user.userName : '登录'
+          isLogin ? (
+            <Menu menuButton={<MenuButton><img src={user.avatar} className="rounded border-box hover:border-2 border-sky-500" width="50" height="50" /></MenuButton>} transition>
+              <MenuHeader>登录操作</MenuHeader>
+              <MenuDivider />
+              <Link href="/quit">
+                <MenuItem>
+                  退出登录
+                </MenuItem>
+              </Link>
+              <MenuItem onClick={onClick}>切换账号</MenuItem>
+            </Menu>
+
+
+          ) : <div onClick={onClick}>登录</div>
         }
       </div>
       <Modal show={showLoginModal} onClose={onModalClose} title="第三方登录授权">

@@ -92,20 +92,24 @@ export function positionToDay(SPOT_WIDTH, startTime, left, paddingFunction) {
 }
 
 export function getRangeDays(startTime, endTime) {
-  return dayjs(endTime).startOf('day').diff(
-    dayjs(startTime).startOf('day'),
-    'day'
-  );
+  if (dayjs.isDayjs(startTime) && dayjs.isDayjs(endTime)) {
+    return endTime.diff(startTime, 'day');
+  }
+  throw new Error('startTime or endTime is not dayjs instance');
 }
 
 // x, w 为左点和长度, dayEndTime 可选，如不传则认为持续1d
+// startTime is dayjs instance
 export function dayToRect(SPOT_WIDTH, startTime, dayTime, dayEndTime) {
+  // 因为频繁地拷贝dayjs实例会造成性能浪费
+  // 本方法会高频调用，所以不放过任何一点性能优化提升的可能
+  if (!dayjs.isDayjs(startTime)) {
+    throw new Error('startTime is not a dayjs instance');
+  }
+
   const left = dayjs(dayTime)
         .startOf('day')
-        .diff(
-          dayjs(startTime).startOf('day'),
-          'day'
-        ) * SPOT_WIDTH;
+        .diff(startTime.startOf('day'), 'day') * SPOT_WIDTH;
 
   if (!dayEndTime) {
     return new Rect(left, 0, SPOT_WIDTH, 0);
@@ -156,4 +160,31 @@ export function throttle(fn, ms) {
       }, ms);
     }
   };
+}
+
+// 例如 -> 1, 2, 3
+// 此时 1 会表现如同节流，3会表现如同防抖
+// -> 1  则会发出1
+// -> 1, 2 即使时间很短也会发出 1, 2
+// -> 1, 2, 3, 4 , 5 会发出 1，5
+// 所以这个方法应该会保证双端同步, 中间使用节流
+export function bothSideThrottleAndDebounce(fn, ms) {
+  let timer = null;
+  let lastSend = null;
+
+  function bs(...args) {
+    lastSend = args;
+    if (!timer) {
+      timer = setTimeout(() => {
+        fn.apply(this, args);
+        timer = null;
+        if (lastSend !== args && lastSend !== null) {
+          bs.apply(this, lastSend);
+          lastSend = null;
+        }
+      }, ms);
+    }
+  }
+
+  return bs;
 }
