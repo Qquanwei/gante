@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useRecoilCallback } from 'recoil';
 import * as atoms from './atom';
 import isBetween from 'dayjs/plugin/isBetween';
 import classNames from 'classnames';
@@ -19,24 +19,23 @@ dayjs.extend(isBetween);
 export default React.memo(function Timeline({ children }) {
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
   const list = useRecoilValue(atoms.list);
-  const currentNode = useRecoilValue(atoms.currentNode);
   const startTime = useRecoilValue(atoms.startTime);
-
   const todayRef = useRef(null);
   const endTime = useRecoilValue(atoms.endTime);
   const currentTime = useCurrentDate();
-  const pins = useRecoilValue(atoms.pins);
+  const currentNode = useRecoilValue(atoms.currentNode);
   // dayjs string
   const [previewPin, setPreviewPin] = useState(false);
 
   // 这一天是否有pin
-  const isThisDayPinIdx = useCallback((day) => {
+  const isThisDayPinIdx = useRecoilCallback(({ snapshot }) => (day) => {
+    const pins = snapshot.getLoadable(atoms.pins).contents;
     const idx = R.findIndex((pin) => {
       return day.isSame(pin?.day);
     }, pins);
 
     return idx;
-  }, [pins]);
+  }, []);
 
   const inRange = useCallback((ts) => {
     if (!currentNode) {

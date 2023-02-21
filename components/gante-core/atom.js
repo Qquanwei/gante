@@ -6,6 +6,11 @@ import prop from 'ramda/src/prop';
 import { effect } from 'recoil-sharedb';
 import { syncEffect } from 'recoil-sync';
 import * as refine from '@recoiljs/refine';
+import * as R from 'ramda';
+
+const memoizeDayjs = R.memoizeWith(R.identity, (dayStr) => {
+  return dayjs(dayStr);
+});
 
 export const user = atom({
   key: 'current user',
@@ -30,8 +35,8 @@ export const _listCore__editor = atom({
     version: '1.0.0',
     list: [],
     pin: [],
-    endTime: dayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day'),
-    startTime:  dayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day')
+    endTime: memoizeDayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day'),
+    startTime: memoizeDayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day')
   },
   effects: [
     effect('list', '<docId>', {
@@ -78,15 +83,13 @@ export const pins = selector({
   }
 });
 
-import * as R from 'ramda';
-
 // 整个甘特图起始时间
 // 返回的是一个dayjs对象
 export const startTime = selector({
   key: 'gante global starttime',
   get: ({ get }) => {
-    const def = dayjs(get(_listCore__editor).startTime);
-    const cur = dayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day');
+    const def = memoizeDayjs(get(_listCore__editor).startTime);
+    const cur = memoizeDayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day');
 
     if (def.isBefore(cur)) {
       return def;
@@ -105,8 +108,8 @@ export const startTime = selector({
 export const endTime = selector({
   key: 'gante global endtime',
   get: ({ get }) => {
-    const def = dayjs(get(_listCore__editor).endTime);
-    const cur = dayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day');
+    const def = memoizeDayjs(get(_listCore__editor).endTime);
+    const cur = memoizeDayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day');
     if (def.isBefore(cur)) {
       return cur;
     }
@@ -193,8 +196,8 @@ export const thatNodeDays = selectorFamily({
     if (!node) {
       return 0;
     }
-    return dayjs(node.endTime).startOf('dayjs')
-      .diff(dayjs(node.startTime).startOf('day'), 'd') + 1;
+    return memoizeDayjs(node.endTime)
+      .diff(node.startTime, 'day') + 1;
   }
 });
 
@@ -205,6 +208,7 @@ export const thatNodeWidth = selectorFamily({
     return get(thatNodeDays(nodeId)) * get(SPOT_WIDTH);
   }
 });
+
 
 // 这个节点相对于graph的x轴偏移量
 export const thatNodeLeft = selectorFamily({
@@ -220,7 +224,7 @@ export const thatNodeLeft = selectorFamily({
       return 0;
     }
 
-    const day = dayjs(node.startTime).diff(get(startTime), 'days');
+    const day = memoizeDayjs(node.startTime).diff(get(startTime), 'days');
     return day * get(SPOT_WIDTH);
   }
 });

@@ -6,14 +6,15 @@ import * as json1 from 'ot-json1';
 import useGante from './useGante';
 import * as atoms from './atom';
 import * as actions from './action';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
+import { useRecoilValueMemo as useRecoilValue } from 'recoil-enhance';
 import useInteractionEvent from './use-interaction-event';
 import NodeControlPanel from './node-control-panel';
 import NodeFormModal from './node-form-modal';
 import { positionToDay, getRangeDays } from './utils';
 import DraggleBar from './draggle-bar';
 
-function Node({id, index }) {
+const Node = React.memo(({id, index }) => {
   const item = useRecoilValue(atoms.thatNode(id));
   const updateItemProperty = actions.useUpdateItemProperty();
   const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
@@ -170,7 +171,7 @@ function Node({id, index }) {
 
   return (
     <div ref={ref}
-      className={classNames("absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all duration-350 cursor-pointer", {
+      className={classNames("absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all duration-150 cursor-pointer", {
         'rounded': !item.lock,
         "z-10": hover,
         'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock,
@@ -222,7 +223,7 @@ function Node({id, index }) {
       </div>
     </div>
   );
-}
+});
 
 export default React.memo(function Nodes() {
   const list = useRecoilValue(atoms.list);
@@ -233,7 +234,7 @@ export default React.memo(function Nodes() {
       {
         list.map((item, index) => {
           return (
-            <Suspense key={item}>
+            <Suspense key={item} fallback={<div>加载中</div>}>
               <Node id={item} index={index} />
             </Suspense>
           );
@@ -242,12 +243,3 @@ export default React.memo(function Nodes() {
     </div>
   );
 });
-
-
-export function getStaticProps() {
-  return {
-    props: {
-      hello: "world"
-    }
-  };
-}

@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { Transition } from '@headlessui/react';
 import classNames from 'classnames';
 import useGante from './useGante';
@@ -85,4 +85,4 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
   );
 }
 
-export default NodeControlPanel;
+export default React.memo(NodeControlPanel);
