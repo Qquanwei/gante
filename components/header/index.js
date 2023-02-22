@@ -23,7 +23,7 @@ function Header({ children, className, user, side, ganteRef }) {
               <div className="h-[18px] w-[24px] border borer-1 border-black border-box flex items-center justify-center"></div>
             </li>
             <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]">
-              <Pin pinIdx={-1} dragMode="copy" />
+              <Pin pin={null} dragMode="copy" />
             </li>
           </ul>
           <div className="mt-auto mb-20">

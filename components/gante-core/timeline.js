@@ -28,22 +28,27 @@ export default React.memo(function Timeline({ children }) {
   const [previewPin, setPreviewPin] = useState(false);
   const pins = useRecoilValue(atoms.pins);
 
+  const cachePinsMap = useMemo(() => {
+    return pins.reduce((result, pin) => {
+      result[dayjs(pin.day).format('YYYYMMDD')] =  pin;
+      return result;
+    }, {});
+  }, [pins]);
   // 这一天是否有pin
-  const isThisDayPinIdx = useRecoilCallback(({ snapshot }) => (day) => {
-    const pins = snapshot.getLoadable(atoms.pins).contents;
-    const idx = R.findIndex((pin) => {
-      return day.isSame(pin?.day);
-    }, pins);
-
-    return idx;
-  }, []);
+  const isThisDayPin = useCallback((day) => {
+    const pin = cachePinsMap[day.format('YYYYMMDD')];
+    if (pin?.type === 'remove') {
+      return null;
+    }
+    return pin;
+  }, [cachePinsMap]);
 
   const inRange = useCallback((ts) => {
     if (!currentNode) {
       return false;
     }
     return ts.isBetween(currentNode.startTime, currentNode.endTime, 'day', '[]');
-  }, [currentNode]);
+  }, [currentNode?.startTime, currentNode?.endTime]);
 
   const getDaySubtitle = useCallback((momDay) => {
     const day = momDay.day();
@@ -68,17 +73,18 @@ export default React.memo(function Timeline({ children }) {
     }
 
     const isStart = time.date() === 1;
-    const pinIdx = isThisDayPinIdx(time);
+    const pin = isThisDayPin(time);
 
     if (isStart) {
       return (
         <div className="font-bold relative text-orange-500 whitespace-nowrap text-[15px] px-1">
           { time.month() + 1}
           月
-          { (pinIdx !== -1) && <Pin
-                                 showPin={showPin}
-                                 dragMode="move"
-                                 pinIdx={pinIdx} className="absolute top-[10px] left-[10px]" />}
+          { (pin) && <Pin
+                       showPin={showPin}
+                       dragMode="move"
+                       pin={pin}
+                       className="absolute top-[10px] left-[10px]" />}
         </div>
       );
     }
@@ -92,11 +98,11 @@ export default React.memo(function Timeline({ children }) {
     return (
       <span className="relative">
         { title }
-        { (pinIdx !== -1) && <Pin showPin={showPin}
-                               dragMode="move" pinIdx={pinIdx} className="absolute left-0 top-0" />}
+        { pin && <Pin showPin={showPin}
+                      dragMode="move" pin={pin} className="absolute left-0 top-0" />}
       </span>
     );
-  }, [SPOT_WIDTH, isThisDayPinIdx]);
+  }, [SPOT_WIDTH, isThisDayPin]);
 
   useEffect(() => {
     if (todayRef.current) {
@@ -128,8 +134,8 @@ export default React.memo(function Timeline({ children }) {
       const transferObject = JSON.parse(transferDataString);
       if (transferObject.type === 'pin') {
         if (e.currentTarget && e.currentTarget.dataset.day) {
-          const idx = isThisDayPinIdx(dayjs(e.currentTarget.dataset.day));
-          if (idx === -1) {
+          const pin = isThisDayPin(dayjs(e.currentTarget.dataset.day));
+          if (!pin) {
             if (transferObject.pinIdx === -1) {
               addPin('timeline', e.currentTarget.dataset.day);
             } else {
@@ -144,7 +150,7 @@ export default React.memo(function Timeline({ children }) {
       return null;
     }
 
-  }, [isThisDayPinIdx]);
+  }, [isThisDayPin]);
 
   const memoizeChild = useMemo(() => {
     let ans = [];
