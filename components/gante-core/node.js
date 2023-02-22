@@ -68,7 +68,7 @@ const Node = React.memo(({id, index }) => {
             updateItemProperty(args.targetNodeId, (target, doc) => {
               if (target.from) {
                 if (target?.from?.indexOf(item.id) === -1) {
-                  doc.submitOp(json1.repalceOp(['from', target?.from?.length || 0], item.id));
+                  doc.submitOp(json1.insertOp(['from', target?.from?.length || 0], item.id));
                 }
               } else {
                 doc.submitOp(json1.insertOp(['from'], [item.id]));
