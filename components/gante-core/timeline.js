@@ -13,6 +13,69 @@ import * as actions from './action';
 import Pin from './pin';
 dayjs.extend(isBetween);
 
+import { busy } from './use-interaction-event';
+
+/*
+  这个组件每次重绘性能开销最大，尽量减少不必要的性能开销
+*/
+const TimelinePerf = React.memo(({
+  startTime,
+  endTime,
+  inRange,
+  currentTime,
+  todayRef,
+  previewPin,
+  onDragEnter,
+  onDragLeave,
+  onDrop,
+  SPOT_WIDTH,
+  getDayTitle,
+  getDaySubtitle,
+  pins
+}) => {
+  return useMemo(() => {
+    let ans = [];
+    const totalDays = utils.getRangeDays(startTime, endTime) + 1;
+    for (let i = 0; i < totalDays ; ++i) {
+      const day = startTime.add(i, 'days');
+      const range = inRange(day);
+      const today = day.isSame(currentTime, 'day');
+      const weekend = day.day() === 6 || day.day() === 0;
+
+      ans.push(
+        <div ref={today ? todayRef : null}
+             className={classNames("box-border text-[13px] shrink-0 flex-col h-10 text-center items-center flex justify-center", {
+               ["bg-sky-200/75"]: range,
+               ["bg-gray-300/25"]: weekend && !range,
+               ["bg-sky-200/20"]: weekend && range,
+               ['bg-sky-200/70']: previewPin === day.toString()
+             })}
+             data-day={day.toString()}
+             onDragOver={e => e.preventDefault()}
+             onDragEnter={onDragEnter}
+             onDragLeave={onDragLeave}
+             onDrop={onDrop}
+             style={{
+               width: SPOT_WIDTH,
+             }} key={i}>
+          {
+            getDayTitle(startTime.add(i, 'days'), {
+              showPin: !range
+            })
+          }
+          <span className="text-xs">{ getDaySubtitle(startTime.add(i, 'day'))}</span>
+        </div>
+      );
+    }
+    return ans;
+  }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin, pins]);
+}, () => {
+  if (busy) {
+    return true;
+  }
+  return false;
+});
+
 /*
    展示时间轴，横轴
  */
@@ -98,8 +161,10 @@ export default React.memo(function Timeline({ children }) {
     return (
       <span className="relative">
         { title }
-        { pin && <Pin showPin={showPin}
-                      dragMode="move" pin={pin} className="absolute left-0 top-0" />}
+        {
+          pin && <Pin showPin={showPin}
+                      dragMode="move" pin={pin} className="absolute left-0 top-0" />
+        }
       </span>
     );
   }, [SPOT_WIDTH, isThisDayPin]);
@@ -149,50 +214,23 @@ export default React.memo(function Timeline({ children }) {
     } catch(e) {
       return null;
     }
-
   }, [isThisDayPin]);
-
-  const memoizeChild = useMemo(() => {
-    let ans = [];
-    const totalDays = utils.getRangeDays(startTime, endTime) + 1;
-    for (let i = 0; i < totalDays ; ++i) {
-      const day = startTime.add(i, 'days');
-      const range = inRange(day);
-      const today = day.isSame(currentTime, 'day');
-      const weekend = day.day() === 6 || day.day() === 0;
-
-      ans.push(
-        <div ref={today ? todayRef : null}
-          className={classNames("box-border text-[13px] shrink-0 flex-col h-10 text-center items-center flex justify-center", {
-            ["bg-sky-200/75"]: range,
-            ["bg-gray-300/25"]: weekend && !range,
-            ["bg-sky-200/20"]: weekend && range,
-            ['bg-sky-200/70']: previewPin === day.toString()
-          })}
-          data-day={day.toString()}
-          onDragOver={e => e.preventDefault()}
-          onDragEnter={onDragEnter}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-          style={{
-            width: SPOT_WIDTH,
-          }} key={i}>
-          {
-            getDayTitle(startTime.add(i, 'days'), {
-              showPin: !range
-            })
-          }
-          <span className="text-xs">{ getDaySubtitle(startTime.add(i, 'day'))}</span>
-        </div>
-      );
-    }
-    return ans;
-  }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin, pins]);
 
   return (
     <div>
       <div className="sticky shadow flex flex-nowrap top-0 z-10 bg-white pb-5">
-        { memoizeChild }
+        <TimelinePerf
+          todayRef={todayRef}
+          previewPin={previewPin}
+          onDragEnter={onDragEnter}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          getDayTitle={getDayTitle}
+          getDaySubtitle={getDaySubtitle}
+          pins={pins}
+          SPOT_WIDTH={SPOT_WIDTH}
+          startTime={startTime}
+          endTime={endTime} inRange={inRange} currentTime={currentTime} />
         <TimelineStatusBar />
       </div>
       <div className="relative">

@@ -20,6 +20,9 @@ import useGante from './useGante';
 let globalHoverLock = false;
 let globalDropLock = false;
 
+/*
+  busy 变量表示当前的操作可能很频繁，外部可以根据此标记跳过一部分重复计算，这个文件会尽量保证在busy设置为false后触发一次外部事件，通知更新
+*/
 export let busy = false;
 
 function State() {
@@ -299,7 +302,9 @@ SortState.prototype.mount = function() {
   this.clone.id = '';
   this.clone.classList.add('z-20');
   this.clone.classList.add('opacity-50');
+  this.clone.classList.add('transform-gpu');
   this.clone.classList.remove('transition-all');
+  this.clone.classList.remove('duration-150');
   graph.appendChild(this.clone);
   element.classList.add('opacity-0');
 
@@ -319,8 +324,8 @@ SortState.prototype.unmount = function() {
   graph.removeChild(this.clone);
   this.machine.getElement().classList.remove('opacity-0');
   globalHoverLock = false;
-  this.machine.emit('leave-sort');
   busy = false;
+  this.machine.emit('leave-sort');
 };
 
 SortState.prototype.onMouseUp = function(e) {
@@ -333,7 +338,9 @@ SortState.prototype.onMouseUp = function(e) {
 
 SortState.prototype.onMouseMove = function(event) {
   const position = getPosition(this.machine.getGraphElement(), event);
+  // 因为 React重绘会把清零的class重新加上，所以每次移动都要加一次classname, 这样可以创建移动元素在原位置消失并浮空出现的效果
   this.machine.getElement().classList.add('opacity-0');
+  this.clone.style.top = 0;
   this.clone.style.top = position.y + 'px';
 
   const newEmit = Math.floor(position.y / this.machine.SINK_HEIGHT);

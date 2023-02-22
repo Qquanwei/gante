@@ -171,7 +171,7 @@ const Node = React.memo(({id, index }) => {
 
   return (
     <div ref={ref}
-      className={classNames("absolute select-none text-left flex items-center box-border whitespace-nowrap transition-all duration-150 cursor-pointer", {
+      className={classNames("absolute transition-all duration-150 select-none text-left flex items-center box-border whitespace-nowrap cursor-pointer", {
         'rounded': !item.lock,
         "z-10": hover,
         'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock,
