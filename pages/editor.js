@@ -24,11 +24,13 @@ const Editor = dynamic(() => Promise.resolve(
     if (!hasPrivilege) {
       return (
         <div className="fixed left-0 top-0 bottom-0 right-0 bg-[#ccc] flex items-center justify-center">
-          <div>
+          <div className="text-center flex items-center flex-col">
             <Link href="/">
               <div className="hover:border-sky-500 hover:border rounded border-box transition cursor-pointer bg-[url(/logo.png)] w-[100px] h-[100px] bg-center bg-contain bg-no-repeat"></div>
             </Link>
-            无权限访问哦
+            <div className="text-center mt-4">
+              无权限访问或当前会话过期，请重新登陆哦
+            </div>
           </div>
         </div>
       );
@@ -44,7 +46,7 @@ const Editor = dynamic(() => Promise.resolve(
               <Content>
                 <GanteGraph />
               </Content>
-              <StatusBar className="fixed bottom-0 left-0 right-0 z-10" />
+              <StatusBar className="fixed bottom-0 left-0 right-0 z-10 select-none" />
             </Container>
           </GanteProvider>
         </div>
