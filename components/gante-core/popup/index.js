@@ -61,16 +61,7 @@ export default function Popup({ children, content, disable, showPreview, preview
             <Fragment>
               <Fragment>
                 {
-                  showPreview && (
-                    <div
-                      style={{
-                        top: 20,
-                        left: 10
-                      }}
-                      className="text-left select-text relative bg-yellow-100/80 p-2 rounded min-w-[100px] min-h-[50px]">
-                      { previewContent }
-                    </div>
-                  )
+                  showPreview && (previewContent)
                 }
               </Fragment>
               { children.props.children }

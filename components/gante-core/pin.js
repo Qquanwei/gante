@@ -26,7 +26,7 @@ export default React.memo(function Pin({ className, pinIdx, dragMode, showPin, s
         fixed: data.get('fixed')
       });
       close();
-    }
+    };
   }, [pinIdx]);
 
   const onClickDelete = useCallback(() => {
@@ -57,7 +57,9 @@ export default React.memo(function Pin({ className, pinIdx, dragMode, showPin, s
     <Popup
       disable={pinIdx === -1}
       showPreview={fixed && showPin}
-      previewContent={data?.content }
+      previewContent={<div
+                        style={{ left: 10, top: pinIdx % 2 === 0 ? 20 : 25}}
+                        className="hover:z-10 break-all font-normal transition-all duration-75 text-left select-text relative hover:bg-yellow-100/90 bg-yellow-100/60 p-2 rounded min-w-[100px] min-h-[50px]">{data?.content}</div>}
       content={({ close }) => (
         <div>
           <form ref={formRef}>
@@ -82,7 +84,7 @@ export default React.memo(function Pin({ className, pinIdx, dragMode, showPin, s
         onClick={onClick}
         onDragStart={onDragPinStart}
         onDragEnd={onDragPinEnd}
-        className={classNames("cursor-pointer w-[20px] bg-transparent translate-x-0 h-[20px] bg-[url(/tuding.png)] bg-contain", className, {
+        className={classNames("cursor-pointer w-[20px] bg-transparent h-[20px] bg-[url(/tuding.png)] bg-contain", className, {
           ['opacity-50']: hiddenIcon
         })}>
       </div>

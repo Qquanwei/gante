@@ -26,6 +26,7 @@ export default React.memo(function Timeline({ children }) {
   const currentNode = useRecoilValue(atoms.currentNode);
   // dayjs string
   const [previewPin, setPreviewPin] = useState(false);
+  const pins = useRecoilValue(atoms.pins);
 
   // 这一天是否有pin
   const isThisDayPinIdx = useRecoilCallback(({ snapshot }) => (day) => {
@@ -180,7 +181,7 @@ export default React.memo(function Timeline({ children }) {
       );
     }
     return ans;
-  }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin]);
+  }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin, pins]);
 
   return (
     <div>
