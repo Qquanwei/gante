@@ -148,6 +148,16 @@ backend.use('connect', async (ctx, next) => {
   }
 });
 
+backend.use('query', function({ query}, next) {
+  console.log('query:', query);
+  next();
+});
+
+backend.use('receive', function({ data}, next) {
+  console.log('receive:', data);
+  next();
+});
+
 backend.use('apply', function({agent, collection, id, op}, next) {
   const { listId } = agent.custom;
   if (
