@@ -101,7 +101,6 @@ export function useDeleteItem() {
     const removeIdx = editor.list.indexOf(nodeId);
     const op = json1.removeOp(['list', removeIdx], nodeId);
     listDoc.submitOp(op);
-    doc.del();
   }, []);
 }
 
