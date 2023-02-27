@@ -285,10 +285,10 @@ MoveState.prototype.onMouseMove = function(e) {
 MoveState.prototype.onMouseUp = function(e) {
   // 判断是否还处在的当前元素上，如果为否，则hover为false
   if (!this.machine.getElement().contains(e.target)) {
-    this.machine.emit('hover', false);
+    this.machine.emitTransition('hover', false);
   }
   this.machine.switchMode(new NormalState());
-}
+};
 
 
 var SortState = inherit(State, function(initPosition) {
