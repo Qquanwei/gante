@@ -22,6 +22,7 @@ const Node = React.memo(({id, index }) => {
   const swapItem = actions.useSwapItem();
   const startTime = useRecoilValue(atoms.startTime);
   const setCurrentId = useSetRecoilState(atoms.currentNodeId);
+  const currentId = useRecoilValue(atoms.currentNodeId);
   const setCurrentFeatures = useSetRecoilState(atoms.currentFeatures);
 
   const [contextInfo, setContextInfo] = useState({
@@ -29,17 +30,15 @@ const Node = React.memo(({id, index }) => {
     point: null
   });
 
-  const [hover, setHover] = useState(false);
-
   const width = useRecoilValue(atoms.thatNodeWidth(id));
   const left = useRecoilValue(atoms.thatNodeLeft(id));
   const days = useRecoilValue(atoms.thatNodeDays(id));
+  const hover = currentId === item.id;
 
   const ref = useInteractionEvent(id, {
     onChange: (event, args) => {
       switch(event) {
         case 'hover':
-          setHover(args);
           setCurrentFeatures({});
           if (args) {
             setCurrentId(item.id);
@@ -57,7 +56,6 @@ const Node = React.memo(({id, index }) => {
               setCurrentId(item.id);
             } else {
               setCurrentId(null);
-              setHover(args.hover);
             }
             break;
           }
@@ -171,6 +169,7 @@ const Node = React.memo(({id, index }) => {
 
   return (
     <div ref={ref}
+      data-id={`node-${item.id}`}
       className={classNames("absolute transition-all duration-150 select-none text-left flex items-center box-border whitespace-nowrap cursor-pointer", {
         'rounded': !item.lock,
         "z-10": hover,
