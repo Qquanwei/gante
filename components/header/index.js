@@ -1,40 +1,59 @@
-import { useCallback } from 'react';
+import { useCallback, useState, Suspense } from 'react';
 import classNames from 'classnames';
+import dynamic from 'next/dynamic';
 import User from 'components/user';
 import Link from 'next/link';
 import Pin from '../gante-core/pin';
 
+const SearchPanel = dynamic(() => import('../search-panel'));
+
 function Header({ children, className, user, side, ganteRef }) {
+  const [searchMode, setSearchMode] = useState(false);
+
+  const onClickSearch = useCallback(() => {
+    setSearchMode(v => !v);
+  }, []);
+
   if (side === 'left') {
     return (
-      <div className="z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block">
-        <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]" onClick={() => ganteRef?.current?.gotoToday()}></div>
-        <div className="flex flex-col items-center h-full select-none">
-          <ul className="flex mt-2 flex-col text-[12px] text-center">
-            <Link href="/">
-              <li className="cursor-pointer h-[24px] bg-[url(/house.png)] bg-no-repeat bg-contain bg-center" />
-            </Link>
-            <li className="cursor-pointer h-[24px] mt-[20px] bg-center bg-[url(/zoom-in.png)] bg-contain bg-no-repeat" onClick={() => ganteRef?.current?.zoomIn()}></li>
-            <li className="cursor-pointer h-[24px] mt-[20px] bg-center bg-[url(/zoom-out.png)] bg-contain bg-no-repeat" onClick={() => ganteRef?.current?.zoomOut()}></li>
-            <li className="cursor-pointer hidden h-[24px] flex justify-center mt-[10px]">
-              <div className="h-[24px] w-[24px] border borer-1 border-black border-box flex items-center justify-center">组</div>
-            </li>
-            <li className="cursor-pointer hidden h-[24px] flex justify-center items-center mt-[20px]">
-              <div className="h-[18px] w-[24px] border borer-1 border-black border-box flex items-center justify-center"></div>
-            </li>
-            <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]">
-              <Pin pinIdx={-1} dragMode="copy" />
-            </li>
-          </ul>
-          <div className="mt-auto mb-20">
-            <div className="flex justify-center">
-              <Link href="https://github.com/Qquanwei/gante" target="_blank">
-                <div className="mb-[30px] w-[30px] h-[30px] bg-contain bg-[url(/github-mark.png)]"></div>
+      <div className={classNames("transition-all z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block border-r-[#e0e0e0] border", {
+        'w-[300px]': searchMode
+      })}>
+        <div className={"transition-all z-20 text-[#333] absolute top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block"}>
+          <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]" onClick={() => ganteRef?.current?.gotoToday()}></div>
+          <div className="flex flex-col items-center h-full select-none">
+            <ul className="flex mt-2 flex-col text-[12px] text-center">
+              <Link href="/">
+                <li className="cursor-pointer h-[24px] bg-[url(/house.png)] bg-no-repeat bg-contain bg-center" />
               </Link>
+              <li className="cursor-pointer h-[24px] mt-[20px]" onClick={onClickSearch}>搜索</li>
+              <li className="cursor-pointer h-[24px] mt-[20px] bg-center bg-[url(/zoom-in.png)] bg-contain bg-no-repeat" onClick={() => ganteRef?.current?.zoomIn()}></li>
+              <li className="cursor-pointer h-[24px] mt-[20px] bg-center bg-[url(/zoom-out.png)] bg-contain bg-no-repeat" onClick={() => ganteRef?.current?.zoomOut()}></li>
+              <li className="cursor-pointer hidden h-[24px] flex justify-center mt-[10px]">
+                <div className="h-[24px] w-[24px] border borer-1 border-black border-box flex items-center justify-center">组</div>
+              </li>
+              <li className="cursor-pointer hidden h-[24px] flex justify-center items-center mt-[20px]">
+                <div className="h-[18px] w-[24px] border borer-1 border-black border-box flex items-center justify-center"></div>
+              </li>
+              <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]">
+                <Pin pin={null} dragMode="copy" />
+              </li>
+            </ul>
+            <div className="mt-auto mb-20">
+              <div className="flex justify-center">
+                <Link href="https://github.com/Qquanwei/gante" target="_blank">
+                  <div className="mb-[30px] w-[30px] h-[30px] bg-contain bg-[url(/github-mark.png)]"></div>
+                </Link>
+              </div>
+              <User user={user} />
+              { children }
             </div>
-            <User user={user} />
-            { children }
           </div>
+        </div>
+        <div className="absolute top-0 bottom-0 left-[60px] right-0">
+          <Suspense fallback={<div>loading...</div>}>
+            { searchMode && <SearchPanel className="w-[240px]" />}
+          </Suspense>
         </div>
       </div>
     );

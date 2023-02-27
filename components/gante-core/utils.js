@@ -107,19 +107,14 @@ export function dayToRect(SPOT_WIDTH, startTime, dayTime, dayEndTime) {
     throw new Error('startTime is not a dayjs instance');
   }
 
-  const left = dayjs(dayTime)
-        .startOf('day')
-        .diff(startTime.startOf('day'), 'day') * SPOT_WIDTH;
+  const left = dayjs(dayTime).diff(startTime, 'day') * SPOT_WIDTH;
 
   if (!dayEndTime) {
     return new Rect(left, 0, SPOT_WIDTH, 0);
   }
 
-  const w = dayjs(dayEndTime).startOf('day')
-    .diff(
-      dayjs(dayTime).startOf('day'),
-      'day'
-    );
+  const w = dayjs(dayEndTime)
+    .diff(dayTime, 'day');
   return new Rect(left, 0, (1 + w) * SPOT_WIDTH);
 }
 

@@ -9,10 +9,10 @@ import * as actions from './action';
 // pin 有两种模式，一种依附在 timeline 上，一种依附在 node 上。
 // timeline 为绝对位置， day 属性有效
 // node 为相对位置，offset 属性有效
-export default React.memo(function Pin({ className, pinIdx, dragMode, showPin, style }) {
+export default React.memo(function Pin({ className, pin, dragMode, showPin, style }) {
   const updatePin = actions.useUpdatePinContent();
   const removePin = actions.useRemovePin();
-  const data = useRecoilValue(atoms.pins)[pinIdx];
+  const data = pin;
   const formRef = useRef(null);
   const [hiddenIcon, setHiddenIcon] = useState(false);
 
@@ -21,26 +21,26 @@ export default React.memo(function Pin({ className, pinIdx, dragMode, showPin, s
   const onClickSave = useCallback((close) => {
     return () => {
       const data = new FormData(formRef.current);
-      updatePin(pinIdx, {
+      updatePin(pin ? pin.pinIdx : -1 , {
         content: data.get('content'),
         fixed: data.get('fixed')
       });
       close();
-    }
-  }, [pinIdx]);
+    };
+  }, [pin]);
 
   const onClickDelete = useCallback(() => {
-    removePin(pinIdx);
-  }, [pinIdx]);
+    removePin(data.pinIdx);
+  }, [data]);
 
   const onDragPinStart = useCallback((event) => {
-    event.dataTransfer.setData('text/plain', JSON.stringify({ type: 'pin', pinIdx }));
+    event.dataTransfer.setData('text/plain', JSON.stringify({ type: 'pin', pinIdx: data ? data.pinIdx : -1 }));
     event.dataTransfer.setDragImage(event.currentTarget, 10, 10);
 
     if (dragMode === 'move') {
       setHiddenIcon(true);
     }
-  }, [dragMode, pinIdx]);
+  }, [dragMode, data?.pinIdx]);
 
   const onDragPinEnd = useCallback(() => {
     if (hiddenIcon) {
@@ -55,9 +55,11 @@ export default React.memo(function Pin({ className, pinIdx, dragMode, showPin, s
 
   return (
     <Popup
-      disable={pinIdx === -1}
+      disable={!data}
       showPreview={fixed && showPin}
-      previewContent={data?.content }
+      previewContent={<div
+                        style={{ left: 10, top: (data?.pinIdx || 0) % 2 === 0 ? 20 : 25}}
+                        className="hover:z-10 break-all font-normal transition-all duration-75 text-left select-text relative hover:bg-yellow-100/90 bg-yellow-100/60 p-2 rounded min-w-[100px] min-h-[50px]">{data?.content}</div>}
       content={({ close }) => (
         <div>
           <form ref={formRef}>
@@ -82,7 +84,7 @@ export default React.memo(function Pin({ className, pinIdx, dragMode, showPin, s
         onClick={onClick}
         onDragStart={onDragPinStart}
         onDragEnd={onDragPinEnd}
-        className={classNames("cursor-pointer w-[20px] bg-transparent translate-x-0 h-[20px] bg-[url(/tuding.png)] bg-contain", className, {
+        className={classNames("cursor-pointer w-[20px] bg-transparent h-[20px] bg-[url(/tuding.png)] bg-contain", className, {
           ['opacity-50']: hiddenIcon
         })}>
       </div>
