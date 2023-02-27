@@ -152,7 +152,8 @@ backend.use('apply', function({agent, collection, id, op}, next) {
   const { listId } = agent.custom;
   if (
       (listId === id || `${id}`.startsWith(listId + '.'))
-     ) {
+  ) {
+    console.log('apply:', id, op);
     next();
   } else {
     console.log('error 跨文档操作对象');
