@@ -174,7 +174,8 @@ const Node = React.memo(({id, index }) => {
         'rounded': !item.lock,
         "z-10": hover,
         'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock,
-        'outline outline-white': !hover && !item.lock
+        'ring-2 ring-sky-300 ring-offset-1 ring-offset-white outline-none': hover && item.lock,
+        'outline outline-white': !hover && !item.lock,
       })}
       style={{
         left,

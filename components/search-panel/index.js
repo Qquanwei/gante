@@ -49,7 +49,7 @@ export default function SearchPanel({ className }) {
       <ul className="h-[800px] overflow-y-auto">
         {
           R.reverse(nodes).filter((node) => {
-            const r = new RegExp(filterText)
+            const r = new RegExp(filterText, 'i')
             return (r.test(node.title) || r.test(node.remark));
           }).map((node) => {
             return (

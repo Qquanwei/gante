@@ -70,10 +70,7 @@ const TimelinePerf = React.memo(({
     return ans;
   }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin, pins]);
 }, () => {
-  if (busy) {
-    return true;
-  }
-  return false;
+  return busy;
 });
 
 /*
