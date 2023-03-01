@@ -83,7 +83,9 @@ const Node = React.memo(({id, index }) => {
                 args.left,
                 Math.floor
               ).valueOf();
-              updateItemProperty(item.id, 'startTime', newBeginTime, 'endTime', item.endTime);
+              if (newBeginTime <= item.endTime) {
+                updateItemProperty(item.id, 'startTime', newBeginTime, 'endTime', item.endTime);
+              }
             }
             if (args.width) {
               const newEndTime = positionToDay(
@@ -92,7 +94,9 @@ const Node = React.memo(({id, index }) => {
                 (args.left || left) + args.width,
                 Math.floor
               ).valueOf();
-              updateItemProperty(item.id, 'startTime', item.startTime, 'endTime', newEndTime);
+              if (item.startTime <= newEndTime) {
+                updateItemProperty(item.id, 'startTime', item.startTime, 'endTime', newEndTime);
+              }
             }
           }
           break;
@@ -167,6 +171,10 @@ const Node = React.memo(({id, index }) => {
 
   const top = index * SINK_HEIGHT + 7;
 
+  const closeContext = useCallback(() => {
+    setContextInfo({ show: false });
+  }, []);
+
   return (
     <div ref={ref}
       data-id={`node-${item.id}`}
@@ -197,9 +205,11 @@ const Node = React.memo(({id, index }) => {
       </span>
 
       <div data-role="ignore-events">
-        <NodeControlPanel node={item} contextInfo={contextInfo} left={left} hover={hover}/>
+        <NodeControlPanel node={item} close={closeContext}
+          contextInfo={contextInfo} left={left} hover={hover}/>
 
-        <NodeFormModal node={item} contextInfo={contextInfo} top={top} left={left} hover={hover}/>
+        <NodeFormModal node={item}
+          close={closeContext} contextInfo={contextInfo} top={top} left={left} hover={hover}/>
 
         <div className={classNames("absolute left-full w-7 flex top-0 items-center", {
           hidden: !hover && !(item.connectTo && item.connectTo.length !== 0)

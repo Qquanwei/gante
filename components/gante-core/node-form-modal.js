@@ -9,7 +9,7 @@ import useGante from './useGante';
 const WIDTH = 430;
 const HEIGHT = 300;
 
-function NodeFormModal({ node, top, hover, left, contextInfo }) {
+function NodeFormModal({ node, top, close, hover, left, contextInfo }) {
   const containerRef = useRef(null);
   const [editMode, setEditMode] = useState(false);
   const leftRef = useRef(0);
@@ -19,14 +19,22 @@ function NodeFormModal({ node, top, hover, left, contextInfo }) {
     e.stopPropagation();
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    updateItemProperty(
-      node.id,
-      'startTime', dayjs(data.get('startTime') || node.startTime).valueOf(),
-      'endTime', dayjs(data.get('endTime') || node.endTime).valueOf(),
-      'title', data.get('title') || node.title,
-      'remark', data.get('remark')
-    );
-    setEditMode(false);
+    const startTime = dayjs(data.get('startTime') || node.startTime).valueOf();
+    const endTime = dayjs(data.get('endTime') || node.endTime).valueOf();
+
+    if (startTime <= endTime) {
+      updateItemProperty(
+        node.id,
+        'startTime',
+        startTime,
+        'endTime',
+        endTime,
+        'title', data.get('title') || node.title,
+        'remark', data.get('remark')
+      );
+      setEditMode(false);
+      close();
+    }
   }, [node]);
 
   if (contextInfo.show) {
