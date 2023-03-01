@@ -260,11 +260,13 @@ MoveState.prototype.mount = function() {
   globalHoverLock = true;
 
   this.ignoreEventsEles = element.querySelectorAll('[data-role=ignore-events]');
+  busy = true;
   this.machine.emit('enter-move');
 }
 
 MoveState.prototype.unmount = function() {
   globalHoverLock = false;
+  busy = false;
   this.machine.emit('leave-move');
 }
 
