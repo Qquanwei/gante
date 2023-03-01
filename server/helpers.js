@@ -45,7 +45,7 @@ module.exports = {
     return null;
   },
 
-  generateSessionByUser: async (ctx, id) => {
+  generateSessionByUser: async (ctx, id, expire) => {
     const session = await ctx.db.collection('session');
 
     const rid = crypto.randomUUID();
@@ -53,7 +53,7 @@ module.exports = {
     await session.insertOne({
       token: rid,
       uid: id,
-      expire: Date.now() + 24 * 60 * 60 * 1000
+      expire
     });
 
     return rid;
