@@ -19,11 +19,12 @@ router.use(mongo({
 }));
 
 async function login(ctx, user) {
-  const session = await helper.generateSessionByUser(ctx, user._id);
+  const expire = 6 * 60 * 60 * 24 * 1000 + Date.now();
+  const session = await helper.generateSessionByUser(ctx, user._id, expire);
   // 一天过期时间
   ctx.cookies.set('ud', session, {
     httpOnly: true,
-    expires: new Date(6 * 60 * 60 * 24 * 1000 + Date.now())
+    expires: new Date(expire)
   });
   ctx.redirect('/');
 }
