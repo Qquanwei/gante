@@ -3,7 +3,7 @@ import { useSetRecoilState, useRecoilCallback } from 'recoil';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, Fragment } from 'react';
 import { useGetDoc } from 'recoil-sharedb';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 dayjs.extend(isSameOrBefore)
@@ -20,6 +20,17 @@ function getNextTodo(todo) {
   return null;
 }
 
+function todoToStr(todo) {
+  const str = todo.title;
+  const sch = dayjs(todo.schedule).format('M.D');
+  const repeat = todo.repeat;
+
+  if (todo.repeat) {
+    return `${str} ${sch}/${repeat}`;
+  }
+  return `${str} ${sch}`;
+}
+
 export function parseTodoStr(str, today) {
   // 分别解析以下几种情况
   /*
@@ -30,12 +41,12 @@ export function parseTodoStr(str, today) {
      5. abc 12 -> 本月12号，或者下月12号第一次, 不重复
      6. abc 12.12 -> 12月12日开始，不重复
    */
-  const scheduleAndRepat = /^.*\+[1-9 ]+\/[1-9 ]+$/;
+  const scheduleAndRepat = /^.*\+[0-9 ]+\/[0-9 ]+$/;
   const onlySchedule = /^.*\+\d$/;
   const onlyRepeat = /^.*\/\d$/;
   const date1 = /\d+$/;
   const date2 = /\d+\.\d+$/;
-  const dateAndRepeat = /[1-9 ]+\.[1-9 ]+\/[1-9 ]+$/;
+  const dateAndRepeat = /[1-9 ]+\.[0-9 ]+\/[0-9 ]+$/;
 
   const todo = {
     headline: 'todo',
@@ -58,7 +69,7 @@ export function parseTodoStr(str, today) {
     todo.repeat = Number(repeat.trim());
 
     const [month, day] = date.split('.');
-    const schedule = dayjs(today).set('month', Number(month.trim()))
+    const schedule = dayjs(today).set('month', Number(month.trim()) - 1)
       .set('date', Number(day.trim()));
 
     todo.schedule = schedule;
@@ -152,51 +163,88 @@ function TodoCard({ todo, className, preview }) {
     doc.submitOp(op);
   }, [todo]);
 
+  const [editMode, setEditMode] = useState(false);
+  const [iptValue, setIptValue] = useState('');
+
+  const onClickEdit = useCallback(() => {
+    setIptValue(todoToStr(todo));
+    setEditMode(true);
+  }, [todo]);
+
+  const onSubmit = useRecoilCallback(({ snapshot }) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    const value = data.get('ipt');
+    const list = snapshot.getLoadable(atoms.agent).contents;
+    if (value) {
+      const newTodo = parseTodoStr(value);
+      const doc = getDoc('agent', '<docId>');
+      const idx = list.todo.indexOf(todo);
+      doc.submitOp(json1.replaceOp(['todo', idx], todo, newTodo));
+      setEditMode(false);
+    }
+  }, [todo]);
+
   return (
     <div
       className={classNames("transition-all relative group mt-2 pt-2 min-h-[50px] text-[12px] flex justify-center flex-col px-2 cursor-pointer ", className, {
         'bg-gray-100': todo.headline === 'todo',
         'bg-sky-100': todo.headline === 'done'
       })}>
-      <div className={classNames({hidden: outdate <= 0 }, outdateStyle)}>
-        +{outdate}天
-      </div>
-      <div className={classNames("text-[12px] flex", { hidden: !todo.schedule })}>
-        schedule: <div className="ml-2 flex-grow">{dayjs(todo?.schedule).format('YYYY-MM-DD')}</div>
-      </div>
-      <div className={classNames("text-[12px] flex", { hidden: !todo.deadline })}>
-        deadline: <div className="ml-2 flex-grow">无</div>
-      </div>
-      <div className={classNames("text-[12px] flex", { hidden: !todo.repeat })}>
-        重复: <div>{ todo.repeat }天</div>
-      </div>
-      <div className="flex items-center">
-        <div className={classNames('inline-block mr-2', {
-          'text-green-500': todo.headline === 'todo',
-          'text-sky-500': todo.headline === 'done'
-        })}>{ todo.headline }</div>
+      {
+        editMode ? (
+          <form className="flex items-center" onSubmit={onSubmit}>
+            <input autoFocus defaultValue={iptValue} name="ipt" className="w-full text-[12px] h-[30px] rounded my-2 px-2 border" type="text" />
+            <div className="shrink-0 ml-1" onClick={() => setEditMode(false) }>取消</div>
+          </form>
+        ) : (
+          <Fragment>
+            <div className={classNames({hidden: outdate <= 0 }, outdateStyle)}>
+              +{outdate}天
+            </div>
+            <div className={classNames("text-[12px] flex", { hidden: !todo.schedule })}>
+              schedule: <div className="ml-2 flex-grow">{dayjs(todo?.schedule).format('YYYY-MM-DD')}</div>
+            </div>
+            <div className={classNames("text-[12px] flex", { hidden: !todo.deadline })}>
+              deadline: <div className="ml-2 flex-grow">无</div>
+            </div>
+            <div className={classNames("text-[12px] flex", { hidden: !todo.repeat })}>
+              重复: <div>{ todo.repeat }天</div>
+            </div>
+            <div className="flex items-center">
+              <div className={classNames('inline-block mr-2', {
+                'text-green-500': todo.headline === 'todo',
+                'text-sky-500': todo.headline === 'done'
+              })}>{ todo.headline }</div>
 
-        <div className={classNames("select-auto flex-grow py-2 font-bold h-full items-center flex", outdateStyle)}>
-          { todo.title }
-        </div>
-      </div>
+              <div className={classNames("select-auto flex-grow py-2 font-bold h-full items-center flex", outdateStyle)}>
+                { todo.title }
+              </div>
+            </div>
 
-      <div className={classNames("absolute top-0 hover:bg-sky-300/70 right-0 bottom-0 w-[0px] rounded overflow-hidden bg-sky-100/50 flex items-center flex", {
-        'group-hover:w-[100px] justify-around': todo.headline === 'done',
-        'group-hover:w-[50px] justify-center flex-col': todo.headline === 'todo'
-      })} >
-        <span className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'todo'})} onClick={onClickArchive}>
-          归档
-        </span>
-        <span
-          onClick={() => onSetDone('todo')}
-          className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'todo'})}>
-          todo
-        </span>
-        <span className={classNames("p-2", { hidden: todo.headline === 'done'})} onClick={() => onSetDone('done')}>
-          done
-        </span>
-      </div>
+            <div className={classNames("absolute top-0 hover:bg-sky-300/70 right-0 bottom-0 w-[0px] rounded overflow-hidden bg-sky-100/50 flex items-center flex", {
+              'group-hover:w-[100px] justify-around': true
+            })} >
+              <span className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'todo'})} onClick={onClickArchive}>
+                归档
+              </span>
+              <span className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'done'})} onClick={onClickEdit}>
+                编辑
+              </span>
+              <span
+                onClick={() => onSetDone('todo')}
+                className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'todo'})}>
+                todo
+              </span>
+              <span className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'done'})} onClick={() => onSetDone('done')}>
+                done
+              </span>
+            </div>
+          </Fragment>
+        )
+      }
     </div>
   );
 }
