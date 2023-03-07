@@ -140,6 +140,7 @@ function TodoCard({ todo, className, preview }) {
       const nextTodo = getNextTodo(todo);
       const ops = [
         nextTodo ? json1.insertOp(['todo', list.todo.length], nextTodo) : null,
+        todo.doneTime ? json1.replaceOp(['todo', idx, 'doneTime'], true, dayjs().toString()) : json1.insertOp(['todo', idx, 'doneTime'], dayjs().toString()),
         json1.replaceOp(['todo', idx, 'repeat'], true, 0),
         json1.replaceOp(['todo', idx, 'headline'], 'todo', 'done')
       ];
@@ -301,7 +302,7 @@ export default function AgentPanel({ className }) {
       }
 
       if (todo.headline === 'done') {
-        return dayjs(todo.schedule).isSame(today, 'day');
+        return dayjs(todo.schedule).isSame(today, 'day') || (todo.doneTime && dayjs(todo.doneTime).isSame(today, 'day'));
       }
 
       if (!todo.schedule) {

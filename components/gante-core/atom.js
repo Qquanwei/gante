@@ -32,7 +32,8 @@ const todoChecker = refine.object({
   title: refine.string(),
   repeat: refine.optional(refine.number()),
   schedule: refine.optional(refine.string()),
-  deadTime: refine.optional(refine.string())
+  deadTime: refine.optional(refine.string()),
+  doneTime: refine.optional(refine.string())
 });
 
 export const agent = atom({
