@@ -179,7 +179,7 @@ function TodoCard({ todo, className, preview }) {
     const value = data.get('ipt');
     const list = snapshot.getLoadable(atoms.agent).contents;
     if (value) {
-      const newTodo = parseTodoStr(value);
+      const newTodo = parseTodoStr(value, dayjs());
       const doc = getDoc('agent', '<docId>');
       const idx = list.todo.indexOf(todo);
       doc.submitOp(json1.replaceOp(['todo', idx], todo, newTodo));
@@ -289,11 +289,18 @@ export default function AgentPanel({ className }) {
   const todayAgendaList = useMemo(() => {
     const today = dayjs().add(agendaDay, 'day');
     return agent.todo.filter((todo) => {
+      if (!todo) {
+        return false;
+      }
       // 如果是查看明天的，则使用精确匹配
       if (agendaDay === '1') {
         if (!todo.schedule) {
           return false;
         }
+        return dayjs(todo.schedule).isSame(today, 'day');
+      }
+
+      if (todo.headline === 'done') {
         return dayjs(todo.schedule).isSame(today, 'day');
       }
 
@@ -323,8 +330,8 @@ export default function AgentPanel({ className }) {
           <input placeholder="检查每日待办+1/1" name="ipt" onChange={onChange} className="w-full text-[12px] h-[30px] rounded my-2 px-2 border" type="text" />
           {
             confirmTodo ? (
-              <div className="whitespace-nowrap text-[12px] border p-2">
-                <div className="text-[12px] text-blue-500">再次按下回车确认</div>
+              <div className="whitespace-nowrap text-[12px] border border-red-500 p-2">
+                <div className="text-[12px] text-red-500">再次按下回车确认</div>
                 <TodoCard todo={confirmTodo} preview={true} />
               </div>
             ) : null
@@ -351,7 +358,7 @@ export default function AgentPanel({ className }) {
             })
           }
           <div className="border-t w-full border-gray-300/50"></div>
-          <div className="mt-2 text-[12px] text-sky-500">所有待办清单</div>
+          <div className="mt-[20px] text-[12px] text-sky-500">所有待办清单</div>
           {
             [...agent.todo].reverse().map((todo, index) => {
               return (
