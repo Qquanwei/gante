@@ -1,13 +1,24 @@
 import { useRecoilValueMemo } from 'recoil-enhance';
-import { useSetRecoilState } from 'recoil';
+import { useSetRecoilState, useRecoilCallback } from 'recoil';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
+import * as json1 from 'ot-json1';
 import { useCallback, useState, useMemo } from 'react';
+import { useGetDoc } from 'recoil-sharedb';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 dayjs.extend(isSameOrBefore)
 
 import * as atoms from '../gante-core/atom';
 
+
+function getNextTodo(todo) {
+  if (todo.repeat !== 0 && Number.isInteger(todo.repeat)) {
+    const cloneTodo = {...todo};
+    cloneTodo.schedule = dayjs(todo.schedule).add(todo.repeat, 'day').toString();
+    return cloneTodo;
+  }
+  return null;
+}
 
 export function parseTodoStr(str, today) {
   // 分别解析以下几种情况
@@ -19,9 +30,7 @@ export function parseTodoStr(str, today) {
      5. abc 12 -> 本月12号，或者下月12号第一次, 不重复
      6. abc 12.12 -> 12月12日开始，不重复
    */
-  // DONE
   const scheduleAndRepat = /^.*\+[1-9 ]+\/[1-9 ]+$/;
-  // DONE
   const onlySchedule = /^.*\+\d$/;
   const onlyRepeat = /^.*\/\d$/;
   const date1 = /\d+$/;
@@ -85,20 +94,73 @@ export function parseTodoStr(str, today) {
     todo.title = str;
   }
 
-
   if (todo.schedule) {
     todo.schedule = todo.schedule.toString();
+  } else {
+    todo.schedule = dayjs().toString();
   }
   return todo;
 }
 
-function TodoCard({ todo, className }) {
-  useMemo(() => {
-    //dayjs.diff(todo.schedule)
-  }, []);
+// preview 表示这是一个临时的todo
+function TodoCard({ todo, className, preview }) {
+  // 过期了多久
+  const outdate = useMemo(() => {
+    if  (todo.schedule) {
+      return dayjs().diff(todo.schedule, 'day');
+    }
+    return 0;
+  }, [todo]);
+
+  const outdateStyle = {
+    'text-stone-800': outdate > 0 && outdate < 10,
+    'text-fuchsia-500': outdate >= 10 && outdate < 20,
+    'text-red-500': outdate >= 20
+  };
+
+  const getDoc = useGetDoc();
+
+  const onSetDone = useRecoilCallback(({ snapshot }) => (status = 'done') => {
+    const list = snapshot.getLoadable(atoms.agent).contents;
+    const idx = list.todo.indexOf(todo);
+    const doc = getDoc('agent', '<docId>');
+
+    if (status === 'done') {
+      const nextTodo = getNextTodo(todo);
+      const ops = [
+        nextTodo ? json1.insertOp(['todo', list.todo.length], nextTodo) : null,
+        json1.replaceOp(['todo', idx, 'repeat'], true, 0),
+        json1.replaceOp(['todo', idx, 'headline'], 'todo', 'done')
+      ];
+      doc.submitOp(ops.reduce(json1.type.compose, null));
+    } else {
+      const ops = [
+        json1.replaceOp(['todo', idx, 'headline'], 'done', 'todo')
+      ];
+      doc.submitOp(ops.reduce(json1.type.compose, null));
+    }
+  }, [todo]);
+
+  const onClickArchive = useRecoilCallback(({ snapshot }) => () => {
+    const list = snapshot.getLoadable(atoms.agent).contents;
+    const idx = list.todo.indexOf(todo);
+    const doc = getDoc('agent', '<docId>');
+    const op = json1.type.compose(
+      json1.removeOp(['todo', idx]),
+      json1.insertOp(['done', list.done.length], todo)
+    );
+    doc.submitOp(op);
+  }, [todo]);
+
   return (
     <div
-      className={classNames("mt-2 pt-2 min-h-[50px] text-[12px] flex justify-center flex-col bg-gray-100 px-2 cursor-pointer ", className)}>
+      className={classNames("transition-all relative group mt-2 pt-2 min-h-[50px] text-[12px] flex justify-center flex-col px-2 cursor-pointer ", className, {
+        'bg-gray-100': todo.headline === 'todo',
+        'bg-sky-100': todo.headline === 'done'
+      })}>
+      <div className={classNames({hidden: outdate <= 0 }, outdateStyle)}>
+        +{outdate}天
+      </div>
       <div className={classNames("text-[12px] flex", { hidden: !todo.schedule })}>
         schedule: <div className="ml-2 flex-grow">{dayjs(todo?.schedule).format('YYYY-MM-DD')}</div>
       </div>
@@ -111,12 +173,29 @@ function TodoCard({ todo, className }) {
       <div className="flex items-center">
         <div className={classNames('inline-block mr-2', {
           'text-green-500': todo.headline === 'todo',
-          'text-gray-500': todo.headline === 'done'
+          'text-sky-500': todo.headline === 'done'
         })}>{ todo.headline }</div>
 
-        <div className="flex-grow py-2 h-full items-center flex">
+        <div className={classNames("select-auto flex-grow py-2 font-bold h-full items-center flex", outdateStyle)}>
           { todo.title }
         </div>
+      </div>
+
+      <div className={classNames("absolute top-0 hover:bg-sky-300/70 right-0 bottom-0 w-[0px] rounded overflow-hidden bg-sky-100/50 flex items-center flex", {
+        'group-hover:w-[100px] justify-around': todo.headline === 'done',
+        'group-hover:w-[50px] justify-center flex-col': todo.headline === 'todo'
+      })} >
+        <span className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'todo'})} onClick={onClickArchive}>
+          归档
+        </span>
+        <span
+          onClick={() => onSetDone('todo')}
+          className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'todo'})}>
+          todo
+        </span>
+        <span className={classNames("p-2", { hidden: todo.headline === 'done'})} onClick={() => onSetDone('done')}>
+          done
+        </span>
       </div>
     </div>
   );
@@ -127,6 +206,7 @@ export default function AgentPanel({ className }) {
   const setAgent = useSetRecoilState(atoms.agent);
   const [confirmTodo, setConfirmTodo] = useState(null);
   const [prevIptValue, setPrevIptValue] = useState('');
+  const [agendaDay, setAgendaDay] = useState('0');
 
   const onSubmit = useCallback((e) => {
     e.stopPropagation();
@@ -159,14 +239,29 @@ export default function AgentPanel({ className }) {
   }, []);
 
   const todayAgendaList = useMemo(() => {
-    const today = dayjs();
+    const today = dayjs().add(agendaDay, 'day');
     return agent.todo.filter((todo) => {
+      // 如果是查看明天的，则使用精确匹配
+      if (agendaDay === '1') {
+        if (!todo.schedule) {
+          return false;
+        }
+        return dayjs(todo.schedule).isSame(today, 'day');
+      }
+
       if (!todo.schedule) {
         return true;
       }
+
       return dayjs(todo.schedule).isSameOrBefore(today, 'day');
     }, []);
-  }, [agent.todo]);
+  }, [agent, agendaDay]);
+
+  const onClickAgendaDay = useCallback((e) => {
+    if (e.target.dataset.day) {
+      setAgendaDay(e.target.dataset.day);
+    }
+  }, []);
 
   return (
     <div className={classNames(className, 'h-full flex flex-col')}>
@@ -182,16 +277,23 @@ export default function AgentPanel({ className }) {
             confirmTodo ? (
               <div className="whitespace-nowrap text-[12px] border p-2">
                 <div className="text-[12px] text-blue-500">再次按下回车确认</div>
-                <TodoCard todo={confirmTodo} />
+                <TodoCard todo={confirmTodo} preview={true} />
               </div>
             ) : null
           }
         </form>
         <div className="flex-grow overflow-auto pb-[80px] select-none">
-          <div className="text-[12px] text-orange-300">
-            今日待办清单
-            <span className="p-2 cursor-pointer text-gray-300">明天</span>
-            <span className="p-2 cursor-pointer text-gray-300">下周</span>
+          <div className="text-[12px]" onClick={onClickAgendaDay}>
+            <span data-day="0"
+              className={classNames('cursor-pointer px-2', agendaDay === '0' ? 'text-orange-300' : 'text-gray-300')}>
+              今日待办清单
+            </span>
+            <span
+              className={classNames('cursor-pointer px-2', agendaDay === '1' ? 'text-orange-300' : 'text-gray-300')}
+              data-day="1">明天</span>
+            <span
+              className={classNames('cursor-pointer px-2', agendaDay === '7' ? 'text-orange-300' : 'text-gray-300')}
+              data-day="7">7天内所有</span>
           </div>
           {
             [...todayAgendaList].reverse().map((todo, index) => {
@@ -200,7 +302,8 @@ export default function AgentPanel({ className }) {
               )
             })
           }
-          <div className="mt-2 text-[12px] text-orange-300">所有待办清单</div>
+          <div className="border-t w-full border-gray-300/50"></div>
+          <div className="mt-2 text-[12px] text-sky-500">所有待办清单</div>
           {
             [...agent.todo].reverse().map((todo, index) => {
               return (
