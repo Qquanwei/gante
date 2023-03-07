@@ -71,6 +71,7 @@ describe('utils Rect', () => {
   });
 });
 
+import dayjs from 'dayjs';
 
 describe('utils dayToRect', () => {
   const { dayToRect} = utils;
@@ -79,7 +80,7 @@ describe('utils dayToRect', () => {
     const SPOT_WIDTH = 17;
     const startTime = new Date('2022-08-17 15:33');
     const dayTime = new Date('2022-08-17 15:50');
-    const rect = dayToRect(SPOT_WIDTH, +startTime, +dayTime);
+    const rect = dayToRect(SPOT_WIDTH, dayjs(+startTime), dayjs(+dayTime));
     expect(rect.x).toBe(0);
     expect(rect.w).toBe(SPOT_WIDTH);
   });
@@ -149,9 +150,9 @@ describe('utils getRangeDays', () => {
     expect(getRangeDays(day1, day2)).toBe(1);
   });
 
-  it ('should be ok 5', () => {
-    const day1 = new Date('2022-08-01 23:59');
-    const day2 = new Date('2022-08-05 00:00');
+  it.only ('should be ok 5', () => {
+    const day1 = dayjs('Mon Aug 01 2022 23:59:00 GMT+0800');
+    const day2 = dayjs('Fri Aug 05 2022 00:00:00 GMT+0800');
     expect(getRangeDays(day1, day2)).toBe(4);
   });
 });

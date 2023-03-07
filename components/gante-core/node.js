@@ -200,7 +200,7 @@ const Node = React.memo(({id, index }) => {
         <DraggleBar />
       </div>
 
-      <span className={"grow px-2 sticky overflow-hidden right-[2px] left-[2px]"}>
+      <span className={"grow px-2 sticky right-[2px] left-[2px]"}>
         { item.title }
       </span>
 
