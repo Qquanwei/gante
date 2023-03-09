@@ -118,7 +118,7 @@ function TodoCard({ todo, className, preview }) {
   // 过期了多久
   const outdate = useMemo(() => {
     if  (todo.schedule) {
-      return dayjs().diff(todo.schedule, 'day');
+      return dayjs(todo.doneTime).diff(todo.schedule, 'day');
     }
     return 0;
   }, [todo]);
@@ -207,6 +207,9 @@ function TodoCard({ todo, className, preview }) {
             </div>
             <div className={classNames("text-[12px] flex", { hidden: !todo.schedule })}>
               schedule: <div className="ml-2 flex-grow">{dayjs(todo?.schedule).format('YYYY-MM-DD')}</div>
+            </div>
+            <div className={classNames("text-[12px] flex", { hidden: todo.headline === 'todo'})}>
+              closed:  <div className="ml-2 flex-grow">{dayjs(todo?.doneTime).format('YYYY-MM-DD')}</div>
             </div>
             <div className={classNames("text-[12px] flex", { hidden: !todo.deadline })}>
               deadline: <div className="ml-2 flex-grow">无</div>
