@@ -19,11 +19,12 @@ router.use(mongo({
 }));
 
 async function login(ctx, user) {
-  const session = await helper.generateSessionByUser(ctx, user._id);
+  const expire = 6 * 60 * 60 * 24 * 1000 + Date.now();
+  const session = await helper.generateSessionByUser(ctx, user._id, expire);
   // 一天过期时间
   ctx.cookies.set('ud', session, {
     httpOnly: true,
-    expires: new Date(60 * 60 * 24 * 1000 + Date.now())
+    expires: new Date(expire)
   });
   ctx.redirect('/');
 }
@@ -100,10 +101,11 @@ router.post('/login', async (ctx, next) => {
   });
 
   if (user) {
-    const session = await helper.generateSessionByUser(ctx, user._id);
+    const expire = 6 * 60 * 60 * 24 * 1000 + Date.now();
+    const session = await helper.generateSessionByUser(ctx, user._id, expire);
     ctx.cookies.set('ud', session, {
       httpOnly: true,
-      expires: new Date(60 * 60 * 24 * 1000 + Date.now())
+      expires: new Date(expire)
     });
     ctx.body = user;
     ctx.status = 200;
@@ -184,7 +186,7 @@ router.post('/reg', async (ctx, next) => {
     const session = await helper.generateSessionByUser(ctx, u._id);
     ctx.cookies.set('ud', session, {
       httpOnly: true,
-      expires: new Date(60 * 60 * 24 * 1000 + Date.now())
+      expires: new Date(6 * 60 * 60 * 24 * 1000 + Date.now())
     });
 
     if (ctx.query && ctx.query.return) {

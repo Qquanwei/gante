@@ -1,4 +1,4 @@
-import { useCallback, useState, Suspense } from 'react';
+import React, { useCallback, useState, Suspense } from 'react';
 import classNames from 'classnames';
 import dynamic from 'next/dynamic';
 import User from 'components/user';
@@ -6,27 +6,37 @@ import Link from 'next/link';
 import Pin from '../gante-core/pin';
 
 const SearchPanel = dynamic(() => import('../search-panel'));
+const AgendaPanel = dynamic(() => import('../agenda-panel'));
+
+const modeMap = {
+  search: SearchPanel,
+  agent: AgendaPanel
+};
 
 function Header({ children, className, user, side, ganteRef }) {
-  const [searchMode, setSearchMode] = useState(false);
+  const [mode, setMode] = useState('');
 
-  const onClickSearch = useCallback(() => {
-    setSearchMode(v => !v);
-  }, []);
+  const onClickMode = useCallback((e) => {
+    if (mode === e.target.dataset.mode) {
+      setMode('');
+    } else {
+      setMode(e.target.dataset.mode);
+    }
+  }, [mode]);
 
   if (side === 'left') {
     return (
       <div className={classNames("transition-all z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block border-r-[#e0e0e0] border", {
-        'w-[300px]': searchMode
+        'w-[300px]': mode !== ''
       })}>
         <div className={"transition-all z-20 text-[#333] absolute top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block"}>
           <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]" onClick={() => ganteRef?.current?.gotoToday()}></div>
           <div className="flex flex-col items-center h-full select-none">
             <ul className="flex mt-2 flex-col text-[12px] text-center">
               <Link href="/">
-                <li className="cursor-pointer h-[24px] bg-[url(/house.png)] bg-no-repeat bg-contain bg-center" />
+                <li className="cursor-pointer h-[24px] bg-[url(/house.png)] bg-no-repeat bg-contain bg-center"/>
               </Link>
-              <li className="cursor-pointer h-[24px] mt-[20px]" onClick={onClickSearch}>搜索</li>
+              <li className="cursor-pointer h-[24px] mt-[20px]" data-mode="search" onClick={onClickMode}>搜索</li>
               <li className="cursor-pointer h-[24px] mt-[20px] bg-center bg-[url(/zoom-in.png)] bg-contain bg-no-repeat" onClick={() => ganteRef?.current?.zoomIn()}></li>
               <li className="cursor-pointer h-[24px] mt-[20px] bg-center bg-[url(/zoom-out.png)] bg-contain bg-no-repeat" onClick={() => ganteRef?.current?.zoomOut()}></li>
               <li className="cursor-pointer hidden h-[24px] flex justify-center mt-[10px]">
@@ -38,6 +48,7 @@ function Header({ children, className, user, side, ganteRef }) {
               <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]">
                 <Pin pin={null} dragMode="copy" />
               </li>
+              <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]" data-mode="agent" onClick={onClickMode}>agenda</li>
             </ul>
             <div className="mt-auto mb-20">
               <div className="flex justify-center">
@@ -51,8 +62,12 @@ function Header({ children, className, user, side, ganteRef }) {
           </div>
         </div>
         <div className="absolute top-0 bottom-0 left-[60px] right-0">
-          <Suspense fallback={<div>loading...</div>}>
-            { searchMode && <SearchPanel className="w-[240px]" />}
+          <Suspense fallback={<div className="w-[240px]">loading...</div>}>
+            {
+              modeMap[mode] ? React.createElement(modeMap[mode], {
+                className: 'w-[240px]'
+              }) : null
+            }
           </Suspense>
         </div>
       </div>
@@ -63,7 +78,6 @@ function Header({ children, className, user, side, ganteRef }) {
     <div className="z-10  text-[#f0f0f0] left-0 absolute right-0 pr-2 pt-2">
       <div className="flex items-center">
         <ul className="flex ml-10">
-          <li className="cursor-pointer">首页</li>
           <li className="ml-[15px] cursor-pointer">
             <Link href="https://github.com/Qquanwei/gante">
               Github

@@ -1,8 +1,6 @@
 import { noWait, waitForAll, atomFamily, atom, selectorFamily, selector } from 'recoil';
 import dayjs from 'dayjs';
-import indexBy from 'ramda/src/indexBy';
 import * as json1 from 'ot-json1';
-import prop from 'ramda/src/prop';
 import { effect } from 'recoil-sharedb';
 import { syncEffect } from 'recoil-sync';
 import * as refine from '@recoiljs/refine';
@@ -27,6 +25,35 @@ export const SINK_HEIGHT = atom({
 export const SPOT_WIDTH = atom({
   key: 'gante spot width',
   default: 40
+});
+
+const todoChecker = refine.object({
+  headline: refine.string(),
+  title: refine.string(),
+  repeat: refine.optional(refine.number()),
+  schedule: refine.optional(refine.string()),
+  deadTime: refine.optional(refine.string()),
+  doneTime: refine.optional(refine.string())
+});
+
+export const agent = atom({
+  key: 'gante_list_core_agent',
+  default: {
+    keyword: ['todo', 'done'],
+    todo: [{ headline: 'todo', title: '创建待办任务', repeat: 1}],
+    done: [{ headline: 'done', title: '已完成任务' }],
+    archive: []
+  },
+  effects: [
+    effect('agent', '<docId>', {
+      refine: refine.object({
+        keyword: refine.array(refine.string()),
+        todo: refine.array(todoChecker),
+        done: refine.array(todoChecker),
+        archive: refine.array(todoChecker)
+      })
+    })
+  ]
 });
 
 export const _listCore__editor = atom({
@@ -169,7 +196,7 @@ export const list = selector({
     return get(_listCore__list);
   },
   set: ({ set }, newValue) => {
-    set(_listCore__list, newValue.map(prop('id')));
+    set(_listCore__list, newValue.map(R.prop('id')));
   }
 });
 

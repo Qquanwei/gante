@@ -148,11 +148,22 @@ backend.use('connect', async (ctx, next) => {
   }
 });
 
+backend.use('query', function({ query}, next) {
+  console.log('query:', query);
+  next();
+});
+
+backend.use('receive', function({ data}, next) {
+  console.log('receive:', data);
+  next();
+});
+
 backend.use('apply', function({agent, collection, id, op}, next) {
   const { listId } = agent.custom;
   if (
       (listId === id || `${id}`.startsWith(listId + '.'))
-     ) {
+  ) {
+    console.log('apply:', id, op);
     next();
   } else {
     console.log('error 跨文档操作对象');
