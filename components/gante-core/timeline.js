@@ -90,7 +90,10 @@ export default React.memo(function Timeline({ children }) {
 
   const cachePinsMap = useMemo(() => {
     return pins.reduce((result, pin) => {
-      result[dayjs(pin.day).format('YYYYMMDD')] =  pin;
+      if (pin.type === 'timeline') {
+        result[dayjs(pin.day).format('YYYYMMDD')] =  pin;
+        return result;
+      }
       return result;
     }, {});
   }, [pins]);
