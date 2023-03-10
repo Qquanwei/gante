@@ -331,7 +331,7 @@ export default function AgentPanel({ className }) {
           <div className="text-[12px]">3天后待办: <span>开始阅读 +3</span></div>
           <div className="text-[12px]">10月5日待办: <span>开始阅读 10.5</span></div>
           <div className="text-[12px]">明天开始并每周重复: <span>开始阅读+1/7</span></div>
-          <input placeholder="检查每日待办+1/1" name="ipt" onChange={onChange} className="w-full text-[12px] h-[30px] rounded my-2 px-2 border" type="text" />
+          <input autoFocus placeholder="检查每日待办+1/1" name="ipt" onChange={onChange} className="w-full text-[12px] h-[30px] rounded my-2 px-2 border" type="text" />
           {
             confirmTodo ? (
               <div className="whitespace-nowrap text-[12px] border border-red-500 p-2">

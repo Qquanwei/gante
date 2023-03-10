@@ -27,7 +27,7 @@ function Header({ children, className, user, side, ganteRef }) {
   if (side === 'left') {
     return (
       <div className={classNames("transition-all z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block border-r-[#e0e0e0] border", {
-        'w-[300px]': mode !== ''
+        'w-[320px]': mode !== ''
       })}>
         <div className={"transition-all z-20 text-[#333] absolute top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block"}>
           <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]" onClick={() => ganteRef?.current?.gotoToday()}></div>
@@ -62,10 +62,10 @@ function Header({ children, className, user, side, ganteRef }) {
           </div>
         </div>
         <div className="absolute top-0 bottom-0 left-[60px] right-0">
-          <Suspense fallback={<div className="w-[240px]">loading...</div>}>
+          <Suspense fallback={<div className="w-[260px]">loading...</div>}>
             {
               modeMap[mode] ? React.createElement(modeMap[mode], {
-                className: 'w-[240px]'
+                className: 'w-[260px]'
               }) : null
             }
           </Suspense>
