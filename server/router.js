@@ -6,7 +6,6 @@ const bodyParser = require('koa-bodyparser');
 const config = require('../config');
 const helper = require('./helpers');
 
-
 const router = new Router({
   prefix: '/api'
 });
@@ -78,6 +77,7 @@ router.get('/cb/login/github', async (ctx, next) => {
   } else {
     // 默认注册
     await User.insertOne({
+      createDate: Date.now(),
       githubUserId: userReq.data.id,
       userName: userReq.data.name,
       avatar: userReq.data.avatar_url,
@@ -195,6 +195,88 @@ router.post('/reg', async (ctx, next) => {
       ctx.redirect('/');
     }
   }
+});
+
+const sms = require('./sms');
+
+router.post('/captcha', async (ctx, next) => {
+  const { phone } = ctx.request.body;
+  if (!/^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/.test(phone)) {
+    ctx.status = 401;
+    ctx.body = {
+      message: '手机号不合法'
+    };
+    return;
+  }
+  const captcha = ctx.db.collection('captcha');
+  const captchaItem = await captcha.findOne({
+    phone,
+    sendTime: {
+      '$gte': Date.now() - 60 * 1000
+    }
+  });
+
+  if (!captchaItem) {
+    const num = helper.generateCaptchaNumber();
+    await sms.sendCaptchaSms({
+      phone,
+      number: num
+    });
+    await captcha.insertOne({
+      phone,
+      sendTime: Date.now(),
+      number: num
+    });
+    ctx.body = { data: '发送成功' };
+    return;
+  }
+  ctx.status = 401;
+  ctx.body = {
+    message: '发送太频繁'
+  };
+});
+
+router.post('/captcha/login', async (ctx, next) => {
+  const { phone, number } = ctx.request.body;
+  const captcha = ctx.db.collection('captcha');
+  const captchaItem = await captcha.findOne({
+    phone,
+    number,
+    sendTime: {
+      '$gte': Date.now() - 60 * 1000
+    }
+  });
+
+  if (captchaItem) {
+    const User = ctx.db.collection('users');
+    const currentUser = await User.findOne({
+      phone
+    });
+
+    if (currentUser) {
+      // 如果已经是平台用户，则登录
+      // pass
+    } else {
+      // 默认注册
+      await User.insertOne({
+        userName: '',
+        phone,
+        createDate: Date.now(),
+        avatar: null,
+        defaultTableId: crypto.randomUUID()
+      });
+    }
+
+    return await login(ctx, await User.findOne({
+      phone
+    }));
+  } else {
+    ctx.status = 400;
+    ctx.body = {
+      message: '验证码不正确'
+    };
+  }
+
 });
 
 module.exports = router;

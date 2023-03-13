@@ -27,7 +27,7 @@ function Header({ children, className, user, side, ganteRef }) {
   if (side === 'left') {
     return (
       <div className={classNames("transition-all z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block border-r-[#e0e0e0] border", {
-        'w-[300px]': mode !== ''
+        'w-[320px]': mode !== ''
       })}>
         <div className={"transition-all z-20 text-[#333] absolute top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block"}>
           <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]" onClick={() => ganteRef?.current?.gotoToday()}></div>
@@ -62,10 +62,10 @@ function Header({ children, className, user, side, ganteRef }) {
           </div>
         </div>
         <div className="absolute top-0 bottom-0 left-[60px] right-0">
-          <Suspense fallback={<div className="w-[240px]">loading...</div>}>
+          <Suspense fallback={<div className="w-[260px]">loading...</div>}>
             {
               modeMap[mode] ? React.createElement(modeMap[mode], {
-                className: 'w-[240px]'
+                className: 'w-[260px]'
               }) : null
             }
           </Suspense>
@@ -75,13 +75,15 @@ function Header({ children, className, user, side, ganteRef }) {
   }
 
   return (
-    <div className="z-10  text-[#f0f0f0] left-0 absolute right-0 pr-2 pt-2">
+    <div className="z-10  text-black left-0 absolute right-0 pr-2 pt-2">
       <div className="flex items-center">
         <ul className="flex ml-10">
-          <li className="ml-[15px] cursor-pointer">
+          <li className="ml-[15px] cursor-pointer flex items-center">
             <Link href="https://github.com/Qquanwei/gante">
               Github
             </Link>
+            <div className="border border-l-black w-[1px] h-[20px] inline-block mx-4 hidden"></div>
+            <Link href="/charge" className="ml-2 hidden">赞助</Link>
           </li>
         </ul>
         <div className="ml-auto">

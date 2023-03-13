@@ -5,7 +5,7 @@ import Modal from 'components/modal';
 import { Menu, MenuItem, MenuHeader, MenuDivider, MenuButton } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
-
+import PhoneLogin from 'components/phone-login';
 import Script from 'next/script'
 
 
@@ -44,6 +44,9 @@ function User({ user }) {
         {
           isLogin ? (
             <Menu menuButton={<MenuButton><img src={user.avatar} className="rounded border-box hover:border-2 border-sky-500" width="50" height="50" /></MenuButton>} transition>
+              <MenuItem disabled>
+                个人中心(暂未开放)
+              </MenuItem>
               <MenuHeader>登录操作</MenuHeader>
               <MenuDivider />
               <Link href="/quit">
@@ -58,13 +61,18 @@ function User({ user }) {
           ) : <div onClick={onClick}>登录</div>
         }
       </div>
-      <Modal show={showLoginModal} onClose={onModalClose} title="第三方登录授权">
+      <Modal show={showLoginModal} onClose={onModalClose} title="登录授权">
         <div className="flex items-center justify-center flex-col mx-auto mt-[20px] w-[300px]">
           登录后即可创建专属甘特图空间
+
+          <PhoneLogin className="w-[300px] mt-[20px]" />
+
           <a className="github-login block border flex items-center justify-center hover:bg-gray-300 w-full mt-[20px] h-[60px]" noreferer="true" href={`https://github.com/login/oauth/authorize?login&client_id=${process.env.GANTE_GITHUB_CLIENT_ID}&scope=user`} >
             <i className="w-[36px] h-[36px] bg-[url(/github-mark.png)] bg-contain bg-no-repeat mr-[10px]"></i>
             Github
           </a>
+
+
         </div>
       </Modal>
     </div>

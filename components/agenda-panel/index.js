@@ -118,7 +118,7 @@ function TodoCard({ todo, className, preview }) {
   // 过期了多久
   const outdate = useMemo(() => {
     if  (todo.schedule) {
-      return dayjs().diff(todo.schedule, 'day');
+      return dayjs(todo.doneTime).diff(todo.schedule, 'day');
     }
     return 0;
   }, [todo]);
@@ -207,6 +207,9 @@ function TodoCard({ todo, className, preview }) {
             </div>
             <div className={classNames("text-[12px] flex", { hidden: !todo.schedule })}>
               schedule: <div className="ml-2 flex-grow">{dayjs(todo?.schedule).format('YYYY-MM-DD')}</div>
+            </div>
+            <div className={classNames("text-[12px] flex", { hidden: todo.headline === 'todo'})}>
+              closed:  <div className="ml-2 flex-grow">{dayjs(todo?.doneTime).format('YYYY-MM-DD')}</div>
             </div>
             <div className={classNames("text-[12px] flex", { hidden: !todo.deadline })}>
               deadline: <div className="ml-2 flex-grow">无</div>
@@ -328,7 +331,7 @@ export default function AgentPanel({ className }) {
           <div className="text-[12px]">3天后待办: <span>开始阅读 +3</span></div>
           <div className="text-[12px]">10月5日待办: <span>开始阅读 10.5</span></div>
           <div className="text-[12px]">明天开始并每周重复: <span>开始阅读+1/7</span></div>
-          <input placeholder="检查每日待办+1/1" name="ipt" onChange={onChange} className="w-full text-[12px] h-[30px] rounded my-2 px-2 border" type="text" />
+          <input autoFocus placeholder="检查每日待办+1/1" name="ipt" onChange={onChange} className="w-full text-[12px] h-[30px] rounded my-2 px-2 border" type="text" />
           {
             confirmTodo ? (
               <div className="whitespace-nowrap text-[12px] border border-red-500 p-2">
