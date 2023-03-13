@@ -75,17 +75,21 @@ function Header({ children, className, user, side, ganteRef }) {
   }
 
   return (
-    <div className="z-10  text-[#f0f0f0] left-0 absolute right-0 pr-2 pt-2">
+    <div className="z-10  text-black left-0 absolute right-0 pr-2 pt-2">
       <div className="flex items-center">
         <ul className="flex ml-10">
-          <li className="ml-[15px] cursor-pointer">
+          <li className="ml-[15px] cursor-pointer flex items-center">
             <Link href="https://github.com/Qquanwei/gante">
               Github
             </Link>
+            <div className="border border-l-black w-[1px] h-[20px] inline-block mx-4 hidden"></div>
+            <Link href="/charge" className="ml-2 hidden">赞助</Link>
           </li>
         </ul>
         <div className="ml-auto">
-          <User user={user} />
+          {
+            user && <User user={user} />
+          }
           { children }
         </div>
       </div>
