@@ -57,5 +57,17 @@ module.exports = {
     });
 
     return rid;
+  },
+
+  generateCaptchaNumber() {
+    let s = '';
+    while (s.length < 6) {
+      const n = Math.floor(Math.random()*10);
+      if (n === 4) {
+        continue;
+      }
+      s += n;
+    }
+    return s;
   }
 };
