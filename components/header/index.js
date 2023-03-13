@@ -87,9 +87,7 @@ function Header({ children, className, user, side, ganteRef }) {
           </li>
         </ul>
         <div className="ml-auto">
-          {
-            user && <User user={user} />
-          }
+          <User user={user} />
           { children }
         </div>
       </div>
