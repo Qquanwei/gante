@@ -68,7 +68,7 @@ function PhoneLogin({ className }) {
         <input className="mx-2 p-2 focus:outline-none rounded h-[50px] w-[160px]" name="ipt" type="text" />
         <button type="submit" className={classNames("whitespace-nowrap ml-2 flex items-center cursor-pointer select-none hover:text-sky-500 transition-all", {
           'opacity-5': loading
-        })}>{ showCaptcha ? Math.floor((outTime - Date.now()) / 1000) + 's' : '立即登录'}
+        })}>{ outTime > Date.now() ? Math.floor((outTime - Date.now()) / 1000) + 's' : '立即登录'}
           <div className={classNames('text-red-500 text-[12px] absolute bottom-0 left-[40px] ml-2', { hidden: !error})}>{ error }</div>
         </button>
       </form>

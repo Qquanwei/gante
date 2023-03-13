@@ -6,7 +6,6 @@ const bodyParser = require('koa-bodyparser');
 const config = require('../config');
 const helper = require('./helpers');
 
-
 const router = new Router({
   prefix: '/api'
 });
@@ -198,6 +197,8 @@ router.post('/reg', async (ctx, next) => {
   }
 });
 
+const sms = require('./sms');
+
 router.post('/captcha', async (ctx, next) => {
   const { phone } = ctx.request.body;
   if (!/^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/.test(phone)) {
@@ -217,6 +218,10 @@ router.post('/captcha', async (ctx, next) => {
 
   if (!captchaItem) {
     const num = helper.generateCaptchaNumber();
+    await sms.sendCaptchaSms({
+      phone,
+      number: num
+    });
     await captcha.insertOne({
       phone,
       sendTime: Date.now(),

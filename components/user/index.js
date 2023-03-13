@@ -44,6 +44,9 @@ function User({ user }) {
         {
           isLogin ? (
             <Menu menuButton={<MenuButton><img src={user.avatar} className="rounded border-box hover:border-2 border-sky-500" width="50" height="50" /></MenuButton>} transition>
+              <MenuItem disabled>
+                个人中心(暂未开放)
+              </MenuItem>
               <MenuHeader>登录操作</MenuHeader>
               <MenuDivider />
               <Link href="/quit">

@@ -10,6 +10,10 @@
     "test": "cross-env NODE_ENV=unittest jest"
   },
   "dependencies": {
+    "@alicloud/dysmsapi20170525": "^2.0.23",
+    "@alicloud/openapi-client": "^0.4.5",
+    "@alicloud/pop-core": "^1.7.12",
+    "@alicloud/tea-util": "^1.4.5",
     "@headlessui/react": "^1.6.6",
     "@heroicons/react": "^2.0.8",
     "@material-tailwind/react": "^1.2.4",
