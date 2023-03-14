@@ -46,7 +46,7 @@ export default React.memo(function CursorCanvas() {
       }
       if (!mouseDown) {
         local.submit({
-          user: user?.userName,
+          user: user?.userName || user?.phone ? user.phone.slice(-4) : '',
           position: getPosition(graphRef.current, e),
           count: 1
         });
