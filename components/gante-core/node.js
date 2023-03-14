@@ -194,7 +194,8 @@ const Node = React.memo(({id, index }) => {
         background: item.color || '#eee'
       }}>
       <div className={classNames("flex-start h-full", {
-        'opacity-0': !hover || item.lock
+        'opacity-0': !hover,
+        hidden: item.lock
       })}
         data-role="left-dragger">
         <DraggleBar />
@@ -226,7 +227,8 @@ const Node = React.memo(({id, index }) => {
       </div>
 
       <div className={classNames("flex-end h-full",{
-        'opacity-0': !hover || item.lock
+        'opacity-0': !hover,
+        hidden: item.lock
       })}
         data-role="right-dragger">
         <DraggleBar />
