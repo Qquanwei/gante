@@ -46,8 +46,8 @@ export function parseTodoStr(str, today) {
   const onlyRepeat = /\/\d$/;
   const date1 = /\d+$/;
   const date2 = /\d+\.\d+$/;
-  const dateAndRepeat = /[1-9 ]+\.[0-9 ]+\/[0-9 ]+$/;
-  const date2AndRepeat = /[1-9]+ {0,}\/[0-9 ]+/;
+  const dateAndRepeat = /[0-9 ]+\.[0-9 ]+\/[0-9 ]+$/;
+  const date2AndRepeat = /[0-9]+ {0,}\/[0-9 ]+/;
 
   const todo = {
     headline: 'todo',
@@ -82,9 +82,9 @@ export function parseTodoStr(str, today) {
     todo.repeat = Number(repeat.trim());
     const day = Number(date.trim());
     if (today.date() > day) {
-      todo.schedule = dayjs(today).add(1, 'month').set('date', day);
+      todo.schedule = today.add(1, 'month').set('date', day);
     } else {
-      todo.schedule = dayjs(today).set('date', day);
+      todo.schedule = today.set('date', day);
     }
     todo.title = str.slice(0, group.index).trim();
   } else if (onlyRepeat.test(str)){
