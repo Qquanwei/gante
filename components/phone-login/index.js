@@ -62,7 +62,7 @@ function PhoneLogin({ className }) {
   }, [phone]);
 
   return (
-    <div className={classNames("border-2 border-sky-500 rounded-md px-2 mx-2 transition-all", className)}>
+    <div className={classNames("focus-within:border-sky-500 border-2 border-gray-300/40 rounded-md px-2 mx-2 transition-all", className)}>
       <form className="relative flex items-center" onSubmit={onPhoneSubmit}>
         <span>+86</span>
         <input className="mx-2 p-2 focus:outline-none rounded h-[50px] w-[160px]" name="ipt" type="text" />
