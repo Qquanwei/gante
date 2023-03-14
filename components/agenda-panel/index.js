@@ -43,10 +43,11 @@ export function parseTodoStr(str, today) {
    */
   const scheduleAndRepat = /^.*\+[0-9 ]+\/[0-9 ]+$/;
   const onlySchedule = /^.*\+\d$/;
-  const onlyRepeat = /^.*\/\d$/;
+  const onlyRepeat = /\/\d$/;
   const date1 = /\d+$/;
   const date2 = /\d+\.\d+$/;
   const dateAndRepeat = /[1-9 ]+\.[0-9 ]+\/[0-9 ]+$/;
+  const date2AndRepeat = /[1-9]+ {0,}\/[0-9 ]+/;
 
   const todo = {
     headline: 'todo',
@@ -75,12 +76,23 @@ export function parseTodoStr(str, today) {
     todo.schedule = schedule;
     todo.title = str.slice(0, group.index).trim();
 
+  } else if (date2AndRepeat.test(str)) {
+    const group = date2AndRepeat.exec(str);
+    const [date, repeat] = group[0].split('/');
+    todo.repeat = Number(repeat.trim());
+    const day = Number(date.trim());
+    if (today.date() > day) {
+      todo.schedule = dayjs(today).add(1, 'month').set('date', day);
+    } else {
+      todo.schedule = dayjs(today).set('date', day);
+    }
+    todo.title = str.slice(0, group.index).trim();
   } else if (onlyRepeat.test(str)){
     const lastIdx = str.lastIndexOf('/');
     todo.title = str.slice(0, lastIdx).trim();
     todo.repeat = Number(str.slice(lastIdx + 1).trim());
     todo.schedule = today;
-  } else if (onlySchedule.test(str)) {
+  }  else if (onlySchedule.test(str)) {
     const lastIdx = str.lastIndexOf('+');
     const schedule = Number(str.slice(lastIdx + 1));
     todo.title = str.slice(0, lastIdx).trim();
@@ -108,7 +120,7 @@ export function parseTodoStr(str, today) {
   if (todo.schedule) {
     todo.schedule = todo.schedule.toString();
   } else {
-    todo.schedule = dayjs().toString();
+    todo.schedule = today.toString();
   }
   return todo;
 }
@@ -362,7 +374,7 @@ export default function AgentPanel({ className }) {
             })
           }
           <div className="border-t w-full border-gray-300/50"></div>
-          <div className="mt-[20px] text-[12px] text-sky-500">所有待办清单</div>
+          <div className="mt-[20px] text-[12px] text-orange-500">所有待办清单</div>
           {
             [...agent.todo].reverse().map((todo, index) => {
               return (

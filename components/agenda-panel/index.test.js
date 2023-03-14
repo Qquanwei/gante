@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 
 describe('agenda-panel', () => {
   describe('parseTodoStr', () => {
-    const today = dayjs('Mon Mar 06 2023 19:17:39 GMT+0800 (中国标准时间)');
+    const today = dayjs('2023 03 08');
 
     it ('case1', () => {
       const todo = parseTodoStr('abc +3', today);
@@ -37,8 +37,7 @@ describe('agenda-panel', () => {
 
     it ('case5', () => {
       const todo = parseTodoStr('abc 12', today);
-      // 今天是6号
-      expect(today.add(6, 'day').isSame(todo.schedule, 'day')).toBe(true);
+      expect(dayjs('2023 03 12').isSame(todo.schedule, 'day')).toBe(true);
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
       expect(todo.repeat).toEqual(0);
@@ -47,7 +46,6 @@ describe('agenda-panel', () => {
 
     it ('case6', () => {
       const todo = parseTodoStr('abc 5', today);
-      // 今天是6号
       expect(today.set('date', 5).add(1, 'month').isSame(todo.schedule, 'day')).toBe(true);
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
@@ -57,7 +55,6 @@ describe('agenda-panel', () => {
 
     it ('case7', () => {
       const todo = parseTodoStr('abc5', today);
-      // 今天是6号
       expect(today.set('date', 5).add(1, 'month').isSame(todo.schedule, 'day')).toBe(true);
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
@@ -67,47 +64,42 @@ describe('agenda-panel', () => {
 
     it ('case8', () => {
       const todo = parseTodoStr('abc5.3', today);
-      // 今天是6号
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
       expect(todo.repeat).toEqual(0);
       expect(todo.deadline).toEqual('');
-      expect(today.set('date', 3).set('month', 5).isSame(todo.schedule, 'day')).toBe(true);
+      expect(dayjs('2023 05 03').isSame(todo.schedule, 'day')).toBe(true);
     });
 
     it ('case9', () => {
       const todo = parseTodoStr('abc 5.3', today);
-      // 今天是6号
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
       expect(todo.repeat).toEqual(0);
       expect(todo.deadline).toEqual('');
-      expect(today.set('date', 3).set('month', 5).isSame(todo.schedule, 'day')).toBe(true);
+      expect(dayjs('2023 05 03').isSame(todo.schedule, 'day')).toBe(true);
     });
 
     it ('case10', () => {
       const todo = parseTodoStr('abc 5.3/3', today);
-      // 今天是6号
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
       expect(todo.repeat).toEqual(3);
       expect(todo.deadline).toEqual('');
-      expect(today.set('date', 3).set('month', 5).isSame(todo.schedule, 'day')).toBe(true);
+      expect(dayjs('2023 05 03').isSame(todo.schedule, 'day')).toBe(true);
     });
 
     it ('case11', () => {
       const todo = parseTodoStr('abc 5.3 / 3', today);
-      // 今天是6号
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
       expect(todo.repeat).toEqual(3);
       expect(todo.deadline).toEqual('');
-      expect(today.set('date', 3).set('month', 5).isSame(todo.schedule, 'day')).toBe(true);
+      expect(dayjs('2023 05 03').isSame(todo.schedule, 'day')).toBe(true);
     });
 
     it ('case12', () => {
       const todo = parseTodoStr('abc /3', today);
-      // 今天是6号
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
       expect(todo.repeat).toEqual(3);
@@ -117,12 +109,38 @@ describe('agenda-panel', () => {
 
     it ('case13', () => {
       const todo = parseTodoStr('abc', today);
-      // 今天是6号
       expect(todo.title).toEqual('abc');
       expect(todo.headline).toEqual('todo');
       expect(todo.repeat).toEqual(0);
       expect(todo.deadline).toEqual('');
-      expect(todo.schedule).toBe('');
+      expect(dayjs(todo.schedule).isSame(today, 'day')).toBe(true);
+    });
+
+    it ('case14', () => {
+      const todo = parseTodoStr('abc 18/2', today);
+      expect(todo.title).toEqual('abc');
+      expect(todo.headline).toEqual('todo');
+      expect(todo.repeat).toEqual(2);
+      expect(todo.deadline).toEqual('');
+      expect(dayjs(todo.schedule).isSame(dayjs('2023 03 18'), 'day')).toBe(true);
+    });
+
+     it ('case15', () => {
+      const todo = parseTodoStr('abc 18 / 2', today);
+      expect(todo.title).toEqual('abc');
+      expect(todo.headline).toEqual('todo');
+      expect(todo.repeat).toEqual(2);
+      expect(todo.deadline).toEqual('');
+      expect(dayjs(todo.schedule).isSame(dayjs('2023 03 18'), 'day')).toBe(true);
+     });
+
+    it ('case15', () => {
+      const todo = parseTodoStr('abc 1 / 2', today);
+      expect(todo.title).toEqual('abc');
+      expect(todo.headline).toEqual('todo');
+      expect(todo.repeat).toEqual(2);
+      expect(todo.deadline).toEqual('');
+      expect(dayjs(todo.schedule).isSame(dayjs('2023 04 01'), 'day')).toBe(true);
     });
 
   });
