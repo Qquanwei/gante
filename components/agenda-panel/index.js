@@ -126,7 +126,7 @@ export function parseTodoStr(str, today) {
 }
 
 // preview 表示这是一个临时的todo
-function TodoCard({ todo, className, preview }) {
+function TodoCard({ todo, className, preview, showArchive = true }) {
   // 过期了多久
   const outdate = useMemo(() => {
     if (todo.headline === 'done') {
@@ -247,7 +247,7 @@ function TodoCard({ todo, className, preview }) {
             <div className={classNames("absolute top-0 hover:bg-sky-300/70 right-0 bottom-0 w-[0px] rounded overflow-hidden bg-sky-100/50 flex items-center flex", {
               'group-hover:w-[100px] justify-around': true
             })} >
-              <span className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'todo'})} onClick={onClickArchive}>
+              <span className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'todo' || !showArchive})} onClick={onClickArchive}>
                 归档
               </span>
               <span className={classNames("p-1 hover:bg-gray-100 rounded", { hidden: todo.headline === 'done'})} onClick={onClickEdit}>
@@ -399,7 +399,7 @@ export default function AgentPanel({ className }) {
 
               return [...list].reverse().map((todo, index) => {
                 return (
-                  <TodoCard todo={todo} key={index} className="mb-4" />
+                  <TodoCard showArchive={filter2 !== 'resolve'} todo={todo} key={index} className="mb-4" />
                 )
               })
             })()
