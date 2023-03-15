@@ -129,6 +129,10 @@ export function parseTodoStr(str, today) {
 function TodoCard({ todo, className, preview }) {
   // 过期了多久
   const outdate = useMemo(() => {
+    if (todo.headline === 'done') {
+      return 0;
+    }
+
     if  (todo.schedule) {
       return dayjs(todo.doneTime).diff(todo.schedule, 'day');
     }
