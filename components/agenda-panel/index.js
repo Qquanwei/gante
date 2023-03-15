@@ -271,6 +271,7 @@ export default function AgentPanel({ className }) {
   const [confirmTodo, setConfirmTodo] = useState(null);
   const [prevIptValue, setPrevIptValue] = useState('');
   const [agendaDay, setAgendaDay] = useState('0');
+  const [filter2, setFilter2] = useState('all');
 
   const onSubmit = useCallback((e) => {
     e.stopPropagation();
@@ -300,6 +301,12 @@ export default function AgentPanel({ className }) {
 
   const onChange = useCallback(() => {
     setConfirmTodo(null);
+  }, []);
+
+  const onClickFilter2 = useCallback((e) => {
+    if (e.target.dataset.filter) {
+      setFilter2(e.target.dataset.filter);
+    }
   }, []);
 
   const todayAgendaList = useMemo(() => {
@@ -374,13 +381,23 @@ export default function AgentPanel({ className }) {
             })
           }
           <div className="border-t w-full border-gray-300/50"></div>
-          <div className="mt-[20px] text-[12px] text-orange-500">所有待办清单</div>
+          <div className="mt-[20px] text-[12px] " onClick={onClickFilter2}>
+            <span data-filter="all" className={classNames("cursor-pointer", filter2 === 'all' ? 'text-orange-500' : 'text-gray-300' )}>
+              所有待办清单
+            </span>
+            <span data-filter="resolve" className={classNames("mx-2 cursor-pointer", filter2 === 'resolve' ? 'text-orange-500' : 'text-gray-300')}>已归档</span>
+          </div>
           {
-            [...agent.todo].reverse().map((todo, index) => {
-              return (
-                <TodoCard todo={todo} key={index} className="mb-4" />
-              )
-            })
+            (() => {
+              const list = filter2 === 'resolve' ? agent.done : agent.todo;
+
+              return [...list].reverse().map((todo, index) => {
+                return (
+                  <TodoCard todo={todo} key={index} className="mb-4" />
+                )
+              })
+            })()
+
           }
         </div>
       </ul>
