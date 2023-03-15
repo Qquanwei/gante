@@ -134,7 +134,7 @@ function TodoCard({ todo, className, preview }) {
     }
 
     if  (todo.schedule) {
-      return dayjs(todo.doneTime).diff(todo.schedule, 'day');
+      return dayjs().startOf('day').diff(dayjs(todo.schedule).startOf('day'), 'day');
     }
     return 0;
   }, [todo]);
@@ -315,7 +315,7 @@ export default function AgentPanel({ className }) {
 
   const todayAgendaList = useMemo(() => {
     const today = dayjs().add(agendaDay, 'day');
-    return agent.todo.filter((todo) => {
+    const todos = agent.todo.filter((todo) => {
       if (!todo) {
         return false;
       }
@@ -336,7 +336,9 @@ export default function AgentPanel({ className }) {
       }
 
       return dayjs(todo.schedule).isSameOrBefore(today, 'day');
-    }, []);
+    });
+    // 将 done 置底
+    return [].concat( todos.filter(t => t.headline === 'done'), todos.filter(t => t.headline === 'todo'));
   }, [agent, agendaDay]);
 
   const onClickAgendaDay = useCallback((e) => {
