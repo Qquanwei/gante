@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { useRecoilValue, useRecoilCallback } from 'recoil';
 import * as atoms from './atom';
 import isBetween from 'dayjs/plugin/isBetween';
+import useListener from '../../event-system/useListener';
 import classNames from 'classnames';
 import useCurrentDate from './useCurrentDate';
 import useGante from './useGante';
@@ -24,6 +25,7 @@ const TimelinePerf = React.memo(({
   inRange,
   currentTime,
   todayRef,
+  containerRef,
   previewPin,
   onDragEnter,
   onDragLeave,
@@ -33,6 +35,10 @@ const TimelinePerf = React.memo(({
   getDaySubtitle,
   pins
 }) => {
+  useListener(containerRef, 'pin/drop', (e) => {
+    console.log('drop e', e);
+  });
+
   return useMemo(() => {
     let ans = [];
     const totalDays = utils.getRangeDays(startTime, endTime) + 1;
@@ -50,11 +56,8 @@ const TimelinePerf = React.memo(({
                ["bg-sky-200/20"]: weekend && range,
                ['bg-sky-200/70']: previewPin === day.toString()
              })}
+             data-x="pin/drop"
              data-day={day.toString()}
-             onDragOver={e => e.preventDefault()}
-             onDragEnter={onDragEnter}
-             onDragLeave={onDragLeave}
-             onDrop={onDrop}
              style={{
                width: SPOT_WIDTH,
              }} key={i}>
@@ -67,8 +70,10 @@ const TimelinePerf = React.memo(({
         </div>
       );
     }
-    return ans;
-  }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin, pins]);
+    return (
+      ans
+    );
+  }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle,  previewPin, pins]);
 }, () => {
   return busy;
 });
@@ -175,56 +180,44 @@ export default React.memo(function Timeline({ children }) {
     }
   }, []);
 
-  const onDragEnter = useCallback((e) => {
-    setPreviewPin(e.currentTarget.dataset.day);
-  }, []);
-
-  const onDragLeave = useCallback((e) => {
-    setPreviewPin(oldValue => {
-      if (e.currentTarget && e.currentTarget.dataset.day === oldValue) {
-        return null;
-      }
-      return oldValue;
-    });
-  }, []);
-
   const addPin = actions.useAddPin();
   const updatePin = actions.useUpdatePinContent();
-  const onDrop = useCallback((e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    const transferDataString = e.dataTransfer.getData('text/plain');
+  // const onDrop = useCallback((e) => {
+  //   e.stopPropagation();
+  //   e.preventDefault();
+  //   const transferDataString = e.dataTransfer.getData('text/plain');
 
-    try {
-      const transferObject = JSON.parse(transferDataString);
-      if (transferObject.type === 'pin') {
-        if (e.currentTarget && e.currentTarget.dataset.day) {
-          const pin = isThisDayPin(dayjs(e.currentTarget.dataset.day));
-          if (!pin) {
-            if (transferObject.pinIdx === -1) {
-              addPin('timeline', e.currentTarget.dataset.day);
-            } else {
-              updatePin(transferObject.pinIdx, {
-                day: e.currentTarget.dataset.day
-              });
-            }
-          }
-        }
-      }
-    } catch(e) {
-      return null;
-    }
-  }, [isThisDayPin]);
+  //   try {
+  //     const transferObject = JSON.parse(transferDataString);
+  //     if (transferObject.type === 'pin') {
+  //       if (e.currentTarget && e.currentTarget.dataset.day) {
+  //         const pin = isThisDayPin(dayjs(e.currentTarget.dataset.day));
+  //         if (!pin) {
+  //           if (transferObject.pinIdx === -1) {
+  //             addPin('timeline', e.currentTarget.dataset.day);
+  //           } else {
+  //             updatePin(transferObject.pinIdx, {
+  //               day: e.currentTarget.dataset.day
+  //             });
+  //           }
+  //         }
+  //       }
+  //     }
+  //   } catch(e) {
+  //     return null;
+  //   }
+  // }, [isThisDayPin]);
+
+  const containerRef = useRef(null);
 
   return (
-    <div>
-      <div className="sticky shadow flex flex-nowrap top-0 z-10 bg-white pb-5">
+    <div ref={containerRef}>
+      <div
+        className="sticky shadow flex flex-nowrap top-0 z-10 bg-white pb-5">
         <TimelinePerf
+          containerRef={containerRef}
           todayRef={todayRef}
           previewPin={previewPin}
-          onDragEnter={onDragEnter}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
           getDayTitle={getDayTitle}
           getDaySubtitle={getDaySubtitle}
           pins={pins}

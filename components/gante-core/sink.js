@@ -180,7 +180,7 @@ export default React.memo(function Sink() {
 
 
   return (
-    <div ref={sinkRef} className="relative" >
+    <div ref={sinkRef} className="relative">
       <svg
         ref={grabElementRef}
         width="100%"

@@ -206,6 +206,8 @@ function TodoCard({ todo, className, preview, showArchive = true }) {
 
   return (
     <div
+      data-x="agenda-item/drag:opacity-50"
+      draggable="true"
       className={classNames("transition-all relative group mt-2 pt-2 min-h-[50px] text-[12px] flex justify-center flex-col px-2 cursor-pointer ", className, {
         'bg-gray-100': todo.headline === 'todo',
         'bg-sky-100': todo.headline === 'done'
@@ -366,7 +368,7 @@ export default function AgentPanel({ className }) {
             ) : null
           }
         </form>
-        <div className="flex-grow overflow-auto pb-[80px] select-none">
+        <div data-x="agenda-item/drop:border.border-sky-500" className="flex-grow overflow-auto pb-[80px] select-none">
           <div className="text-[12px]" onClick={onClickAgendaDay}>
             <span data-day="0"
               className={classNames('cursor-pointer px-2', agendaDay === '0' ? 'text-orange-300' : 'text-gray-300')}>

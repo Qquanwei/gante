@@ -14,7 +14,6 @@ export default React.memo(function Pin({ className, pin, dragMode, showPin, styl
   const removePin = actions.useRemovePin();
   const data = pin;
   const formRef = useRef(null);
-  const [hiddenIcon, setHiddenIcon] = useState(false);
 
   const fixed = data?.fixed === 'enable';
 
@@ -32,21 +31,6 @@ export default React.memo(function Pin({ className, pin, dragMode, showPin, styl
   const onClickDelete = useCallback(() => {
     removePin(data.pinIdx);
   }, [data]);
-
-  const onDragPinStart = useCallback((event) => {
-    event.dataTransfer.setData('text/plain', JSON.stringify({ type: 'pin', pinIdx: data ? data.pinIdx : -1 }));
-    event.dataTransfer.setDragImage(event.currentTarget, 10, 10);
-
-    if (dragMode === 'move') {
-      setHiddenIcon(true);
-    }
-  }, [dragMode, data?.pinIdx]);
-
-  const onDragPinEnd = useCallback(() => {
-    if (hiddenIcon) {
-      setHiddenIcon(false);
-    }
-  }, [hiddenIcon]);
 
   const onClick = useCallback((e) => {
     e.stopPropagation();
@@ -79,14 +63,12 @@ export default React.memo(function Pin({ className, pin, dragMode, showPin, styl
       )}>
       <div
         draggable="true"
+        data-x="pin/drag:opacity-50"
+        data-x-drag-data={JSON.stringify({type: 'pin', pinIdx: pin?.pinIdx || -1})}
         style={style}
         title={data?.content}
         onClick={onClick}
-        onDragStart={onDragPinStart}
-        onDragEnd={onDragPinEnd}
-        className={classNames("cursor-pointer w-[20px] bg-transparent h-[20px] bg-[url(/tuding.png)] bg-contain", className, {
-          ['opacity-50']: hiddenIcon
-        })}>
+        className={classNames("cursor-pointer w-[20px] bg-transparent h-[20px] bg-[url(/tuding.png)] bg-contain", className)}>
       </div>
     </Popup>
   );

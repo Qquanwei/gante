@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, Fragment } from 'react';
+import { useEffect, useRef, useCallback, useState, Fragment } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import classNames from 'classnames';
@@ -8,10 +8,11 @@ import { Container, LeftSide, Content } from '../components/layout';
 import { GanteProvider, GanteGraph, StatusBar } from '../components/gante-core';
 import dynamic from 'next/dynamic';
 import config from '../config';
+import ES from '../event-system';
 
 const Editor = dynamic(() => Promise.resolve(
   function Editor({ user, count, exceed, hasPrivilege }) {
-    console.log('count:', count);
+    const containerRef = useRef(null);
     const query = qs.parse(window.location.search.slice(1));
     const ganteRef = useRef(null);
 
@@ -20,6 +21,10 @@ const Editor = dynamic(() => Promise.resolve(
         <div>当前文档已超过最大同时在线人数 { count }</div>
       );
     }
+
+    useEffect(() => {
+      return ES().attachDOM(containerRef.current);
+    }, []);
 
     if (!hasPrivilege) {
       return (
@@ -37,8 +42,7 @@ const Editor = dynamic(() => Promise.resolve(
     }
 
     return (
-      <div>
-
+      <div ref={containerRef}>
         <div className="w-full h-full text-black">
           <GanteProvider user={user} docId={query.id} ref={ganteRef}>
             <Header user={user} side="left" ganteRef={ganteRef} />
