@@ -180,12 +180,13 @@ export default React.memo(function Sink() {
 
 
   return (
-    <div ref={sinkRef} className="relative">
+    <div ref={sinkRef} className="relative" >
       <svg
         ref={grabElementRef}
         width="100%"
         height="100%"
         onClick={onClickEmptySVG}
+        data-x="pin/drop.!opacity-50"
         style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
         <g>
           {

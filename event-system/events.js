@@ -1,0 +1,1 @@
+export const MOVE = 'inner-move';

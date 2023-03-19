@@ -487,14 +487,14 @@ function StateMachine({ nodeId, element, graphElement, onChange, SPOT_WIDTH, SIN
     this.element.addEventListener('dragleave', this.onDragLeave);
     this.element.addEventListener('drop', this.onDrop);
   }
-  this.element.addEventListener('click', this.onClick);
-  this.element.addEventListener('mouseover', this.onMouseOver);
-  this.element.addEventListener('mouseleave', this.onMouseLeave);
-  this.element.addEventListener('mousedown', this.onMouseDown);
-  this.graphElement.addEventListener('interaction-mouseover', this.onInteractionMouseOver);
-  this.graphElement.addEventListener('interaction-mouseleave', this.onInteractionMouseLeave);
-  this.graphElement.addEventListener('mouseup', this.onMouseUp);
-  this.graphElement.addEventListener('mousemove', this.onMouseMove, { passive: true });
+  // this.element.addEventListener('click', this.onClick);
+  // this.element.addEventListener('mouseover', this.onMouseOver);
+  // this.element.addEventListener('mouseleave', this.onMouseLeave);
+  // this.element.addEventListener('mousedown', this.onMouseDown);
+  // this.graphElement.addEventListener('interaction-mouseover', this.onInteractionMouseOver);
+  // this.graphElement.addEventListener('interaction-mouseleave', this.onInteractionMouseLeave);
+  // this.graphElement.addEventListener('mouseup', this.onMouseUp);
+  // this.graphElement.addEventListener('mousemove', this.onMouseMove, { passive: true });
 
   this.currentState = new NormalState();
   this.currentState.machine = this;

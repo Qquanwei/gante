@@ -368,7 +368,7 @@ export default function AgentPanel({ className }) {
             ) : null
           }
         </form>
-        <div data-x="agenda-item/drop:border.border-sky-500" className="flex-grow overflow-auto pb-[80px] select-none">
+        <div data-x="agenda-item/drop.border.border-sky-500" className="flex-grow overflow-auto pb-[80px] select-none">
           <div className="text-[12px]" onClick={onClickAgendaDay}>
             <span data-day="0"
               className={classNames('cursor-pointer px-2', agendaDay === '0' ? 'text-orange-300' : 'text-gray-300')}>

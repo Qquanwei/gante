@@ -20,6 +20,7 @@ import { busy } from './use-interaction-event';
   这个组件每次重绘性能开销最大，尽量减少不必要的性能开销
 */
 const TimelinePerf = React.memo(({
+  isThisDayPin,
   startTime,
   endTime,
   inRange,
@@ -27,16 +28,32 @@ const TimelinePerf = React.memo(({
   todayRef,
   containerRef,
   previewPin,
-  onDragEnter,
-  onDragLeave,
-  onDrop,
   SPOT_WIDTH,
   getDayTitle,
   getDaySubtitle,
   pins
 }) => {
+  const addPin = actions.useAddPin();
+  const updatePin = actions.useUpdatePinContent();
+
   useListener(containerRef, 'pin/drop', (e) => {
-    console.log('drop e', e);
+    try {
+      const data = JSON.parse(e.detail.transferData);
+      const pin = isThisDayPin(dayjs(e.target.dataset.day));
+      if (!pin) {
+        if (data.pinIdx === -1) {
+          addPin('timeline', e.target.dataset.day);
+        } else {
+          updatePin(data.pinIdx, {
+            day: e.target.dataset.day
+          });
+        }
+      }
+
+    } catch(e) {
+      // pass
+      console.error('parse error:', e);
+    }
   });
 
   return useMemo(() => {
@@ -56,7 +73,7 @@ const TimelinePerf = React.memo(({
                ["bg-sky-200/20"]: weekend && range,
                ['bg-sky-200/70']: previewPin === day.toString()
              })}
-             data-x="pin/drop"
+             data-x="pin/drop pin/dragover.!bg-red-300"
              data-day={day.toString()}
              style={{
                width: SPOT_WIDTH,
@@ -180,41 +197,15 @@ export default React.memo(function Timeline({ children }) {
     }
   }, []);
 
-  const addPin = actions.useAddPin();
-  const updatePin = actions.useUpdatePinContent();
-  // const onDrop = useCallback((e) => {
-  //   e.stopPropagation();
-  //   e.preventDefault();
-  //   const transferDataString = e.dataTransfer.getData('text/plain');
-
-  //   try {
-  //     const transferObject = JSON.parse(transferDataString);
-  //     if (transferObject.type === 'pin') {
-  //       if (e.currentTarget && e.currentTarget.dataset.day) {
-  //         const pin = isThisDayPin(dayjs(e.currentTarget.dataset.day));
-  //         if (!pin) {
-  //           if (transferObject.pinIdx === -1) {
-  //             addPin('timeline', e.currentTarget.dataset.day);
-  //           } else {
-  //             updatePin(transferObject.pinIdx, {
-  //               day: e.currentTarget.dataset.day
-  //             });
-  //           }
-  //         }
-  //       }
-  //     }
-  //   } catch(e) {
-  //     return null;
-  //   }
-  // }, [isThisDayPin]);
-
   const containerRef = useRef(null);
 
   return (
     <div ref={containerRef}>
       <div
+        data-x="pin/drop.!shadow.transition-all"
         className="sticky shadow flex flex-nowrap top-0 z-10 bg-white pb-5">
         <TimelinePerf
+          isThisDayPin={isThisDayPin}
           containerRef={containerRef}
           todayRef={todayRef}
           previewPin={previewPin}

@@ -1,9 +1,9 @@
 import StateManage from './state';
+import parseX from './parsex';
+
 
 function EventSystem() {
   let dropTree = {};
-
-
 
   function domNotify(mutationList) {
     mutationList.forEach((mutation) => {
@@ -15,12 +15,14 @@ function EventSystem() {
           const allDataNodes = node.querySelectorAll('[data-x]');
           requestAnimationFrame(() => {
             allDataNodes.forEach((node) => {
-              const config = parseX(node.dataset.x);
-              if (config.groupName) {
-                node.setAttribute(`data-inner-${config.groupName}-${config.eventName}`, true);
-              } else {
-                node.setAttribute(`data-inner-${config.eventName}`, true);
-              }
+              const configs = parseX(node.dataset.x);
+              configs.forEach(config => {
+                if (config.groupName) {
+                  node.setAttribute(`data-inner-${config.groupName}-${config.eventName}`, true);
+                } else {
+                  node.setAttribute(`data-inner-${config.eventName}`, true);
+                }
+              });
             });
           });
         });

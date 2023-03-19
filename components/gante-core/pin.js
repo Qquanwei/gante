@@ -63,7 +63,7 @@ export default React.memo(function Pin({ className, pin, dragMode, showPin, styl
       )}>
       <div
         draggable="true"
-        data-x="pin/drag:opacity-50"
+        data-x="pin/drag.opacity-50"
         data-x-drag-data={JSON.stringify({type: 'pin', pinIdx: pin?.pinIdx || -1})}
         style={style}
         title={data?.content}

@@ -178,6 +178,7 @@ const Node = React.memo(({id, index }) => {
   return (
     <div ref={ref}
       data-id={`node-${item.id}`}
+      data-x="pin/drop.!opacity-50 move-x.!transition-none"
       className={classNames("absolute transition-all duration-150 select-none text-left flex items-center box-border whitespace-nowrap cursor-pointer", {
         'rounded': !item.lock,
         "z-10": hover,
