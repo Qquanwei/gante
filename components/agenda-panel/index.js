@@ -141,7 +141,7 @@ function TodoCard({ todo, className, preview, showArchive = true }) {
 
   const outdateStyle = {
     'text-stone-800': outdate > 0 && outdate < 10,
-    'text-fuchsia-500': outdate >= 10 && outdate < 20,
+    'text-[#a77880]': outdate >= 10 && outdate < 20,
     'text-red-500': outdate >= 20
   };
 
