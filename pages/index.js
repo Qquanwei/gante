@@ -74,7 +74,14 @@ export default function Home({ user }) {
                 </div>
               </div>
               <div className="mt-[50px] sm:mt-0 w-[1766px] h-[976px] bg-[url(/gante2.png)] bg-cover bg-no-repeat"></div>
+
+
             </div>
+
+          </div>
+
+          <div className="my-[50px] px-[50px] text-[14px] text-center text-gray-500">
+            ©版权所有：<a href="https://beian.miit.gov.cn/" target="_blank" className="ml-2">浙ICP备2022024285号-1</a>
           </div>
         </div>
       </main>
