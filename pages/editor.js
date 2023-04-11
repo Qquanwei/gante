@@ -4,6 +4,7 @@ import Link from 'next/link';
 import classNames from 'classnames';
 import qs from 'qs';
 import Header from 'components/header';
+import SuggestModal from 'components/suggest-modal';
 import { Container, LeftSide, Content } from '../components/layout';
 import { GanteProvider, GanteGraph, StatusBar } from '../components/gante-core';
 import dynamic from 'next/dynamic';
@@ -11,9 +12,17 @@ import config from '../config';
 
 const Editor = dynamic(() => Promise.resolve(
   function Editor({ user, count, exceed, hasPrivilege }) {
-    console.log('count:', count);
     const query = qs.parse(window.location.search.slice(1));
     const ganteRef = useRef(null);
+    const [showSuggest, setShowSuggest] = useState(false);
+
+    const onClickSuggest = useCallback(() => {
+      setShowSuggest(true);
+    }, []);
+
+    const onCloseSuggest = useCallback(() => {
+      setShowSuggest(false);
+    }, []);
 
     if (exceed) {
       return (
@@ -46,7 +55,12 @@ const Editor = dynamic(() => Promise.resolve(
               <Content>
                 <GanteGraph />
               </Content>
-              <StatusBar className="fixed bottom-0 left-0 right-0 z-10 select-none" />
+              <StatusBar className="fixed bottom-0 left-0 right-0 z-10 select-none">
+                <span className="hover:text-orange-300 text-[12px] ml-auto cursor-pointer" onClick={onClickSuggest}>
+                    产品建议
+                </span>
+              </StatusBar>
+              <SuggestModal show={showSuggest} onClose={onCloseSuggest} />
             </Container>
           </GanteProvider>
         </div>

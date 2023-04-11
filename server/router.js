@@ -33,8 +33,6 @@ router.get('/cb/login/github', async (ctx, next) => {
   // github 临时 code 参数，用于获取详用户细信息
   const githubCode = ctx.query.code;
 
-  console.log('->', githubCode);
-
   const tokenReq = await axios({
     url: 'https://github.com/login/oauth/access_token',
     method: 'post',
@@ -233,6 +231,23 @@ router.post('/captcha', async (ctx, next) => {
   ctx.status = 401;
   ctx.body = {
     message: '发送太频繁'
+  };
+});
+
+router.post('/suggest', async (ctx, next) => {
+  const { sender, content } = ctx.request.body;
+  const uid = await helper.getUserIdBySession(ctx);
+  const db = ctx.db.collection('suggest');
+
+  await db.insertOne({
+    uid,
+    sender,
+    content
+  });
+
+  ctx.status = 200;
+  ctx.body = {
+    message: '提交成功'
   };
 });
 

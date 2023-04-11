@@ -61,12 +61,13 @@ export default React.memo(function StatusBar({ className, children }) {
 
     return () => {
       con.off('state', stateChange);
-    }
+    };
   }, []);
 
   return (
     <div className={classNames(className, 'h-[30px] px-[80px] bg-[#f0f0f0] flex items-center border-t-white border box-border')}>
       { iconMap[state] }
+      { children }
     </div>
   );
 })
