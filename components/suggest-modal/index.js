@@ -41,8 +41,8 @@ function SuggestModal({ onClose, show }) {
   }, [pending]);
 
   return (
-    <div className={classNames("fixed shadow px-2 rounded right-[20px] pt-[50px] transition-all w-[300px] h-[500px] bg-white bottom-[-600px]", {
-      '!bottom-[20px]': show
+    <div className={classNames("z-20 opacity-0 fixed shadow px-2 duration-[.5s] rounded right-[20px] pt-[50px] transition-all w-[300px] h-[500px] bg-white bottom-[-600px]", {
+      '!bottom-[20px] !opacity-100': show
     })}>
       <div className="absolute right-2 top-2 cursor-pointer hover:text-sky-500" onClick={onClose}>关闭</div>
       <div className="bg-[url(/logo.png)] rounded left-[10px] top-[-30px] absolute cursor-pointer bg-white w-[60px] bg-cover h-[60px]"></div>
@@ -73,7 +73,12 @@ function SuggestModal({ onClose, show }) {
       <div className={classNames("absolute top-[500px] left-0 right-0 text-center transition-all duration-[.8s] text-green-500 text-[12px] mt-2 opacity-0", {
         '!opacity-100 !top-[100px]': !pending && success
       })}>
-        提交成功，感谢反馈
+        <div>
+          提交成功，感谢反馈
+        </div>
+        <div className="px-4">
+          您的每条建议会被认真对待
+        </div>
         <div className="text-gray-500">
           { content }
         </div>
