@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import PhoneLogin from 'components/phone-login';
 import Input from 'components/main-input';
 import Button from 'components/button';
-import classNames from 'classNames';
+import classNames from 'classnames';
 import Link from 'next/link';
 
 function UserProfile({ user: defaultUser }) {
