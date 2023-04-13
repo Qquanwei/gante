@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react';
+import classNames from 'classnames';
 
-function Input({ onChange, placeholder }) {
+function Input({ onChange, placeholder, className, children }) {
   const iptRef = useRef(null);
 
   const onSubmit = useCallback((event) => {
@@ -14,12 +15,15 @@ function Input({ onChange, placeholder }) {
   }, [onChange]);
 
   return (
-    <form className="inline-flex p-1 border-4 rounded-lg border-gray-300 w-3/6" onSubmit={onSubmit}>
+    <form className={classNames("inline-flex focus-within:border-sky-500 border border-gray-300 rounded", className)} onSubmit={onSubmit}>
       <input ref={iptRef}
-             placeholder={placeholder}
-             name="input"
-             type="text"
-    className="h-8 w-full border-0 focus:outline-0 font-bold text-xl" />
+        placeholder={placeholder}
+        name="input"
+        type="text"
+        className="w-full rounded px-2 border-0 focus:outline-0" />
+      {
+        children
+      }
     </form>
   );
 }

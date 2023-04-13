@@ -1,11 +1,29 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import PhoneLogin from 'components/phone-login';
+import Input from 'components/main-input';
+import Button from 'components/button';
+import classNames from 'classNames';
 import Link from 'next/link';
 
-function UserProfile({ user }) {
+function UserProfile({ user: defaultUser }) {
+  const [user, setUser] = useState(defaultUser);
+  const [showUserNameInput, setShowUserNameInput] = useState(false);
 
   const onClickBack = useCallback(() => {
     window.history.back();
+  }, []);
+
+  const onUpdateUserName = useCallback((value) => {
+    return axios.put('/api/user/userName', {
+      value
+    }).then((resp) => {
+      setShowUserNameInput(false);
+      setUser(resp.data);
+    });
+  }, []);
+
+  const onClickShowUpdateUserName = useCallback(() => {
+    setShowUserNameInput(true);
   }, []);
 
   return (
@@ -21,8 +39,14 @@ function UserProfile({ user }) {
           <div>
             用户名:
           </div>
-          <div>
-            { user?.userName || <span className="ml-2 text-gray-500">未设置</span> }
+          <div className="ml-2">
+            { user?.userName || <span className="ml-2 text-gray-500">未设置</span>}
+            <span className={classNames("ml-2 text-gray-500 cursor-pointer", { hidden: showUserNameInput})} onClick={onClickShowUpdateUserName}>点击更新</span>
+            <div className={classNames("inline-flex items-center", { hidden: !showUserNameInput})}>
+              <Input className="ml-2" onChange={onUpdateUserName} >
+                <Button type="submit" className="ml-2 border-none">更新</Button>
+              </Input>
+            </div>
           </div>
         </div>
 
@@ -31,7 +55,7 @@ function UserProfile({ user }) {
             手机号:
           </div>
           {
-            user?.phone ? user.phone : <PhoneLogin />
+            user?.phone ? <span className="ml-2">{user.phone}</span> : null
           }
           <span className="ml-2 text-gray-500">绑定可快速登录</span>
         </div>
@@ -60,9 +84,7 @@ function UserProfile({ user }) {
       </div>
 
       <div className="h-[50px] flex ml-[100px] mt-[80px]">
-        <div className="hover:border-sky-600 border border-gray-200 w-[100px] h-[42px] rounded-md cursor-pointer select-none flex items-center justify-center" onClick={onClickBack}>
-          返回
-        </div>
+        <Button className="w-[100px]" onClick={onClickBack}>返回</Button>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ const mongo = require('koa-mongo');
 const bodyParser = require('koa-bodyparser');
 const config = require('../config');
 const helper = require('./helpers');
+const R = require('ramda');
 
 const router = new Router({
   prefix: '/api'
@@ -158,6 +159,35 @@ router.get('/user', async (ctx) => {
   } else {
     ctx.status = 401;
   }
+});
+
+router.put('/user/:property', async (ctx) => {
+  const uid = await helper.getUserIdBySession(ctx);
+  const { value } = ctx.request.body;
+  const { property } = ctx.params;
+
+  if (!uid) {
+    ctx.status = 401;
+    return;
+  }
+
+  // 仅允许修改特定字段
+  if (!R.includes(property, ['userName'])) {
+    ctx.status = 401;
+    ctx.body = {
+      message: 'forbidden'
+    };
+  }
+
+  const User = ctx.db.collection('users');
+  await User.findOneAndUpdate({
+    _id: uid
+  }, {
+    '$set': {
+      [property]: value
+    }
+  });
+  ctx.body = await User.findOne({ _id: uid});
 });
 
 // 注册
