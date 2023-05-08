@@ -32,7 +32,12 @@ async function startApp() {
   await mongoClient.connect();
   const mem = mongoClient.db().collection('mem');
   if (await mem.count() !== 0) {
-    await mem.drop();
+    await mem.updateMany({
+    }, {
+      '$set': {
+        count: 0
+      }
+    });
   }
 
   router.use(serverApi.routes());
@@ -124,7 +129,10 @@ backend.use('connect', async (ctx, next) => {
       },
       '$push': {
         clients: ctx.agent.clientId
-      }
+      },
+      '$set': {
+        loginDate: (new Date()).toLocaleString()
+      },
     }, {
       upsert: true
     });
@@ -134,6 +142,9 @@ backend.use('connect', async (ctx, next) => {
 
     ctx.stream.on('close', () => {
       mem.updateOne({ listId }, {
+        '$set': {
+          quitDate: (new Date()).toLocaleString()
+        },
         '$inc': {
           count: -1
         },

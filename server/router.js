@@ -24,6 +24,7 @@ async function login(ctx, user) {
   // 一天过期时间
   ctx.cookies.set('ud', session, {
     httpOnly: true,
+    domain: config.cookieDomain || '',
     expires: new Date(expire)
   });
   ctx.redirect('/');
