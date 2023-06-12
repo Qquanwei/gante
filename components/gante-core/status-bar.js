@@ -43,12 +43,8 @@ export default React.memo(function StatusBar({ className, children }) {
   useEffect(() => {
     const con = connectionRef.current;
 
-    function stateChange(newState) {
-      setState(newState);
-    }
-
     let nothingPendingFlag = false;
-    function onSend() {
+    function onSendCheck() {
       if (con.hasWritePending()) {
         setHasPending(true);
         if (!nothingPendingFlag) {
@@ -63,12 +59,15 @@ export default React.memo(function StatusBar({ className, children }) {
       }
     }
 
-    con.on('send', onSend);
-    con.on('state', stateChange);
+    const timer = setInterval(() => {
+      onSendCheck();
+    }, 1000);
+
+    con.on('send', onSendCheck);
 
     return () => {
-      con.off('state', stateChange);
-      con.off('send', onSend);
+      clearInterval(timer);
+      con.off('send', onSendCheck);
     };
   }, []);
 
