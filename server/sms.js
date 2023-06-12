@@ -3,7 +3,6 @@ const Dysmsapi20170525 = require('@alicloud/dysmsapi20170525');
 const OpenApi = require('@alicloud/openapi-client');
 const Util = require('@alicloud/tea-util');
 
-console.log(Dysmsapi20170525);
 const getClient = (() => {
   let client = null;
 

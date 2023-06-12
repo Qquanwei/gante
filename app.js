@@ -154,7 +154,6 @@ backend.use('query', function({ query}, next) {
 });
 
 backend.use('receive', function({ data}, next) {
-  console.log('receive:', data);
   next();
 });
 
