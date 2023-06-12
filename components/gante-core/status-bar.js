@@ -11,7 +11,7 @@ const READY = 'ready';
 
 export default React.memo(function StatusBar({ className, children }) {
   const connectionRef = useConnectionRef();
-  const [hasPending, setHasPending] = useState(0);
+  const [hasPending, setHasPending] = useState(false);
   const [state, setState] = useState(() => {
     return connectionRef.current.state;
   });
@@ -36,38 +36,46 @@ export default React.memo(function StatusBar({ className, children }) {
       <div className="text-[12px] ml-2 text-green-300">保存中...</div>
     ),
     [false]: (
-      <div className="text-[12px] ml-2 text-green-500">已保存</div>
+      <div className="text-[12px] ml-2 text-green-500">已全部保存</div>
     )
   };
 
   useEffect(() => {
     const con = connectionRef.current;
+
     function stateChange(newState) {
       setState(newState);
     }
-    function receiveChange(message) {
-      setTimeout(() => {
-        setHasPending(v => Math.max(v-1, 0));
-      }, 200);
+
+    let nothingPendingFlag = false;
+    function onSend() {
+      if (con.hasWritePending()) {
+        setHasPending(true);
+        if (!nothingPendingFlag) {
+          nothingPendingFlag = true;
+          con.whenNothingPending(() => {
+            setHasPending(false);
+            nothingPendingFlag = false;
+          });
+        }
+      } else {
+        setHasPending(false);
+      }
     }
 
-    function sendChange(message){
-      setHasPending(v => v+1);
-    }
-
+    con.on('send', onSend);
     con.on('state', stateChange);
-    // con.on('send', sendChange);
-    // con.on('receive', receiveChange);
 
     return () => {
       con.off('state', stateChange);
+      con.off('send', onSend);
     };
   }, []);
 
   return (
     <div className={classNames(className, 'h-[30px] px-[80px] bg-[#f0f0f0] flex items-center border-t-white border box-border')}>
-      { iconMap[state] }
+      { pendingMap[hasPending] }
       { children }
     </div>
   );
-})
+});
