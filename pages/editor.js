@@ -38,7 +38,6 @@ const Editor = dynamic(() => Promise.resolve(
 
     return (
       <div>
-
         <div className="w-full h-full text-black">
           <GanteProvider user={user} docId={query.id} ref={ganteRef}>
             <Header user={user} side="left" ganteRef={ganteRef} />
