@@ -38,7 +38,6 @@ const Editor = dynamic(() => Promise.resolve(
 
     return (
       <div>
-
         <div className="w-full h-full text-black">
           <GanteProvider user={user} docId={query.id} ref={ganteRef}>
             <Header user={user} side="left" ganteRef={ganteRef} />
@@ -62,6 +61,8 @@ function EditorPage(props) {
       <Head>
         <title>Gante! 高效的项目管理，流程图在线工具</title>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="keywords" content="甘特图,个人甘特图,甘特图工具,在线甘特图,项目管理工具" />
       </Head>
       <Editor {...props}/>
     </Fragment>

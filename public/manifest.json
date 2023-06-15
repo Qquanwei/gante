@@ -1,0 +1,12 @@
+{
+    "name": "Gante",
+    "start_url": "/",
+    "display": "standalone",
+    "icons": [
+        {
+        "src": "logo.png",
+        "type": "image/png",
+        "sizes": "512x512"
+    }
+    ]
+}
