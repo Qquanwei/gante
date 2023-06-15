@@ -13,6 +13,7 @@ export default function Home({ user }) {
         <link rel="icon" href="/favicon.ico" />
         <meta name="google-signin-client_id" content="499253238732-j69pk534uht0ce1h8vg1ts8epak5rgm8.apps.googleusercontent.com" />
         <meta name="keywords" content="甘特图,个人甘特图,甘特图工具,在线甘特图,项目管理工具" />
+        <link rel="manifest" href="/manifest.json" />
       </Head>
       <main className="overflow-hidden min-h-[100vh] text-black bg-[#fbfbfb] font-mono ">
         <Header user={user} />
