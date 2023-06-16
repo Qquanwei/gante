@@ -2,6 +2,7 @@
     "name": "Gante",
     "start_url": "/",
     "display": "standalone",
+    "background_color": "#fbfbfb",
     "icons": [
         {
         "src": "logo.png",
