@@ -12,7 +12,7 @@ const cacheClone = async (e) => {
 
 function fetchEvent() {
   self.addEventListener('fetch', (e) => {
-    if (!e.request.method === 'GET') {
+    if (e.request.method != 'GET') {
       return;
     }
     e.respondWith(
