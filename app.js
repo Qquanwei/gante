@@ -85,7 +85,7 @@ async function startApp() {
 const { parse } = require('url');
 ShareDB.types.register(json1.type);
 const backend = new ShareDB({
-  db,
+  db: require('@plotdb/sharedb-postgres')({user: 'postgres', password: '1234', host: 'localhost', database: 'gantedb', port: 5432}),
   presence: true,
   doNotForwardSendPresenceErrorsToClient: true
 });

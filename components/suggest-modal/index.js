@@ -64,6 +64,14 @@ function SuggestModal({ onClose, show }) {
             pending ? '(loading...)' : null
           }
         </button>
+        <div className="text-[12px] text-sky-500 mt-[10px]">
+          您也可以来github反馈:
+          <div>
+            <a href="https://github.com/Qquanwei/gante" target="_blank">
+              https://github.com/Qquanwei/gante
+            </a>
+          </div>
+        </div>
         {
           !pending && error && (
             <div className="text-red-500 text-[12px] mt-2">{ error }</div>

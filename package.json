@@ -17,6 +17,7 @@
     "@headlessui/react": "^1.6.6",
     "@heroicons/react": "^2.0.8",
     "@material-tailwind/react": "^1.2.4",
+    "@plotdb/sharedb-postgres": "^4.0.1",
     "@recoiljs/refine": "^0.1.1",
     "@szhsin/react-menu": "^3.4.1",
     "@teamwork/websocket-json-stream": "^2.0.0",
