@@ -55,8 +55,9 @@ const Editor = dynamic(() => Promise.resolve(
                 <GanteGraph />
               </Content>
               <StatusBar className="fixed bottom-0 left-0 right-0 z-10 select-none">
-                <span className="hover:text-orange-300 text-[12px] ml-auto cursor-pointer" onClick={onClickSuggest}>
-                    产品建议
+                <span className="mx-auto text-[12px] text-gray-500">点击时间轴最右侧透明区域可以增加时间轴时间哦~</span>
+                <span className="hover:text-orange-300 text-[12px] cursor-pointer" onClick={onClickSuggest}>
+                  产品建议
                 </span>
               </StatusBar>
               <SuggestModal show={showSuggest} onClose={onCloseSuggest} />
