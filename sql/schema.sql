@@ -1,8 +1,25 @@
+CREATE OR REPLACE FUNCTION generate_uid(size INT) RETURNS TEXT AS $$
+DECLARE
+  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  bytes BYTEA := gen_random_bytes(size);
+  l INT := length(characters);
+  i INT := 0;
+  output TEXT := '';
+BEGIN
+  WHILE i < size LOOP
+    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
+    i := i + 1;
+  END LOOP;
+  RETURN output;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+
 CREATE TABLE IF NOT EXISTS ops (
   collection character varying(255) not null,
   doc_id character varying(255) not null,
   version integer not null,
-  operation jsonb not null, -- {v:0, create:{...}} or {v:n, op:[...]}
+  operation jsonb not null
 );
 
 CREATE TABLE IF NOT EXISTS snapshots (
@@ -29,7 +46,7 @@ ALTER TABLE snapshots
 
 
 CREATE TABLE IF NOT EXISTS users (
-  _id int generated always as identity,
+  _id character varying(50) PRIMARY KEY DEFAULT generate_uid(50),
   userName character varying(255),
   avatar TEXT,
   createDate int,
@@ -37,15 +54,13 @@ CREATE TABLE IF NOT EXISTS users (
   githubUserId character varying(255),
   password character varying(255),
   defaultTableId character varying(255) not null,
-  extra jsonb not null default '{}'::jsonb,
-  PRIMARY KEY (_id)
+  extra jsonb not null default '{}'::jsonb
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
-  token character varying(1024),
-  uid character varying(20),
-  expire TEXT,
-  PRIMARY KEY (token)
+  uid character varying(50) references users(_id),
+  token character varying(1024) PRIMARY KEY,
+  expire TEXT
 );
 
 CREATE TABLE IF NOT EXISTS captcha (
@@ -55,7 +70,6 @@ CREATE TABLE IF NOT EXISTS captcha (
 );
 
 CREATE INDEX IF NOT EXISTS idx_captcha_phone ON captcha(phone);
-
 
 CREATE TABLE IF NOT EXISTS mem (
    listId character varying(255) not null,
@@ -68,5 +82,5 @@ CREATE TABLE IF NOT EXISTS mem (
 CREATE TABLE IF NOT EXiSTS suggests(
  content text,
  sender text,
- uid int
+ uid character varying(50) references users(_id)
 );

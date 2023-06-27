@@ -19,11 +19,11 @@ async function main() {
   const pgClient = new Client(config.pg);
   await pgClient.connect();
 
-  await withPGTransaction(pgClient, 'suggest', async () => {
-    const src_Table = mongoClient.db().collection('suggest');
-    const dst_Table = 'suggests';
-    const src_fields = ['content', 'sender', 'uid'];
-    const dst_fields = ['content', 'sender', 'uid'];
+  await withPGTransaction(pgClient, 'user', async () => {
+    const src_Table = mongoClient.db().collection('users');
+    const dst_Table = 'users';
+    const src_fields = ['username', 'avatar', 'phone', 'githubUserId', 'password', 'defaultTableId', 'createDate'];
+    const dst_fields = src_fields;
 
     const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
     await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
@@ -33,11 +33,11 @@ async function main() {
     }));
   });
 
-  await withPGTransaction(pgClient, 'user', async () => {
-    const src_Table = mongoClient.db().collection('users');
-    const dst_Table = 'users';
-    const src_fields = ['username', 'avatar', 'phone', 'githubUserId', 'password', 'defaultTableId', 'createDate'];
-    const dst_fields = src_fields;
+  await withPGTransaction(pgClient, 'suggest', async () => {
+    const src_Table = mongoClient.db().collection('suggest');
+    const dst_Table = 'suggests';
+    const src_fields = ['content', 'sender', 'uid'];
+    const dst_fields = ['content', 'sender', 'uid'];
 
     const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
     await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
@@ -110,8 +110,8 @@ async function main() {
       }));
     }));
 
-  await withPGTransaction(pgClient, 'agenda', async () => {
-    const src_Table = mongoClient.db().collection('agent');
+    await withPGTransaction(pgClient, 'agenda', async () => {
+      const src_Table = mongoClient.db().collection('agent');
       const dst_Table = 'snapshots';
       const src_fields = ['collection', 'doc_id', 'doc_type', 'version', 'data'];
       const dst_fields = src_fields;
@@ -136,8 +136,9 @@ async function main() {
     });
 
 
-  console.log('结束');
-  await pgClient.end();
+    console.log('结束');
+    await pgClient.end();
+  });
 }
 
-main();
+  main();
