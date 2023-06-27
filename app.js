@@ -10,7 +10,7 @@ const { WebSocketServer } = require('ws');
 const cookie = require('cookie');
 const serverApi = require('./server/router');
 const config = require('./config');
-
+const Services = require('./server/services');
 const app = new koa();
 const server = http.createServer(app.callback());
 
@@ -29,6 +29,8 @@ async function startApp() {
   await pgClient.query('update mem set cnt = 0');
 
   await nextApp.prepare();
+
+
 
   router.use(serverApi.routes());
   router.use(serverApi.allowedMethods());
@@ -101,7 +103,16 @@ async function shareBackend() {
       // 此时，允许cookie过期，即便cookie过期ws依然可以连接，但是页面不可以。
       const cookieObj = cookie.parse(ctx.req.headers.cookie || '');
 
-      const user = await helpers.getUserByUD(cookieObj.ud, pgClient, {
+      const msServices = new Services({
+        pgClient,
+        cookies: {
+          get: (key) => {
+            return cookieObj[key];
+          }
+        }
+      });
+
+      const user = await msServices.getUserByUD(cookieObj.ud, {
         allowExpire: true
       });
 
@@ -113,7 +124,7 @@ async function shareBackend() {
         throw new Error('无权限访问');
       }
 
-      const memList = await pgClient.query('select * from mem where listId = $1', [listId]);
+      const memList = await helpers.queryOne(pgClient.query('select * from mem where listId = $1', [listId]));
       if (memList && memList.cnt >= 50) {
         throw new Error('连接数量超过最大限制');
       }
@@ -128,6 +139,7 @@ async function shareBackend() {
       });
       next();
     } catch(e) {
+      console.error(e);
       next(e || new Error('连接串不合法'));
     }
   });

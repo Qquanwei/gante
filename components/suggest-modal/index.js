@@ -56,7 +56,7 @@ function SuggestModal({ onClose, show }) {
         <textarea placeholder="我认为..." className={classNames("text-[13px] w-full border p-2", {
           'text-gray-300': pending
         })} cols="30" id="" name="content" rows="10"></textarea>
-        <button type="submit" className={classNames("text-[14px] inline-block border p-2 cursor-pointer hover:border-sky-500", {
+        <button type="submit" className={classNames("text-[14px] inline-block border py-2 px-10 cursor-pointer text-sky-500 border-sky-500", {
           'text-gray-300': pending
         })}>
           提交
@@ -64,7 +64,7 @@ function SuggestModal({ onClose, show }) {
             pending ? '(loading...)' : null
           }
         </button>
-        <div className="text-[12px] text-sky-500 mt-[10px]">
+        <div className="text-[12px] text-gray-500 mt-[10px]">
           您也可以来github反馈:
           <div>
             <a href="https://github.com/Qquanwei/gante" target="_blank">

@@ -1,22 +1,17 @@
 const Router  = require('koa-router');
 const crypto = require('crypto');
 const axios = require('axios');
-const mongo = require('koa-mongo');
 const bodyParser = require('koa-bodyparser');
 const config = require('../config');
 const helper = require('./helpers');
 const R = require('ramda');
+const Services = require('./services');
 
 const router = new Router({
   prefix: '/api'
 });
 
 router.use(bodyParser());
-router.use(mongo({
-  uri: config.MONGO_ADDR,
-  max: 100,
-  min: 1
-}));
 
 async function login(ctx, user) {
   const expire = 365 * 60 * 60 * 24 * 1000 + Date.now();
@@ -119,39 +114,24 @@ router.post('/login', async (ctx, next) => {
 
 router.get('/count', async (ctx) => {
   const { listId } = ctx.query;
-  const col = ctx.db.collection('mem');
+  const services = new Services(ctx);
 
   if (!listId) {
     ctx.status = 400;
     return;
   }
 
-  const doc = await col.findOne({
-    listId
-  });
-  if (!doc) {
-    ctx.body = {
-      count: 0,
-      exceed: false
-    }
-  } else {
-    ctx.body = {
-      count: doc.count,
-      exceed: doc.count >=  50
-    }
-  }
+  const cnt = services.getCount(listId);
+  ctx.body = {
+    count: cnt,
+    exceed: cnt > 50
+  };
 });
 
+
 router.get('/user', async (ctx) => {
-  const uid = await helper.getUserIdBySession(ctx);
-
-  if (!uid) {
-    ctx.status = 401;
-    return;
-  }
-
-  const user = (await ctx.pgClient.query('select * from users where _id = $1', [uid])).rows[0];
-
+  const services = new Services(ctx);
+  const user = await services.getUser();
   if (user) {
     ctx.body = user;
   } else {
@@ -269,15 +249,8 @@ router.post('/captcha', async (ctx, next) => {
 
 router.post('/suggest', async (ctx, next) => {
   const { sender, content } = ctx.request.body;
-  const uid = await helper.getUserIdBySession(ctx);
-  const db = ctx.db.collection('suggest');
-
-  await db.insertOne({
-    uid,
-    sender,
-    content
-  });
-
+  const services = new Services(ctx);
+  await services.addSuggest(content, sender);
   ctx.status = 200;
   ctx.body = {
     message: '提交成功'

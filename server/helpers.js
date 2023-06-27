@@ -1,23 +1,8 @@
 const crypto = require('crypto');
 
 // in memory session
-module.exports = {
-  // 给websocket使用
-  getUserByUD: async (ud, pgClient, { allowExpire = false}) => {
-    if (!ud || !pgClient) {
-      return null;
-    }
-    const data = await pgClient.query('select * from sessions where token = $1', [ud]);
-
-    if (data && data.uid) {
-      if (data.expire >= Date.now() || allowExpire) {
-        return await pgClient.query('select * from users where _id = $1', [data.uid]);
-      }
-      return null;
-    }
-    return null;
-  },
-
+let helpers = null;
+module.exports = helpers = {
   getUserIdBySession: async (ctx) => {
     const ud = ctx.cookies.get('ud');
 
@@ -30,7 +15,7 @@ module.exports = {
     console.log('->', data);
 
     if (data && data.uid) {
-      if (data.expire >= Date.now()) {
+      if (Number(data.expire) >= Date.now()) {
         return data.uid;
       } else {
         return null;
