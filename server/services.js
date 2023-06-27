@@ -44,7 +44,7 @@ Services.prototype.createGithubUser = async function({
 
 Services.prototype.getUser = async function () {
   const uid = await helper.getUserIdBySession(this.ctx);
-  const user = (await helper.queryOne(this.ctx.pgClient.query('select _id, defaultTableId as \"defaultTableId\", userName as \"userName\"  from users where _id = $1', [uid])));
+  const user = (await helper.queryOne(this.ctx.pgClient.query('select _id, avatar, defaultTableId as \"defaultTableId\", userName as \"userName\"  from users where _id = $1', [uid])));
   return user;
 };
 
