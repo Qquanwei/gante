@@ -69,7 +69,7 @@ async function main() {
 
     const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
     await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
-      await pgClient.query(queryText, src_fields.map((field) => {
+      return await pgClient.query(queryText, src_fields.map((field) => {
         switch (field) {
         case 'collection':
           return 'list';
@@ -78,7 +78,7 @@ async function main() {
         case 'version':
           return 1;
         case 'doc_type':
-          return item._type;
+          return item._type || 'http://sharejs.org/types/JSONv1';
         case 'data':
           return JSON.stringify(item);
         }
@@ -94,7 +94,7 @@ async function main() {
 
     const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
     await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
-      await pgClient.query(queryText, src_fields.map((field) => {
+      return await pgClient.query(queryText, src_fields.map((field) => {
         switch (field) {
         case 'collection':
           return 'item';
@@ -110,30 +110,30 @@ async function main() {
       }));
     }));
 
-    await withPGTransaction(pgClient, 'agenda', async () => {
-      const src_Table = mongoClient.db().collection('agent');
-      const dst_Table = 'snapshots';
-      const src_fields = ['collection', 'doc_id', 'doc_type', 'version', 'data'];
-      const dst_fields = src_fields;
+    // await withPGTransaction(pgClient, 'agenda', async () => {
+    //   const src_Table = mongoClient.db().collection('agent');
+    //   const dst_Table = 'snapshots';
+    //   const src_fields = ['collection', 'doc_id', 'doc_type', 'version', 'data'];
+    //   const dst_fields = src_fields;
 
-      const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
-      await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
-        await pgClient.query(queryText, src_fields.map((field) => {
-          switch (field) {
-          case 'collection':
-            return 'agent';
-          case 'doc_id':
-            return item._id;
-          case 'version':
-            return 1;
-          case 'doc_type':
-            return item._type;
-          case 'data':
-            return JSON.stringify(item);
-          }
-        }));
-      }));
-    });
+    //   const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
+    //   await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
+    //     await pgClient.query(queryText, src_fields.map((field) => {
+    //       switch (field) {
+    //       case 'collection':
+    //         return 'agent';
+    //       case 'doc_id':
+    //         return item._id;
+    //       case 'version':
+    //         return 1;
+    //       case 'doc_type':
+    //         return item._type;
+    //       case 'data':
+    //         return JSON.stringify(item);
+    //       }
+    //     }));
+    //   }));
+    // });
 
 
     console.log('结束');
