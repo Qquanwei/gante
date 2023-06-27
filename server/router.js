@@ -150,10 +150,7 @@ router.get('/user', async (ctx) => {
     return;
   }
 
-  const User = ctx.db.collection('users');
-  const user = await User.findOne({
-    _id: uid
-  });
+  const user = (await ctx.pgClient.query('select * from users where _id = $1', [uid])).rows[0];
 
   if (user) {
     ctx.body = user;
@@ -229,6 +226,11 @@ router.post('/reg', async (ctx, next) => {
 const sms = require('./sms');
 
 router.post('/captcha', async (ctx, next) => {
+  if (process.env.NODE_ENV !== 'production') {
+    ctx.status = 200;
+    ctx.body = {};
+    return null;
+  }
   const { phone } = ctx.request.body;
   if (!/^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/.test(phone)) {
     ctx.status = 401;
@@ -285,37 +287,35 @@ router.post('/suggest', async (ctx, next) => {
 router.post('/captcha/login', async (ctx, next) => {
   const { phone, number } = ctx.request.body;
   const captcha = ctx.db.collection('captcha');
-  const captchaItem = await captcha.findOne({
-    phone,
-    number,
-    sendTime: {
-      '$gte': Date.now() - 60 * 1000
+
+  const captchaItem = await (async () => {
+    if (process.env.NODE_ENV === 'production') {
+      await ctx.pgClient.query('select * from captcha where phone = $1 and number = $2 and sendTime >= $3', [
+        phone, number, Date.now() - 60 * 1000
+      ]);
+    } else {
+      return {};
     }
-  });
+  })();
 
   if (captchaItem) {
-    const User = ctx.db.collection('users');
-    const currentUser = await User.findOne({
-      phone
-    });
+    const currentUser = await ctx.pgClient.query('select userName from users where phone = $1', [phone]);
 
     if (currentUser) {
       // 如果已经是平台用户，则登录
       // pass
     } else {
       // 默认注册
-      await User.insertOne({
-        userName: '',
+      await ctx.pgClient.query('insert into users(userName, phone, createDate, avatar, defaultTableId) values($1, $2, $3, $4, $5)', [
+        '',
         phone,
-        createDate: Date.now(),
-        avatar: null,
-        defaultTableId: crypto.randomUUID()
-      });
+        Date.now(),
+        null,
+        crypto.randomUUID()
+      ]);
     }
 
-    return await login(ctx, await User.findOne({
-      phone
-    }));
+    return await login(ctx, await ctx.pgClient.query('select * from users where phone = $1', [phone]));
   } else {
     ctx.status = 400;
     ctx.body = {

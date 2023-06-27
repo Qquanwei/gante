@@ -1,24 +1,18 @@
 const http = require('http');
 const next = require('next');
+const { Client } = require('pg');
 const ShareDB = require('sharedb');
 const Router = require('koa-router');
 const koa = require('koa');
 const json1 = require('ot-json1');
-const { MongoClient } = require('mongodb');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream');
 const { WebSocketServer } = require('ws');
 const cookie = require('cookie');
 const serverApi = require('./server/router');
 const config = require('./config');
-const db = require('sharedb-mongo')(config.MONGO_ADDR, {
-  mongoOptions: {
-    appname: 'gante'
-  }
-});
 
 const app = new koa();
 const server = http.createServer(app.callback());
-const mongoClient = new MongoClient(config.MONGO_ADDR);
 
 /* NEXTJS APP BEGN */
 const nextApp = next({
@@ -26,19 +20,15 @@ const nextApp = next({
 });
 const handler = nextApp.getRequestHandler();
 const router = new Router();
+let pgClient = null;
 
 async function startApp() {
+  pgClient = new Client(config.pg);
+  pgClient.connect();
+
+  await pgClient.query('update mem set cnt = 0');
+
   await nextApp.prepare();
-  await mongoClient.connect();
-  const mem = mongoClient.db().collection('mem');
-  if (await mem.count() !== 0) {
-    await mem.updateMany({
-    }, {
-      '$set': {
-        count: 0
-      }
-    });
-  }
 
   router.use(serverApi.routes());
   router.use(serverApi.allowedMethods());
@@ -46,6 +36,11 @@ async function startApp() {
     console.log('next:', ctx.req.url);
     await handler(ctx.req, ctx.res);
     ctx.respond = false;
+  });
+
+  app.use(async (ctx, next) => {
+    ctx.pgClient = pgClient;
+    await next();
   });
   app.use(router.routes());
   const port = process.env.PORT || 8088;
@@ -80,106 +75,90 @@ async function startApp() {
 
 /* NEXTJS APP END */
 
-
-/* SHAREDB BEGIN */
 const { parse } = require('url');
-ShareDB.types.register(json1.type);
 const backend = new ShareDB({
   db: require('@plotdb/sharedb-postgres')({user: 'postgres', password: '1234', host: 'localhost', database: 'gantedb', port: 5432}),
   presence: true,
   doNotForwardSendPresenceErrorsToClient: true
 });
 
-const Url = require('url');
-const queryString = require('querystring');
-const helpers = require('./server/helpers');
-backend.use('connect', async (ctx, next) => {
-  console.log('新连接接入', ctx.req.url);
+/* SHAREDB BEGIN */
+async function shareBackend() {
 
-  try {
-    const qs = queryString.parse(Url.parse(ctx.req.url).query);
-    const listId = qs.id;
-    const mem = mongoClient.db().collection('mem');
+  ShareDB.types.register(json1.type);
 
-    // 这里可能会出现cookie失效的情况，例如页面一直打开超过24h，此时页面未刷新，ws会自动重连
-    // 当重连时会发生cookie失效问题，此时页面就会一直处在连接中状态
-    // 此时，允许cookie过期，即便cookie过期ws依然可以连接，但是页面不可以。
-    const cookieObj = cookie.parse(ctx.req.headers.cookie || '');
+  const Url = require('url');
+  const queryString = require('querystring');
+  const helpers = require('./server/helpers');
+  backend.use('connect', async (ctx, next) => {
+    console.log('新连接接入', ctx.req.url);
 
-    const user = await helpers.getUserByUD(cookieObj.ud, mongoClient.db(), {
-      allowExpire: true
-    });
+    try {
+      const qs = queryString.parse(Url.parse(ctx.req.url).query);
+      const listId = qs.id;
+      // 这里可能会出现cookie失效的情况，例如页面一直打开超过24h，此时页面未刷新，ws会自动重连
+      // 当重连时会发生cookie失效问题，此时页面就会一直处在连接中状态
+      // 此时，允许cookie过期，即便cookie过期ws依然可以连接，但是页面不可以。
+      const cookieObj = cookie.parse(ctx.req.headers.cookie || '');
 
-    if (listId && (listId === 'guest' || listId === user?.defaultTableId)) {
-      // 允许
-      // pass
-    } else {
-      // 不允许访问
-      throw new Error('无权限访问');
-    }
-
-    const memList = await mem.findOne({ listId });
-    if (memList && memList.count >= 50) {
-      throw new Error('连接数量超过最大限制');
-    }
-
-    await mem.updateOne({ listId }, {
-      '$inc': {
-        count: 1
-      },
-      '$push': {
-        clients: ctx.agent.clientId
-      },
-      '$set': {
-        loginDate: (new Date()).toLocaleString()
-      },
-    }, {
-      upsert: true
-    });
-    // 注入 listId, 所有操作的item必须在listId下.
-    ctx.agent.custom.listId = listId;
-    ctx.agent.custom.user = user;
-
-    ctx.stream.on('close', () => {
-      mem.updateOne({ listId }, {
-        '$set': {
-          quitDate: (new Date()).toLocaleString()
-        },
-        '$inc': {
-          count: -1
-        },
-        '$pull': {
-          clients: ctx.agent.clientId
-        }
+      const user = await helpers.getUserByUD(cookieObj.ud, pgClient, {
+        allowExpire: true
       });
-    });
+
+      if (listId && (listId === 'guest' || listId === user?.defaultTableId)) {
+        // 允许
+        // pass
+      } else {
+        // 不允许访问
+        throw new Error('无权限访问');
+      }
+
+      const memList = await pgClient.query('select * from mem where listId = $1', [listId]);
+      if (memList && memList.cnt >= 50) {
+        throw new Error('连接数量超过最大限制');
+      }
+
+      await pgClient.query('INSERT INTO mem(listId, cnt) values($1, $2) ON CONFLICT (listId) DO UPDATE SET cnt = $3', [listId, 1, (memList?.cnt || 0) + 1]);
+      // 注入 listId, 所有操作的item必须在listId下.
+      ctx.agent.custom.listId = listId;
+      ctx.agent.custom.user = user;
+
+      ctx.stream.on('close', async () => {
+        await pgClient.query('update mem set cnt = cnt - 1 where listId = $1', [listId]);
+      });
+      next();
+    } catch(e) {
+      next(e || new Error('连接串不合法'));
+    }
+  });
+
+  backend.use('query', function({ query}, next) {
+    console.log('query:', query);
     next();
-  } catch(e) {
-    next(e || new Error('连接串不合法'));
-  }
-});
+  });
 
-backend.use('query', function({ query}, next) {
-  console.log('query:', query);
-  next();
-});
+  backend.use('receive', function({ data}, next) {
+    next();
+  });
 
-backend.use('receive', function({ data}, next) {
-  next();
-});
-
-backend.use('apply', function({agent, collection, id, op}, next) {
-  const { listId } = agent.custom;
-  if (
+  backend.use('apply', function({agent, collection, id, op}, next) {
+    const { listId } = agent.custom;
+    if (
       (listId === id || `${id}`.startsWith(listId + '.'))
-  ) {
-    console.log('apply:', id, op);
-    next();
-  } else {
-    console.log('error 跨文档操作对象');
-    next(new Error('不允许操作跨文档对象'));
-  }
-});
+    ) {
+      console.log('apply:', id, op);
+      next();
+    } else {
+      console.log('error 跨文档操作对象');
+      next(new Error('不允许操作跨文档对象'));
+    }
+  });
+}
 /* SHAREDB END */
 
-startApp();
+async function main() {
+  await startApp();
+  await shareBackend();
+}
+
+main();

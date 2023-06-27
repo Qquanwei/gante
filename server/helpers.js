@@ -3,20 +3,15 @@ const crypto = require('crypto');
 // in memory session
 module.exports = {
   // 给websocket使用
-  getUserByUD: async (ud, db, { allowExpire = false}) => {
-    if (!ud || !db) {
+  getUserByUD: async (ud, pgClient, { allowExpire = false}) => {
+    if (!ud || !pgClient) {
       return null;
     }
-    const session = await db.collection('session');
-    const user = await db.collection('users');
-    const data = await session.findOne({
-      token: ud
-    });
+    const data = await pgClient.query('select * from sessions where token = $1', [ud]);
+
     if (data && data.uid) {
       if (data.expire >= Date.now() || allowExpire) {
-        return await user.findOne({
-          _id: data.uid
-        });
+        return await pgClient.query('select * from users where _id = $1', [data.uid]);
       }
       return null;
     }
@@ -26,14 +21,13 @@ module.exports = {
   getUserIdBySession: async (ctx) => {
     const ud = ctx.cookies.get('ud');
 
+    console.log(ud);
     if (!ud) {
       return null;
     }
 
-    const session = await ctx.db.collection('session');
-    const data = await session.findOne({
-      token: ud
-    });
+    const data = (await ctx.pgClient.query('select * from sessions where token = $1', [ud])).rows[0];
+    console.log('->', data);
 
     if (data && data.uid) {
       if (data.expire >= Date.now()) {
@@ -69,5 +63,9 @@ module.exports = {
       s += n;
     }
     return s;
+  },
+
+  async queryOne(queryObj) {
+    return (await queryObj).rows[0];
   }
 };

@@ -60,8 +60,9 @@ CREATE INDEX IF NOT EXISTS idx_captcha_phone ON captcha(phone);
 CREATE TABLE IF NOT EXISTS mem (
    listId character varying(255) not null,
    clients jsonb not null default '[]'::jsonb,
-   count int default 0,
-   loginDate date
+   cnt int default 0,
+   loginDate date,
+   PRIMARY KEY (listId)
 );
 
 CREATE TABLE IF NOT EXiSTS suggests(
