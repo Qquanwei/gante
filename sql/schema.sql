@@ -1,20 +1,3 @@
-CREATE OR REPLACE FUNCTION generate_uid(size INT) RETURNS TEXT AS $$
-DECLARE
-  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  bytes BYTEA := gen_random_bytes(size);
-  l INT := length(characters);
-  i INT := 0;
-  output TEXT := '';
-BEGIN
-  WHILE i < size LOOP
-    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
-    i := i + 1;
-  END LOOP;
-  RETURN output;
-END;
-$$ LANGUAGE plpgsql VOLATILE;
-
-
 CREATE TABLE IF NOT EXISTS ops (
   collection character varying(255) not null,
   doc_id character varying(255) not null,
@@ -46,10 +29,10 @@ ALTER TABLE snapshots
 
 
 CREATE TABLE IF NOT EXISTS users (
-  _id character varying(50) PRIMARY KEY DEFAULT generate_uid(50),
+  _id character varying(50) PRIMARY KEY DEFAULT gen_random_uuid(),
   userName character varying(255),
   avatar TEXT,
-  createDate int,
+  createDate TEXT,
   phone character varying(20),
   githubUserId character varying(255),
   password character varying(255),

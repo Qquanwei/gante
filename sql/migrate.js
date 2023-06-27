@@ -22,7 +22,7 @@ async function main() {
   await withPGTransaction(pgClient, 'user', async () => {
     const src_Table = mongoClient.db().collection('users');
     const dst_Table = 'users';
-    const src_fields = ['username', 'avatar', 'phone', 'githubUserId', 'password', 'defaultTableId', 'createDate'];
+    const src_fields = ['_id', 'username', 'avatar', 'phone', 'githubUserId', 'password', 'defaultTableId', 'createDate'];
     const dst_fields = src_fields;
 
     const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
