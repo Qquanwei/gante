@@ -1,22 +1,17 @@
 const Router  = require('koa-router');
 const crypto = require('crypto');
 const axios = require('axios');
-const mongo = require('koa-mongo');
 const bodyParser = require('koa-bodyparser');
 const config = require('../config');
 const helper = require('./helpers');
 const R = require('ramda');
+const Services = require('./services');
 
 const router = new Router({
   prefix: '/api'
 });
 
 router.use(bodyParser());
-router.use(mongo({
-  uri: config.MONGO_ADDR,
-  max: 100,
-  min: 1
-}));
 
 async function login(ctx, user) {
   const expire = 365 * 60 * 60 * 24 * 1000 + Date.now();
@@ -64,97 +59,46 @@ router.get('/cb/login/github', async (ctx, next) => {
     throw new Error('服务器访问github发生错误: ' + e.message );
   };
 
-  console.log('get user success', userReq.data);
-  const User = ctx.db.collection('users');
-
-  const currentUser = await User.findOne({
-    githubUserId: userReq.data.id
-  });
+  const services = new Services(ctx);
+  const currentUser = await services.getGithubUser(userReq.data.id);
 
   if (currentUser) {
     // 如果已经是平台用户，则登录
     // pass
   } else {
     // 默认注册
-    await User.insertOne({
+    await services.createGithubUser({
+      githubId: userReq.data.id,
       createDate: Date.now(),
-      githubUserId: userReq.data.id,
       userName: userReq.data.name,
       avatar: userReq.data.avatar_url,
       defaultTableId: crypto.randomUUID()
     });
   }
 
-  return await login(ctx, await User.findOne({
-    githubUserId: userReq.data.id
-  }));
-});
-
-// controller 和 service 先不拆开了。
-router.post('/login', async (ctx, next) => {
-  const User = ctx.db.collection('users');
-  const { uname, password } = ctx.request.body;
-
-  const user = await User.findOne({
-    uname,
-    password
-  });
-
-  if (user) {
-    const expire = 365 * 60 * 60 * 24 * 1000 + Date.now();
-    const session = await helper.generateSessionByUser(ctx, user._id, expire);
-    ctx.cookies.set('ud', session, {
-      httpOnly: true,
-      expires: new Date(expire)
-    });
-    ctx.body = user;
-    ctx.status = 200;
-  } else {
-    ctx.status = 401;
-    ctx.body = {
-      message: '身份凭证校验失败'
-    };
-  }
+  return await login(ctx, await services.getGithubUser(userReq.data.id));
 });
 
 router.get('/count', async (ctx) => {
   const { listId } = ctx.query;
-  const col = ctx.db.collection('mem');
+  const services = new Services(ctx);
 
   if (!listId) {
     ctx.status = 400;
     return;
   }
 
-  const doc = await col.findOne({
-    listId
-  });
-  if (!doc) {
-    ctx.body = {
-      count: 0,
-      exceed: false
-    }
-  } else {
-    ctx.body = {
-      count: doc.count,
-      exceed: doc.count >=  50
-    }
-  }
+  const cnt = services.getCount(listId);
+  ctx.body = {
+    count: cnt,
+    exceed: cnt > 50
+  };
 });
 
+
 router.get('/user', async (ctx) => {
-  const uid = await helper.getUserIdBySession(ctx);
-
-  if (!uid) {
-    ctx.status = 401;
-    return;
-  }
-
-  const User = ctx.db.collection('users');
-  const user = await User.findOne({
-    _id: uid
-  });
-
+  const services = new Services(ctx);
+  const user = await services.getUser();
   if (user) {
     ctx.body = user;
   } else {
@@ -163,14 +107,8 @@ router.get('/user', async (ctx) => {
 });
 
 router.put('/user/:property', async (ctx) => {
-  const uid = await helper.getUserIdBySession(ctx);
   const { value } = ctx.request.body;
   const { property } = ctx.params;
-
-  if (!uid) {
-    ctx.status = 401;
-    return;
-  }
 
   // 仅允许修改特定字段
   if (!R.includes(property, ['userName'])) {
@@ -179,50 +117,12 @@ router.put('/user/:property', async (ctx) => {
       message: 'forbidden'
     };
   }
-
-  const User = ctx.db.collection('users');
-  await User.findOneAndUpdate({
-    _id: uid
-  }, {
-    '$set': {
-      [property]: value
-    }
-  });
-  ctx.body = await User.findOne({ _id: uid});
-});
-
-// 注册
-// query: { return: encodeURIComponent('/editor')}
-router.post('/reg', async (ctx, next) => {
-  const { uname, password } = ctx.request.body;
-  const User = ctx.db.collection('users');
-  const user = await User.findOne({
-    uname
-  });
-  if (user) {
-    ctx.status = 401;
-    ctx.body = {
-      message: 'user exists'
-    };
+  const services = new Services(ctx);
+  if (property === 'userName') {
+    await services.updateUserName(value);
+    ctx.body = await services.getUser();
   } else {
-    const uuid = crypto.randomBytes(24).toString('hex');
-    const u = await User.insert({
-      uname,
-      password,
-      defaultTableId: uuid
-    });
-    // 设置cookie
-    const session = await helper.generateSessionByUser(ctx, u._id);
-    ctx.cookies.set('ud', session, {
-      httpOnly: true,
-      expires: new Date(365 * 60 * 60 * 24 * 1000 + Date.now())
-    });
-
-    if (ctx.query && ctx.query.return) {
-      ctx.redirect(ctx.query.return);
-    } else {
-      ctx.redirect('/');
-    }
+    ctx.status = 401;
   }
 });
 
@@ -237,45 +137,22 @@ router.post('/captcha', async (ctx, next) => {
     };
     return;
   }
-  const captcha = ctx.db.collection('captcha');
-  const captchaItem = await captcha.findOne({
-    phone,
-    sendTime: {
-      '$gte': Date.now() - 60 * 1000
-    }
-  });
-
-  if (!captchaItem) {
-    const num = helper.generateCaptchaNumber();
-    await sms.sendCaptchaSms({
-      phone,
-      number: num
-    });
-    await captcha.insertOne({
-      phone,
-      sendTime: Date.now(),
-      number: num
-    });
+  const services = new Services(ctx);
+  try {
+    await services.sendCaptcha(phone);
     ctx.body = { data: '发送成功' };
-    return;
+  } catch(e) {
+    ctx.status = 401;
+    ctx.body = {
+      message: e.message
+    };
   }
-  ctx.status = 401;
-  ctx.body = {
-    message: '发送太频繁'
-  };
 });
 
 router.post('/suggest', async (ctx, next) => {
   const { sender, content } = ctx.request.body;
-  const uid = await helper.getUserIdBySession(ctx);
-  const db = ctx.db.collection('suggest');
-
-  await db.insertOne({
-    uid,
-    sender,
-    content
-  });
-
+  const services = new Services(ctx);
+  await services.addSuggest(content, sender);
   ctx.status = 200;
   ctx.body = {
     message: '提交成功'
@@ -284,45 +161,19 @@ router.post('/suggest', async (ctx, next) => {
 
 router.post('/captcha/login', async (ctx, next) => {
   const { phone, number } = ctx.request.body;
-  const captcha = ctx.db.collection('captcha');
-  const captchaItem = await captcha.findOne({
-    phone,
-    number,
-    sendTime: {
-      '$gte': Date.now() - 60 * 1000
-    }
-  });
+  const defaultTableId = crypto.randomUUID();
+  const services = new Services(ctx);
 
-  if (captchaItem) {
-    const User = ctx.db.collection('users');
-    const currentUser = await User.findOne({
-      phone
-    });
-
-    if (currentUser) {
-      // 如果已经是平台用户，则登录
-      // pass
-    } else {
-      // 默认注册
-      await User.insertOne({
-        userName: '',
-        phone,
-        createDate: Date.now(),
-        avatar: null,
-        defaultTableId: crypto.randomUUID()
-      });
-    }
-
-    return await login(ctx, await User.findOne({
-      phone
-    }));
-  } else {
+  try {
+    const user = await services.getPhoneUserByCaptcha(phone, number, defaultTableId);
+    return login(ctx, user);
+  } catch(e) {
+    console.error(e);
     ctx.status = 400;
     ctx.body = {
-      message: '验证码不正确'
+      message: e.message
     };
   }
-
 });
 
 module.exports = router;

@@ -1,28 +1,8 @@
 const crypto = require('crypto');
 
 // in memory session
-module.exports = {
-  // 给websocket使用
-  getUserByUD: async (ud, db, { allowExpire = false}) => {
-    if (!ud || !db) {
-      return null;
-    }
-    const session = await db.collection('session');
-    const user = await db.collection('users');
-    const data = await session.findOne({
-      token: ud
-    });
-    if (data && data.uid) {
-      if (data.expire >= Date.now() || allowExpire) {
-        return await user.findOne({
-          _id: data.uid
-        });
-      }
-      return null;
-    }
-    return null;
-  },
-
+let helpers = null;
+module.exports = helpers = {
   getUserIdBySession: async (ctx) => {
     const ud = ctx.cookies.get('ud');
 
@@ -30,13 +10,10 @@ module.exports = {
       return null;
     }
 
-    const session = await ctx.db.collection('session');
-    const data = await session.findOne({
-      token: ud
-    });
+    const data = (await ctx.pgClient.query('select * from sessions where token = $1', [ud])).rows[0];
 
     if (data && data.uid) {
-      if (data.expire >= Date.now()) {
+      if (Number(data.expire) >= Date.now()) {
         return data.uid;
       } else {
         return null;
@@ -46,16 +23,12 @@ module.exports = {
   },
 
   generateSessionByUser: async (ctx, id, expire) => {
-    const session = await ctx.db.collection('session');
-
     const rid = crypto.randomUUID();
-
-    await session.insertOne({
-      token: rid,
-      uid: id,
+    await ctx.pgClient.query('INSERT INTO sessions(uid, token, expire) values($1, $2, $3)', [
+      id,
+      rid,
       expire
-    });
-
+    ]);
     return rid;
   },
 
@@ -69,5 +42,9 @@ module.exports = {
       s += n;
     }
     return s;
+  },
+
+  async queryOne(queryObj) {
+    return (await queryObj).rows[0];
   }
 };
