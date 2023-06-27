@@ -25,7 +25,7 @@ async function main() {
   await pgClient.connect();
 
   console.log('执行');
-  await withPGTransaction1(pgClient, 'userName', async() {
+  await withPGTransaction1(pgClient, 'userName', async() => {
     const src_Table = mongoClient.db().collection('users');
     await Promise.all(src_Table.find({}).toArray().map(async (item) => {
       return await pgClient.query('update users set userName=$1 where _id = $2', [item.userName, item._id]);
