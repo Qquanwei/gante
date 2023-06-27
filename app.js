@@ -27,10 +27,8 @@ async function startApp() {
     ...config.pg,
     max: 1024
   });
-  pgClient.connect();
-
+  await pgClient.connect();
   await pgClient.query('update mem set cnt = 0');
-
   await nextApp.prepare();
 
 
