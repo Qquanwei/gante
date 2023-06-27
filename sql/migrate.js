@@ -19,47 +19,47 @@ async function main() {
   const pgClient = new Client(config.pg);
   await pgClient.connect();
 
-  await withPGTransaction(pgClient, 'user', async () => {
-    const src_Table = mongoClient.db().collection('users');
-    const dst_Table = 'users';
-    const src_fields = ['_id', 'username', 'avatar', 'phone', 'githubUserId', 'password', 'defaultTableId', 'createDate'];
-    const dst_fields = src_fields;
+  // await withPGTransaction(pgClient, 'user', async () => {
+  //   const src_Table = mongoClient.db().collection('users');
+  //   const dst_Table = 'users';
+  //   const src_fields = ['_id', 'username', 'avatar', 'phone', 'githubUserId', 'password', 'defaultTableId', 'createDate'];
+  //   const dst_fields = src_fields;
 
-    const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
-    await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
-      await pgClient.query(queryText, src_fields.map((field) => {
-        return item[field];
-      }));
-    }));
-  });
+  //   const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
+  //   await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
+  //     await pgClient.query(queryText, src_fields.map((field) => {
+  //       return item[field];
+  //     }));
+  //   }));
+  // });
 
-  await withPGTransaction(pgClient, 'suggest', async () => {
-    const src_Table = mongoClient.db().collection('suggest');
-    const dst_Table = 'suggests';
-    const src_fields = ['content', 'sender', 'uid'];
-    const dst_fields = ['content', 'sender', 'uid'];
+  // await withPGTransaction(pgClient, 'suggest', async () => {
+  //   const src_Table = mongoClient.db().collection('suggest');
+  //   const dst_Table = 'suggests';
+  //   const src_fields = ['content', 'sender', 'uid'];
+  //   const dst_fields = ['content', 'sender', 'uid'];
 
-    const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
-    await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
-      await pgClient.query(queryText, src_fields.map((field) => {
-        return item[field];
-      }));
-    }));
-  });
+  //   const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
+  //   await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
+  //     await pgClient.query(queryText, src_fields.map((field) => {
+  //       return item[field];
+  //     }));
+  //   }));
+  // });
 
-  await withPGTransaction(pgClient, 'session', async () => {
-    const src_Table = mongoClient.db().collection('session');
-    const dst_Table = 'sessions';
-    const src_fields = ['expire', 'token', 'uid'];
-    const dst_fields = src_fields;
+  // await withPGTransaction(pgClient, 'session', async () => {
+  //   const src_Table = mongoClient.db().collection('session');
+  //   const dst_Table = 'sessions';
+  //   const src_fields = ['expire', 'token', 'uid'];
+  //   const dst_fields = src_fields;
 
-    const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
-    await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
-      await pgClient.query(queryText, src_fields.map((field) => {
-        return item[field];
-      }));
-    }));
-  });
+  //   const queryText = `insert into ${dst_Table}(${src_fields.join(',')}) values(${src_fields.map((_, index) => '$' + (index + 1)).join(',')})`;
+  //   await Promise.all((await src_Table.find({}).toArray()).map(async (item) => {
+  //     await pgClient.query(queryText, src_fields.map((field) => {
+  //       return item[field];
+  //     }));
+  //   }));
+  // });
 
   await withPGTransaction(pgClient, 'list', async () => {
     const src_Table = mongoClient.db().collection('list');
@@ -103,7 +103,7 @@ async function main() {
         case 'version':
           return 1;
         case 'doc_type':
-          return item._type;
+          return item._type || 'http://sharejs.org/types/JSONv1';
         case 'data':
           return JSON.stringify(item);
         }
