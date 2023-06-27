@@ -1,6 +1,6 @@
 const http = require('http');
 const next = require('next');
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const ShareDB = require('sharedb');
 const Router = require('koa-router');
 const koa = require('koa');
@@ -23,7 +23,10 @@ const router = new Router();
 let pgClient = null;
 
 async function startApp() {
-  pgClient = new Client(config.pg);
+  pgClient = new Pool({
+    ...config.pg,
+    max: 1024
+  });
   pgClient.connect();
 
   await pgClient.query('update mem set cnt = 0');

@@ -6,13 +6,11 @@ module.exports = helpers = {
   getUserIdBySession: async (ctx) => {
     const ud = ctx.cookies.get('ud');
 
-    console.log(ud);
     if (!ud) {
       return null;
     }
 
     const data = (await ctx.pgClient.query('select * from sessions where token = $1', [ud])).rows[0];
-    console.log('->', data);
 
     if (data && data.uid) {
       if (Number(data.expire) >= Date.now()) {
@@ -25,16 +23,12 @@ module.exports = helpers = {
   },
 
   generateSessionByUser: async (ctx, id, expire) => {
-    const session = await ctx.db.collection('session');
-
     const rid = crypto.randomUUID();
-
-    await session.insertOne({
-      token: rid,
-      uid: id,
+    await ctx.pgClient.query('INSERT INTO sessions(uid, token, expire) values($1, $2, $3)', [
+      id,
+      rid,
       expire
-    });
-
+    ]);
     return rid;
   },
 

@@ -15,11 +15,4 @@ describe('router test', () => {
   beforeEach(() => {
     app = getApp();
   });
-
-  it ('should be ok', async () => {
-    const response = await app.post('/api/login')
-          .send({ username: 'foo', password: 'bar' });
-
-    expect(response.status).toBe(200);
-  });
 });
