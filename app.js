@@ -23,10 +23,7 @@ const router = new Router();
 let pgClient = null;
 
 async function startApp() {
-  pgClient = new Pool({
-    ...config.pg,
-    max: 1024
-  });
+  pgClient = new Pool(config.pg);
   await pgClient.connect();
   await pgClient.query('update mem set cnt = 0');
   await nextApp.prepare();

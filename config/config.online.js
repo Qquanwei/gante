@@ -10,7 +10,11 @@ module.exports = {
     password: psql_pass,
     host: 'pgm-bp14z805s1wrc544.rwlb.rds.aliyuncs.com',
     database: 'gantedb',
-    port: 5432
+    port: 5432,
+    max: 1024,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000
+
   },
   cookieDomain: '.gante.link'
 };
