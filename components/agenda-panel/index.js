@@ -393,11 +393,13 @@ export default function AgentPanel({ className }) {
               data-day="7">7天内所有</span>
           </div>
           {
-            [...todayAgendaList].reverse().map((todo, index) => {
+            todayAgendaList.length ? [...todayAgendaList].reverse().map((todo, index) => {
               return (
                 <TodoCard todo={todo} key={index} className="mb-4" />
               )
-            })
+            }) : (
+              <div className="text-gray-300 text-center p-4">暂无待办</div>
+            )
           }
           <div className="border-t w-full border-gray-300/50"></div>
           <div className="mt-[20px] text-[12px] " onClick={onClickFilter2}>
