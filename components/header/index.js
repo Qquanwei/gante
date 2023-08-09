@@ -1,5 +1,6 @@
 import React, { useCallback, useState, Suspense } from 'react';
 import classNames from 'classnames';
+import { atom, useRecoilState } from 'recoil';
 import dynamic from 'next/dynamic';
 import User from 'components/user';
 import Link from 'next/link';
@@ -13,8 +14,13 @@ const modeMap = {
   agent: AgendaPanel
 };
 
+export const headerMode = atom({
+  key: 'header mode',
+  default: ''
+});
+
 function Header({ children, className, user, side, ganteRef }) {
-  const [mode, setMode] = useState('');
+  const [mode, setMode] = useRecoilState(headerMode);
 
   const onClickMode = useCallback((e) => {
     if (mode === e.target.dataset.mode) {

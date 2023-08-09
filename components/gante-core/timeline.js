@@ -9,6 +9,8 @@ import useGante from './useGante';
 import * as utils from './utils';
 import * as R from 'ramda';
 import TimelineStatusBar from './timeline-status-bar';
+import TimelineDayBar from './timeline-day-bar';
+import AgendaStatusBar from './agenda-status-bar';
 import * as actions from './action';
 import Pin from './pin';
 dayjs.extend(isBetween);
@@ -84,6 +86,7 @@ export default React.memo(function Timeline({ children }) {
   const endTime = useRecoilValue(atoms.endTime);
   const currentTime = useCurrentDate();
   const currentNode = useRecoilValue(atoms.currentNode);
+  const showAgentInTimeline = useRecoilValue(atoms.showAgentInTimeline);
   // dayjs string
   const [previewPin, setPreviewPin] = useState(false);
   const pins = useRecoilValue(atoms.pins);
@@ -232,6 +235,11 @@ export default React.memo(function Timeline({ children }) {
           startTime={startTime}
           endTime={endTime} inRange={inRange} currentTime={currentTime} />
         <TimelineStatusBar />
+        <div>
+          {
+            showAgentInTimeline && <AgendaStatusBar />
+          }
+        </div>
       </div>
       <div className="relative">
         <div className="relative w-full">

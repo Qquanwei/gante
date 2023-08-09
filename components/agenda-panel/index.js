@@ -1,5 +1,5 @@
 import { useRecoilValueMemo } from 'recoil-enhance';
-import { useSetRecoilState, useRecoilCallback } from 'recoil';
+import { useSetRecoilState, useRecoilCallback, useRecoilState } from 'recoil';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
@@ -322,11 +322,24 @@ export default function AgentPanel({ className }) {
     }
   }, []);
 
+  const [showAgentInTimeline, setShowAgentInTimeline] = useRecoilState(atoms.showAgentInTimeline);
+
+  const onTimelineSwitchChange = useCallback((e) => {
+    setShowAgentInTimeline(e.target.checked);
+  }, []);
+
   return (
     <div className={classNames(className, 'h-full flex flex-col')}>
-      <h1 className="px-2 mt-2 text-gray-500">Daily Agenda</h1>
+      <h1 className="px-2 mt-2 text-gray-500">
+        Daily Agenda
 
-      <ul className="px-2 mt-4 text-gray-500 h-full flex flex-col">
+        <form className="text-[12px] flex p-2 select-none">
+          <input type="checkbox" checked={showAgentInTimeline} id="show-in-timeline" onChange={onTimelineSwitchChange} />
+          <label htmlFor="show-in-timeline" className="ml-1 cursor-pointer">在时间轴上展示 </label>
+        </form>
+      </h1>
+
+      <ul className="px-2 text-gray-500 h-full flex flex-col">
         <form onSubmit={onSubmit}>
           <div className="text-[12px]">新增待办: <span>开始阅读</span></div>
           <div className="text-[12px]">3天后待办: <span>开始阅读 +3</span></div>
