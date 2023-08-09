@@ -178,7 +178,7 @@ const Node = React.memo(({id, index }) => {
   return (
     <div ref={ref}
       data-id={`node-${item.id}`}
-      className={classNames("absolute transition-all duration-150 select-none text-left flex items-center box-border whitespace-nowrap cursor-pointer", {
+      className={classNames("group absolute transition-all duration-150 select-none text-left flex items-center box-border whitespace-nowrap cursor-pointer", {
         'rounded': !item.lock,
         "z-10": hover,
         'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock,
@@ -203,6 +203,10 @@ const Node = React.memo(({id, index }) => {
 
       <span className={"grow px-2 sticky right-[2px] left-[2px]"}>
         { item.title }
+      </span>
+
+      <span className='absolute text-xs left-full ml-2 text-gray-500 group-hover:ml-8 transition-all pointer-events-none'>
+        { item.remark }
       </span>
 
       <div data-role="ignore-events">
