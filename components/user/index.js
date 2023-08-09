@@ -67,7 +67,10 @@ function User({ user }) {
 
           <PhoneLogin className="w-[300px] mt-[20px]" />
 
-          <a className="github-login block border flex items-center justify-center hover:bg-gray-300 w-full mt-[20px] h-[60px]" noreferer="true" href={`https://github.com/login/oauth/authorize?login&client_id=${process.env.GANTE_GITHUB_CLIENT_ID}&scope=user`} >
+          <div className="h-[1px] border-gray-300/30 rounded border-t mt-[50px] mb-[10px] w-full flex items-center justify-center">
+            <div className="text-gray-500 text-[13px] bg-white px-3">其他登录方式</div>
+          </div>
+          <a className="github-login block border flex items-center justify-center hover:bg-gray-300 w-full mt-[10px] h-[60px]" noreferer="true" href={`https://github.com/login/oauth/authorize?login&client_id=${process.env.GANTE_GITHUB_CLIENT_ID}&scope=user`} >
             <i className="w-[36px] h-[36px] bg-[url(/github-mark.png)] bg-contain bg-no-repeat mr-[10px]"></i>
             Github
           </a>
