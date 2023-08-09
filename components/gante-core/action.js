@@ -137,13 +137,27 @@ export function useAddPin() {
     if (type === 'timeline') {
       const day = payload;
       set(atoms._listCore__editor, (oldValue) => {
-        return {
-          ...oldValue,
-          pin: [].concat(oldValue.pin || [], {
+        // 这里先判断有没有类型为remove类型的，然后再复用，省去插入成本
+        const idx = (oldValue.pin||[]).findIndex(v => v.type === 'remove');
+        if (idx != -1) {
+          const oldPin = [...oldValue.pin];
+          oldPin[idx] = {
             type,
             day: payload
-          })
-        };
+          };
+          return {
+            ...oldValue,
+            pin: oldPin
+          };
+        } else {
+          return {
+            ...oldValue,
+            pin: [].concat(oldValue.pin || [], {
+              type,
+              day: payload
+            })
+          };
+        }
       });
     }
     if (type === 'node') {
