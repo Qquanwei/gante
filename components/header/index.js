@@ -26,7 +26,7 @@ function Header({ children, className, user, side, ganteRef }) {
 
   if (side === 'left') {
     return (
-      <div className={classNames("transition-all z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block border-r-[#e0e0e0] border", {
+      <div className={classNames("transition-all z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block border-r-[#e0e0e0] border-r", {
         'w-[320px]': mode !== ''
       })}>
         <div className={"transition-all z-20 text-[#333] absolute top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block"}>
