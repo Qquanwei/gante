@@ -62,6 +62,7 @@ export const _listCore__editor = atom({
     version: '1.0.0',
     list: [],
     pin: [],
+    showAgentInTimeline: false,
     endTime: memoizeDayjs(Date.now() + 40 * 24 * 60 * 60 * 1000).startOf('day'),
     startTime: memoizeDayjs(Date.now() - 90 * 24 * 60 * 60 * 1000).startOf('day')
   },
@@ -71,6 +72,7 @@ export const _listCore__editor = atom({
       refine: refine.match(
         refine.object({
           list: refine.array(refine.string()),
+          showAgentInTimeline: refine.optional(refine.bool()),
           version: refine.optional(refine.string()),
           pin: refine.optional(refine.array(refine.object({
             type: refine.string(),
@@ -159,6 +161,19 @@ export const _listCore__list = selector({
     set(_listCore__editor, oldValue => ({
       ...oldValue,
       list: newValue
+    }));
+  }
+});
+
+export const showAgentInTimeline = selector({
+  key: 'gante: show agent in timeline',
+  get: ({ get }) => {
+    return get(_listCore__editor).showAgentInTimeline;
+  },
+  set: ({ set }, newValue) => {
+    set(_listCore__editor, oldValue => ({
+      ...oldValue,
+      showAgentInTimeline: newValue
     }));
   }
 });
