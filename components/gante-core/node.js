@@ -1,5 +1,4 @@
-import { Suspense, useState, useRef, useCallback, useMemo } from 'react';
-import React from 'react';
+import React, { Fragment, Suspense, useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
@@ -25,6 +24,10 @@ const Node = React.memo(({id, index }) => {
   const currentId = useRecoilValue(atoms.currentNodeId);
   const setCurrentFeatures = useSetRecoilState(atoms.currentFeatures);
 
+  const textRef = useRef(null);
+  // 是否是小节点，对于小节点的定义为：文字比节点本身的宽度更宽，此时文字会超出节点本身的宽度，样式上会不好看，需要特殊处理
+  const [smallNode, setSmallNode] = useState(false);
+
   const [contextInfo, setContextInfo] = useState({
     show: false,
     point: null
@@ -34,6 +37,8 @@ const Node = React.memo(({id, index }) => {
   const left = useRecoilValue(atoms.thatNodeLeft(id));
   const days = useRecoilValue(atoms.thatNodeDays(id));
   const hover = currentId === item.id;
+
+
 
   const ref = useInteractionEvent(id, {
     onChange: (event, args) => {
@@ -169,6 +174,16 @@ const Node = React.memo(({id, index }) => {
     drop: false
   });
 
+  // 小节点检测，当节点宽度小的时候，进行检测
+  useEffect(() => {
+    try {
+      setTimeout(() => {
+        setSmallNode((textRef.current.clientWidth < textRef.current.scrollWidth));
+      }, 100);
+    } catch {
+    }
+  }, [item.title, item.startTime, item.endTime, item.lock]);
+
   const top = index * SINK_HEIGHT + 7;
 
   const closeContext = useCallback(() => {
@@ -178,7 +193,7 @@ const Node = React.memo(({id, index }) => {
   return (
     <div ref={ref}
       data-id={`node-${item.id}`}
-      className={classNames("group absolute transition-all duration-150 select-none text-left flex items-center box-border whitespace-nowrap cursor-pointer", {
+      className={classNames("absolute transition-all duration-150 select-none text-left flex items-center box-border whitespace-nowrap cursor-pointer", {
         'rounded': !item.lock,
         "z-10": hover,
         'ring-2 ring-sky-500 ring-offset-4 ring-offset-white outline-none': hover && !item.lock,
@@ -201,11 +216,18 @@ const Node = React.memo(({id, index }) => {
         <DraggleBar />
       </div>
 
-      <span className={"grow px-2 sticky right-[2px] left-[2px]"}>
+      <span className={classNames("grow px-2 right-[2px] left-[2px] max-w-full overflow-hidden", {['opacity-0']: smallNode})} ref={textRef}>
         { item.title }
       </span>
 
-      <span className='absolute text-xs left-full ml-2 text-gray-500 group-hover:ml-8 transition-all pointer-events-none'>
+      <Fragment>
+        { smallNode && (
+            <span className={"absolute right-full mr-2 px-2 rounded text-black bg-gray-200"} >{ item.title } </span>
+          )}
+      </Fragment>
+
+      <span className={classNames('p-2 absolute whitespace-pre text-xs left-full ml-2 text-gray-500 transition-all pointer-events-none', {
+      })}>
         { item.remark }
       </span>
 
