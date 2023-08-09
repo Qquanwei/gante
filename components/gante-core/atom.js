@@ -40,8 +40,8 @@ export const agent = atom({
   key: 'gante_list_core_agent',
   default: {
     keyword: ['todo', 'done'],
-    todo: [{ headline: 'todo', title: '创建待办任务', repeat: 1}],
-    done: [{ headline: 'done', title: '已完成任务' }],
+    todo: [],
+    done: [],
     archive: []
   },
   effects: [
