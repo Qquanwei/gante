@@ -103,10 +103,8 @@ export default React.memo(function Sink() {
 
     return () => {
       setGotoTodayImpl(null);
-    }
+    };
   }, [setGotoTodayImpl, OFFSET_DAY, SPOT_WIDTH]);
-
-
 
 
   useEffect(() => {
@@ -124,7 +122,7 @@ export default React.memo(function Sink() {
   const onClickEnlarge = useCallback((type) => {
     return () => {
       enlargeEditor(type);
-    }
+    };
   }, [enlargeEditor]);
 
   const memLinEle = useMemo(() => {

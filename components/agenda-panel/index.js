@@ -353,9 +353,9 @@ export default function AgentPanel({ className }) {
 
       <ul className="px-2 mt-4 text-gray-500 h-full flex flex-col">
         <form onSubmit={onSubmit}>
+          <div className="text-[12px]">新增待办: <span>开始阅读</span></div>
           <div className="text-[12px]">3天后待办: <span>开始阅读 +3</span></div>
-          <div className="text-[12px]">10月5日待办: <span>开始阅读 10.5</span></div>
-          <div className="text-[12px]">明天开始并每周重复: <span>开始阅读+1/7</span></div>
+          <div className="text-[12px]">10.1日开始并每周重复: <span>开始阅读 10.1/7</span></div>
           <input autoFocus placeholder="检查每日待办+1/1" name="ipt" onChange={onChange} className="w-full text-[12px] h-[30px] rounded my-2 px-2 border" type="text" />
           {
             confirmTodo ? (
