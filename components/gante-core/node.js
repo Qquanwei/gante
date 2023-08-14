@@ -222,7 +222,7 @@ const Node = React.memo(({id, index }) => {
 
       <Fragment>
         { smallNode && (
-            <span className={"absolute right-full mr-2 px-2 rounded text-black bg-gray-200"} >{ item.title } </span>
+            <span className={"absolute right-full mr-2 px-2 rounded text-black"} >{ item.title } </span>
           )}
       </Fragment>
 
