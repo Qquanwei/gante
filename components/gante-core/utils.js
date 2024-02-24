@@ -87,13 +87,14 @@ export function getEleRect(graphEle, Ele) {
 
 // 将鼠标坐标转化成天数
 import dayjs from 'dayjs';
+
 export function positionToDay(SPOT_WIDTH, startTime, left, paddingFunction) {
   return dayjs(startTime).add((paddingFunction || Math.floor)(left / SPOT_WIDTH), 'd');
 }
 
 export function getRangeDays(startTime, endTime) {
   if (dayjs.isDayjs(startTime) && dayjs.isDayjs(endTime)) {
-    return endTime.diff(startTime, 'day');
+    return endTime.startOf('day').diff(startTime.startOf('day'), 'day');
   }
   throw new Error('startTime or endTime is not dayjs instance');
 }
@@ -106,6 +107,9 @@ export function dayToRect(SPOT_WIDTH, startTime, dayTime, dayEndTime) {
   if (!dayjs.isDayjs(startTime)) {
     throw new Error('startTime is not a dayjs instance');
   }
+
+  startTime = startTime.startOf('day');
+  dayTime = dayTime.startOf('day');
 
   const left = dayjs(dayTime).diff(startTime, 'day') * SPOT_WIDTH;
 
