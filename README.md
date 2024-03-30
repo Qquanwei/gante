@@ -76,5 +76,10 @@ podman build . --tag gante:local
 2. 启动镜像
 
 ```
-podman run -p 8088:8088 -e GANTE_MONG_ADDR="mongodb://root:example@localhost:27017/gante_store?authSource=admin" gante:local
+podman run --rm --net host -e GANTE_MONG_ADDR="mongodb://root:example@localhost:27017/gante_store?authSource=admin" gante:local
 ```
+
+
+### 启动外部数据库(测试使用)
+
+podman  run --rm --name gante-mongo --net host -e "MONGO_INITDB_ROOT_USERNAME=root" -e "MONGO_INITDB_ROOT_PASSWORD=example" mongo
