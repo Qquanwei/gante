@@ -28,7 +28,7 @@
 
 ## Agenda
 
-[./agenda.md](./agemda.md)
+[./agenda.md](./agenda.md)
 
 ### Developer
 

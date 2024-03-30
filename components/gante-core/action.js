@@ -1,5 +1,3 @@
-import { useContext } from 'react';
-import prop from 'ramda/src/prop';
 import { useGetDoc } from 'recoil-sharedb';
 import * as atoms from './atom';
 import * as json1 from 'ot-json1';
