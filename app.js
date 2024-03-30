@@ -10,7 +10,7 @@ const { WebSocketServer } = require('ws');
 const cookie = require('cookie');
 const serverApi = require('./server/router');
 const config = require('./config');
-const db = require('sharedb-mongo')(config.MONGO_ADDR, {
+const db = require('sharedb-mongo')(process.env.GANTE_MONGO_ADDR || config.MONGO_ADDR, {
   mongoOptions: {
     appname: 'gante'
   }
