@@ -38,7 +38,7 @@ config/config.dev.js
 
 config/config.online.js
 
-开发
+开发(**注意，node版本确保18及以下版本，高版本未经过测试**)
 
 npm run dev
 
