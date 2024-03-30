@@ -76,7 +76,7 @@ podman build . --tag gante:local
 2. 启动镜像
 
 ```
-podman run --rm --net host -e GANTE_MONG_ADDR="mongodb://root:example@localhost:27017/gante_store?authSource=admin" gante:local
+podman run --rm --net host -e GANTE_MONGO_ADDR="mongodb://root:example@localhost:27017/gante_store?authSource=admin" gante:local
 ```
 
 
