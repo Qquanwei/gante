@@ -56,8 +56,25 @@ npm run start
 2. GANTE_GITHUB_CLIENT_SECRET
 3. GANTE_MONGO_UNAME
 4. GANTE_MONGO_PASS
-5. PORT 启动端口号
-6. NODE_ENV 生产环境 development, production
-7. GANTE_PUBLIC_PATH cdn加速配置
-8. GANTE_SMS_accessKeyId 阿里云短信keyid
-9. GANTE_SMS_accessKeySecret 阿里云短信secret
+5. GANTE_MONG_ADDR mongodb数据库连接地址，当设置此选项后，会忽略上述MONGO选项，默认值 mongodb://root:example@localhost:27017/gante_store?authSource=admin
+6. PORT 启动端口号
+7. NODE_ENV 生产环境 development, production
+8. GANTE_PUBLIC_PATH cdn加速配置
+9. GANTE_SMS_accessKeyId 阿里云短信keyid
+10. GANTE_SMS_accessKeySecret 阿里云短信secret
+
+### 容器
+
+可以自己构建容器，也可以使用我发布的构建好的镜像启动（注意，镜像需要连接外部数据库才能使用）
+
+1. 构建镜像
+
+```
+podman build . --tag gante:local
+```
+
+2. 启动镜像
+
+```
+podman run -p 8088:8088 -e GANTE_MONG_ADDR="mongodb://root:example@localhost:27017/gante_store?authSource=admin" gante:local
+```
