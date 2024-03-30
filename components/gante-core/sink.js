@@ -1,9 +1,7 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import sortBy from 'ramda/src/sortBy';
 import * as R from 'ramda';
 import { useRecoilValueMemo as useRecoilValue } from 'recoil-enhance';
 import hotkeys from 'hotkeys-js';
-import path from 'ramda/src/path';
 import classNames from 'classnames';
 import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
