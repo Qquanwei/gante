@@ -10,7 +10,7 @@ const { WebSocketServer } = require('ws');
 const cookie = require('cookie');
 const serverApi = require('./server/router');
 const config = require('./config');
-const db = require('sharedb-mongo')(config.MONGO_ADDR, {
+const db = require('sharedb-mongo')(process.env.GANTE_MONGO_ADDR || config.MONGO_ADDR, {
   mongoOptions: {
     appname: 'gante'
   }
@@ -18,7 +18,7 @@ const db = require('sharedb-mongo')(config.MONGO_ADDR, {
 
 const app = new koa();
 const server = http.createServer(app.callback());
-const mongoClient = new MongoClient(config.MONGO_ADDR);
+const mongoClient = new MongoClient(process.env.GANTE_MONGO_ADDR || config.MONGO_ADDR);
 
 /* NEXTJS APP BEGN */
 const nextApp = next({

@@ -12,7 +12,7 @@ const router = new Router({
 
 router.use(bodyParser());
 router.use(mongo({
-  uri: config.MONGO_ADDR,
+  uri: process.env.GANTE_MONGO_ADDR || config.MONGO_ADDR,
   max: 100,
   min: 1
 }));
