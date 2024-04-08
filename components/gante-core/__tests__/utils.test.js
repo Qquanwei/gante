@@ -1,4 +1,4 @@
-import * as utils from './utils.js';
+import * as utils from '../utils';
 
 import dayjs from 'dayjs';
 describe('utils Position', () => {
@@ -157,3 +157,18 @@ describe('utils getRangeDays', () => {
     expect(getRangeDays(day1, day2)).toBe(4);
   });
 });
+
+describe('inherit', () => {
+  const { inherit } = utils;
+  it ('inherit should keep which we wish [this] instance ', () => {
+    function Base() {
+
+    }
+    const spy = jest.fn();
+    const Child = inherit(Base, spy);
+    const childInstance = new Child();
+    expect(childInstance).toBeInstanceOf(Child);
+    expect(spy.mock.instances).toHaveLength(1);
+    expect(spy.mock.instances[0]).toEqual(childInstance);
+  })
+})

@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react';
-import throttle from 'lodash.throttle';
 import StateMachine, { State } from './statemachine';
 import { inherit, getPositionViewport, getScrollingElement } from './utils';
 import useGante from './useGante';

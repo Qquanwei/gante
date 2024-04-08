@@ -1,56 +1,68 @@
-export function Position(x, y) {
+// empty line
+
+
+export class Position {
+  x!: number;
+  y!: number;
+  constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
-}
+  }
 
-Position.prototype.diff = function(a) {
+  diff(a) {
     return new Position(
-        this.x - a.x,
-        this.y - a.y
+      this.x - a.x,
+      this.y - a.y
     );
+  }
+  add(a) {
+    return new Position(
+      this.x + a.x,
+      this.y + a.y
+    );
+  }
+  /* 仅用来表示距离的程度，没有绝对意义，仅在小范围内有相对意义 */
+  Edistance(a: Position) {
+    return Math.abs(this.x - a.x) + Math.abs(this.y - a.y);
+  }
 }
 
-Position.prototype.add = function(a) {
-  return new Position(
-    this.x + a.x,
-    this.y + a.y
-  );
+
+export function inherit<S extends Function, C extends Function>(Super: S, Child: C) {
+  const NewChild = function(...args) {
+    Super.apply(this, args);
+    Child.apply(this, args);
+  }
+
+  NewChild.prototype = Object.create(Super.prototype);
+  NewChild.prototype.constructor = Child;
+  return NewChild;
 }
 
-/* 仅用来表示距离的程度，没有绝对意义，仅在小范围内有相对意义 */
-Position.prototype.Edistance = function(a) {
-  return Math.abs(this.x - a.x) + Math.abs(this.y - a.y);
+export class Rect extends Position {
+  w!: number;
+  h!: number;
+
+  constructor(x: number, y: number, w: number, h: number) {
+    super(x, y);
+    this.w = w;
+    this.h = h;
+  }
+
+  center() {
+    return new Position(
+      this.x + this.w / 2,
+      this.y + this.h / 2
+    );
+  }
+
+  leftCenter() {
+    return new Position(
+      this.x,
+      this.y + this.h / 2
+    );
+  };
 }
-
-export function inherit(Super, Child) {
-    function NewChild() {
-        Super.apply(this, arguments);
-        Child.apply(this, arguments);
-    }
-
-    NewChild.prototype = Object.create(Super.prototype);
-    NewChild.prototype.constructor = Child;
-    return NewChild;
-}
-
-export const Rect = inherit(Position, function(x, y, w, h) {
-  this.w = w;
-  this.h = h;
-});
-
-Rect.prototype.center = function() {
-  return new Position(
-    this.x + this.w / 2,
-    this.y + this.h / 2
-  );
-};
-
-Rect.prototype.leftCenter = function() {
-  return new Position(
-    this.x,
-    this.y + this.h / 2
-  );
-};
 
 // 将鼠标坐标系转化成基于甘特图的坐标系
 export function getPosition(graphEle, event) {
@@ -86,7 +98,7 @@ export function getEleRect(graphEle, Ele) {
 }
 
 // 将鼠标坐标转化成天数
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 export function positionToDay(SPOT_WIDTH, startTime, left, paddingFunction) {
   return dayjs(startTime).add((paddingFunction || Math.floor)(left / SPOT_WIDTH), 'd');
@@ -101,10 +113,10 @@ export function getRangeDays(startTime, endTime) {
 
 // x, w 为左点和长度, dayEndTime 可选，如不传则认为持续1d
 // startTime is dayjs instance
-export function dayToRect(SPOT_WIDTH, startTime, dayTime, dayEndTime) {
+export function dayToRect(SPOT_WIDTH: number, startTime: Dayjs, dayTime: Dayjs, dayEndTime: Dayjs) {
   // 因为频繁地拷贝dayjs实例会造成性能浪费
   // 本方法会高频调用，所以不放过任何一点性能优化提升的可能
-  if (!dayjs.isDayjs(startTime)) {
+  if (!dayjs.isDayjs(startTime) || !dayjs.isDayjs(dayTime)) {
     throw new Error('startTime is not a dayjs instance');
   }
 
@@ -119,7 +131,7 @@ export function dayToRect(SPOT_WIDTH, startTime, dayTime, dayEndTime) {
 
   const w = dayjs(dayEndTime)
     .diff(dayTime, 'day');
-  return new Rect(left, 0, (1 + w) * SPOT_WIDTH);
+  return new Rect(left, 0, (1 + w) * SPOT_WIDTH, 0);
 }
 
 
@@ -149,7 +161,7 @@ export function getScrollingElement(element) {
 
 export function throttle(fn, ms) {
   let timer = null;
-  return function(...args) {
+  return function (...args) {
     if (timer) {
       return;
     } else {

@@ -1,7 +1,6 @@
 import { useCallback, useRef } from 'react';
 import axios from 'axios';
 import { getUserIdBySession } from '../server/helpers';
-import config from '../config';
 
 export default function Login() {
   const unameRef = useRef(null);
