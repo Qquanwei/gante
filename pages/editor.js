@@ -1,14 +1,12 @@
-import { useRef, useCallback, useState, Fragment } from 'react';
+import { useRef, Fragment } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import classNames from 'classnames';
 import qs from 'qs';
 import Header from 'components/header';
 import SuggestModal from 'components/suggest-modal';
-import { Container, LeftSide, Content } from '../components/layout';
+import { Container, Content } from '../components/layout';
 import { GanteProvider, GanteGraph, StatusBar } from '../components/gante-core';
 import dynamic from 'next/dynamic';
-import config from '../config';
 
 const Editor = dynamic(() => Promise.resolve(
   function Editor({ user, count, exceed, hasPrivilege }) {

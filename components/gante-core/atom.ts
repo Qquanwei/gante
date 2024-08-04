@@ -1,13 +1,11 @@
-import { noWait, waitForAll, atomFamily, atom, selectorFamily, selector } from 'recoil';
+import { waitForAll, atomFamily, atom, selectorFamily, selector } from 'recoil';
 import dayjs from 'dayjs';
-import * as json1 from 'ot-json1';
 import { effect } from 'recoil-sharedb';
-import { syncEffect } from 'recoil-sync';
 import * as refine from '@recoiljs/refine';
 import * as R from 'ramda';
 
-const memoizeDayjs = R.memoizeWith(R.identity, (dayStr) => {
-  return dayjs(dayStr);
+const memoizeDayjs = R.memoizeWith(dayNum => `${dayNum}`, (dayNum: number) => {
+  return dayjs(dayNum);
 });
 
 export const user = atom({
@@ -152,7 +150,7 @@ export const endTime = selector({
   }
 });
 
-export const _listCore__list = selector({
+export const _listCore__list = selector<string[]>({
   key: 'gante_list_core_list',
   get: ({ get }) => {
     return get(_listCore__editor).list;
@@ -178,7 +176,7 @@ export const showAgentInTimeline = selector({
   }
 });
 
-export const thatNode = atomFamily({
+export const thatNode = atomFamily<INode, string>({
   key: 'gante: some node by id',
   effects: (nodeKey) => {
     return [
@@ -187,9 +185,9 @@ export const thatNode = atomFamily({
           id: refine.string(),
           type: refine.match(
             refine.string(),
-            refine.asType(refine.voidable(), () => 'node')
+            refine.asType(refine.voidable(refine.string()), () => 'node')
           ),
-          segments: refine.optional(refine.array()),
+          segments: refine.optional(refine.array(refine.string())),
           remark: refine.optional(refine.string()),
           lock: refine.optional(refine.bool()),
           title: refine.optional(refine.string()),
@@ -205,18 +203,15 @@ export const thatNode = atomFamily({
   }
 });
 
-export const list = selector({
+export const list = selector<string[]>({
   key: 'gante list',
   get: ({ get }) => {
     return get(_listCore__list);
-  },
-  set: ({ set }, newValue) => {
-    set(_listCore__list, newValue.map(R.prop('id')));
   }
 });
 
 
-export const allNodes = selector({
+export const allNodes = selector<INode[]>({
   key: 'all nodes selector',
   get: ({ get }) => {
     return get(waitForAll(get(list).map(nodeId => {
@@ -226,7 +221,7 @@ export const allNodes = selector({
 });
 
 // 这个节点有多少天
-export const thatNodeDays = selectorFamily({
+export const thatNodeDays = selectorFamily<number, string>({
   key: 'gante: some node days',
   get: (nodeId) => ({ get }) => {
     if (!nodeId) {
@@ -244,7 +239,7 @@ export const thatNodeDays = selectorFamily({
 });
 
 // 这个节点的宽度
-export const thatNodeWidth = selectorFamily({
+export const thatNodeWidth = selectorFamily<number, string>({
   key: 'gante: some node width',
   get: (nodeId) => ({ get }) => {
     return get(thatNodeDays(nodeId)) * get(SPOT_WIDTH);
@@ -253,7 +248,7 @@ export const thatNodeWidth = selectorFamily({
 
 
 // 这个节点相对于graph的x轴偏移量
-export const thatNodeLeft = selectorFamily({
+export const thatNodeLeft = selectorFamily<number, string>({
   key: 'gante: some node left',
   get: (nodeId) => ({ get }) => {
     if (!nodeId) {
@@ -276,7 +271,20 @@ export const currentNodeId = atom({
   default: null
 });
 
-export const currentNode = selector({
+/** 一个节点 */
+export interface INode {
+  startTime: number;
+  endTime: number;
+  id: string;
+  type: string;
+  lock: boolean;
+  color?: string;
+  fgcolor: string;
+  connectTo?: string[],
+  from?: string[]
+}
+
+export const currentNode = selector<INode>({
   key: 'gante current node',
   get: ({ get }) => {
     if (get(currentNodeId)) {
@@ -308,26 +316,25 @@ export const connections = selector({
 
     const nodeMap = R.indexBy(R.prop('id'), get(allNodes));
 
-    return R.filter(R.identity, R.flatten(get(allNodes).map((node) => {
+    return R.filter(v => !!v, R.flatten(get(allNodes).map((node) => {
       if (node && node.connectTo && node.connectTo.length) {
-        const rect = dayToRect(get(SPOT_WIDTH), get(startTime), node.startTime, node.endTime);
+        const rect = dayToRect(get(SPOT_WIDTH), get(startTime), dayjs(node.startTime), dayjs(node.endTime));
         const left = rect.x;
         const width = rect.w;
         const top = getNodeTop(node);
         const fromPoint = new Position(
           left + width + 24,
-          top + (get(SINK_HEIGHT) - 6)/ 2,
+          top + (get(SINK_HEIGHT) - 6) / 2,
         );
 
-        const lines = node.connectTo.map((t, idx) => {
-          const k = `${node.id}-${idx}`;
+        const lines = node.connectTo.map((t) => {
           const tNode = nodeMap[t];
 
           if (!tNode) {
             return null;
           }
 
-          const tRect = dayToRect(get(SPOT_WIDTH), get(startTime), tNode.startTime, tNode.endTime);
+          const tRect = dayToRect(get(SPOT_WIDTH), get(startTime), dayjs(tNode.startTime), dayjs(tNode.endTime));
           const tLeft = tRect.x;
           const tWidth = tRect.w;
           const tTop = getNodeTop(tNode);

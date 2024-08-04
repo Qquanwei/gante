@@ -1,7 +1,7 @@
-export default function() {
+export default function QuitPage () {
   return (
-      <div className="text-[#333] fixed left-0 right-0 top-0 bottom-0 right-0 flex items-center justify-center">
-        已成功退出账号
+    <div className="text-[#333] fixed left-0 right-0 top-0 bottom-0 right-0 flex items-center justify-center">
+      已成功退出账号
     </div>
   );
 }

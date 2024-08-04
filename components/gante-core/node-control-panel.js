@@ -5,7 +5,7 @@ import useGante from './useGante';
 import * as actions from './action';
 
 const HEIGHT = 45;
-const WIDTH = 280;
+const WIDTH = 320;
 
 // <bg, fg> colorpair
 const colors = [
@@ -16,6 +16,11 @@ const colors = [
   ['#7FBEEB', '#fff'],
   ['#134074', '#fff'],
 ];
+
+
+// 关于收纳操作: 收纳是当前任务临时被挤掉，当前中断掉，未来会继续开发的一种任务。相当于任务被DELAY的状态
+// 为什么要收纳：收纳是因为这个任务的重要性从当前变为未来，未来很重要。
+// 收纳对应的反操作是 -> 放出，将其从收纳箱中放在主视图上，时间为当前时间
 
 function NodeControlPanel({ node, contextInfo, left, hover }) {
   const leftRef = useRef(0);
@@ -67,7 +72,14 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
               })
             }
 
-            <span className="mr-auto ml-2  text-[12px] text-black cursor-pointer" onClick={onClickLock}>
+            <span
+              title="临时不做的任务可以放入收纳盒中，未来再开启任务"
+              className="ml-2 mr-auto text-[12px] text-black cursor-pointer">
+              收纳
+            </span>
+            <span
+              title="锁定之后将无法直接修改任务时间，避免误操作导致时间发生变更"
+              className="mr-auto ml-2  text-[12px] text-black cursor-pointer" onClick={onClickLock}>
               {
                 node.lock ? '解锁' : '锁定'
               }

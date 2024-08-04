@@ -1,5 +1,6 @@
-import * as utils from './utils.js';
+import * as utils from '../utils';
 
+import dayjs from 'dayjs';
 describe('utils Position', () => {
   const { Position } = utils;
   it ('should be a function', () => {
@@ -71,15 +72,14 @@ describe('utils Rect', () => {
   });
 });
 
-import dayjs from 'dayjs';
 
 describe('utils dayToRect', () => {
   const { dayToRect} = utils;
 
   it ('should be ok 不跨天', () => {
     const SPOT_WIDTH = 17;
-    const startTime = new Date('2022-08-17 15:33');
-    const dayTime = new Date('2022-08-17 15:50');
+    const startTime = dayjs(new Date('2022-08-17 15:33'));
+    const dayTime = dayjs(new Date('2022-08-17 15:50'));
     const rect = dayToRect(SPOT_WIDTH, dayjs(+startTime), dayjs(+dayTime));
     expect(rect.x).toBe(0);
     expect(rect.w).toBe(SPOT_WIDTH);
@@ -87,37 +87,37 @@ describe('utils dayToRect', () => {
 
   it ('should be ok2 跨天', () => {
     const SPOT_WIDTH = 17;
-    const startTime = new Date('2022-08-17 15:33');
-    const dayTime = new Date('2022-08-18 15:50');
-    const rect = dayToRect(SPOT_WIDTH, +startTime, +dayTime);
+    const startTime = dayjs(new Date('2022-08-17 15:33'));
+    const dayTime = dayjs(new Date('2022-08-18 15:50'));
+    const rect = dayToRect(SPOT_WIDTH, startTime, dayTime);
     expect(rect.x).toBe(SPOT_WIDTH);
     expect(rect.w).toBe(SPOT_WIDTH);
   });
 
   it ('should be ok3 跨天', () => {
     const SPOT_WIDTH = 17;
-    const startTime = new Date('2022-08-17 15:33');
-    const dayTime = new Date('2022-08-18 23:59');
-    const rect = dayToRect(SPOT_WIDTH, +startTime, +dayTime);
+    const startTime = dayjs(new Date('2022-08-17 15:33'));
+    const dayTime = dayjs(new Date('2022-08-18 23:59'));
+    const rect = dayToRect(SPOT_WIDTH, startTime, dayTime);
     expect(rect.x).toBe(SPOT_WIDTH);
     expect(rect.w).toBe(SPOT_WIDTH);
   });
 
   it ('should be ok4 跨2天', () => {
     const SPOT_WIDTH = 17;
-    const startTime = new Date('2022-08-17 15:33');
-    const dayTime = new Date('2022-08-19 00:01');
-    const rect = dayToRect(SPOT_WIDTH, +startTime, +dayTime);
+    const startTime = dayjs(new Date('2022-08-17 15:33'));
+    const dayTime = dayjs(new Date('2022-08-19 00:01'));
+    const rect = dayToRect(SPOT_WIDTH, startTime, dayTime);
     expect(rect.x).toBe(2 * SPOT_WIDTH);
     expect(rect.w).toBe(SPOT_WIDTH);
   });
 
   it ('should be ok4 跨2天,持续3天', () => {
     const SPOT_WIDTH = 17;
-    const startTime = new Date('2022-08-17 15:33');
-    const dayTime = new Date('2022-08-19 00:01');
-    const dayEndTime = new Date('2022-08-21 00:01');
-    const rect = dayToRect(SPOT_WIDTH, +startTime, +dayTime, +dayEndTime);
+    const startTime = dayjs(new Date('2022-08-17 15:33'));
+    const dayTime = dayjs(new Date('2022-08-19 00:01'));
+    const dayEndTime = dayjs(new Date('2022-08-21 00:01'));
+    const rect = dayToRect(SPOT_WIDTH, startTime, dayTime, dayEndTime);
     expect(rect.x).toBe(2 * SPOT_WIDTH);
     expect(rect.w).toBe(3 * SPOT_WIDTH);
   });
@@ -127,32 +127,48 @@ describe('utils dayToRect', () => {
 describe('utils getRangeDays', () => {
   const { getRangeDays } = utils;
   it ('should be ok 1', () => {
-    const day1 = new Date('2022-08-01 13:21');
-    const day2 = new Date('2022-08-01 15:02');
+    const day1 = dayjs(new Date('2022-08-01 13:21'));
+    const day2 = dayjs(new Date('2022-08-01 15:02'));
     expect(getRangeDays(day1, day2)).toBe(0);
   });
 
   it ('should be ok 2', () => {
-    const day1 = new Date('2022-08-01 13:21');
-    const day2 = new Date('2022-08-02 15:02');
+    const day1 = dayjs(new Date('2022-08-01 13:21'));
+    const day2 = dayjs(new Date('2022-08-02 15:02'));
     expect(getRangeDays(day1, day2)).toBe(1);
   });
 
   it ('should be ok 3', () => {
-    const day1 = new Date('2022-08-01 13:21');
-    const day2 = new Date('2022-08-02 23:59');
+    const day1 = dayjs(new Date('2022-08-01 13:21'));
+    const day2 = dayjs(new Date('2022-08-02 23:59'));
     expect(getRangeDays(day1, day2)).toBe(1);
   });
 
   it ('should be ok 4', () => {
-    const day1 = new Date('2022-08-01 23:59');
-    const day2 = new Date('2022-08-02 00:00');
+    const day1 = dayjs(new Date('2022-08-01 23:59'));
+    const day2 = dayjs(new Date('2022-08-02 00:00'));
     expect(getRangeDays(day1, day2)).toBe(1);
   });
 
-  it.only ('should be ok 5', () => {
-    const day1 = dayjs('Mon Aug 01 2022 23:59:00 GMT+0800');
-    const day2 = dayjs('Fri Aug 05 2022 00:00:00 GMT+0800');
+  it ('should be ok 5', () => {
+    const day1 = dayjs(new Date('2022-08-01 23:59:00'));
+    const day2 = dayjs(new Date('2022-08-05 00:00:00'));
+
     expect(getRangeDays(day1, day2)).toBe(4);
   });
 });
+
+describe('inherit', () => {
+  const { inherit } = utils;
+  it ('inherit should keep which we wish [this] instance ', () => {
+    function Base() {
+
+    }
+    const spy = jest.fn();
+    const Child = inherit(Base, spy);
+    const childInstance = new Child();
+    expect(childInstance).toBeInstanceOf(Child);
+    expect(spy.mock.instances).toHaveLength(1);
+    expect(spy.mock.instances[0]).toEqual(childInstance);
+  })
+})

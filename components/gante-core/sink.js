@@ -1,9 +1,8 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import sortBy from 'ramda/src/sortBy';
 import * as R from 'ramda';
 import { useRecoilValueMemo as useRecoilValue } from 'recoil-enhance';
 import hotkeys from 'hotkeys-js';
-import path from 'ramda/src/path';
+import dayjs from 'dayjs';
 import classNames from 'classnames';
 import useGante from './useGante';
 import useCurrentDate from './useCurrentDate';
@@ -12,7 +11,7 @@ import useGrabEvent from './use-grab-event';
 import * as atoms from './atom';
 import { useCreateNewNode, useEnlargeEditor } from './action';
 import {
-  Position, getPosition, positionToDay, dayToRect, getRangeDays,
+  getPosition, positionToDay, dayToRect, getRangeDays,
   getScrollingElement
 } from './utils';
 
@@ -49,7 +48,7 @@ export default React.memo(function Sink() {
         x: -99
       };
     }
-    return dayToRect(SPOT_WIDTH, startTime, currentNode.startTime, currentNode.endTime);
+    return dayToRect(SPOT_WIDTH, startTime, dayjs(currentNode.startTime), currentNode.endTime);
   }, [currentNode, startTime, SPOT_WIDTH]);
 
   const onClickConnectLine = useCallback((fromNode, toNode) => {
