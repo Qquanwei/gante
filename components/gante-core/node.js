@@ -1,8 +1,7 @@
-import React, { Fragment, Suspense, useState, useRef, useCallback, useMemo, useEffect } from 'react';
+/* eslint-disable react/display-name */
+import React, { Fragment, Suspense, useState, useRef, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
-import dayjs from 'dayjs';
 import * as json1 from 'ot-json1';
-import useGante from './useGante';
 import * as atoms from './atom';
 import * as actions from './action';
 import { useSetRecoilState } from 'recoil';
@@ -10,7 +9,7 @@ import { useRecoilValueMemo as useRecoilValue } from 'recoil-enhance';
 import useInteractionEvent from './use-interaction-event';
 import NodeControlPanel from './node-control-panel';
 import NodeFormModal from './node-form-modal';
-import { positionToDay, getRangeDays } from './utils';
+import { positionToDay } from './utils';
 import DraggleBar from './draggle-bar';
 
 const Node = React.memo(({id, index }) => {
@@ -178,7 +177,9 @@ const Node = React.memo(({id, index }) => {
   useEffect(() => {
     try {
       setTimeout(() => {
-        setSmallNode((textRef.current.clientWidth < textRef.current.scrollWidth));
+        if (textRef.current) {
+          setSmallNode((textRef.current.clientWidth < textRef.current.scrollWidth));
+        }
       }, 100);
     } catch {
     }
@@ -265,7 +266,6 @@ const Node = React.memo(({id, index }) => {
 
 export default React.memo(function Nodes() {
   const list = useRecoilValue(atoms.list);
-  const [showNodeContext, setShowNodeContext] = useState(null);
 
   return (
     <div>

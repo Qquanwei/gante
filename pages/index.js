@@ -26,8 +26,8 @@ export default function Home({ user }) {
 
           <h1 className="text-[#444] text-[20px]">免费管理你自己的项目进度、日程安排</h1>
         </div>
-        <div className="p-4 rounded-lg w-[1000px] mt-[20px] bg-blue-300/20 mx-auto flex items-center justify-center">
-          <div className="w-[900px] h-[450px] bg-[url(/gante4.png)] bg-no-repeat bg-cover mx-auto"></div>
+        <div className="p-4 rounded-lg w-[1400px] mt-[20px] bg-blue-300/20 mx-auto flex items-center justify-center">
+          <div className="w-[1200px] h-[600px] bg-[url(/gante4.png)] bg-no-repeat bg-cover mx-auto"></div>
         </div>
 
         <div className="text-[#444]">

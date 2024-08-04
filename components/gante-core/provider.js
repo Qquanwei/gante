@@ -30,11 +30,11 @@ const Provider = React.forwardRef(({ children, user }, forwardRef) => {
 
   const zoomOut = useCallback(() => {
     setSpotWidth(v => Math.max(v - 5, 25));
-  }, []);
+  }, [setSpotWidth]);
 
   const zoomIn = useCallback(() => {
     setSpotWidth(v => Math.min(v + 5, 50));
-  }, []);
+  }, [setSpotWidth]);
 
   const setGotoTodayImpl = useCallback((gotoImpl) => {
     impl.gotoTodayImpl = gotoImpl;
@@ -52,8 +52,8 @@ const Provider = React.forwardRef(({ children, user }, forwardRef) => {
     const toNode = nodeMap[toNodeId];
 
     if (!isAdd && fromNode && toNode) {
-      const removeFromIdx = (fromNode.connectTo||[]).indexOf(toNode.id);
-      const removeToIdx = (toNode.from||[]).indexOf(fromNode.id);
+      const removeFromIdx = (fromNode.connectTo || []).indexOf(toNode.id);
+      const removeToIdx = (toNode.from || []).indexOf(fromNode.id);
       if (removeFromIdx !== -1) {
         const cp1 = [...fromNode.connectTo];
         cp1[removeFromIdx] = null;
@@ -100,11 +100,11 @@ const Provider = React.forwardRef(({ children, user }, forwardRef) => {
       zoomIn,
       user
     };
-  }, []);
+  }, [setGotoTodayImpl, updateItemConnect, user, zoomIn, zoomOut]);
 
   return (
     <Context.Provider value={contextValue}>
-      { children }
+      {children}
     </Context.Provider>
   );
 });
@@ -136,7 +136,7 @@ function SmartLoading() {
   }, []);
 }
 
-export default React.forwardRef(function ProviderRef({docId, ...props}, ref) {
+export default React.forwardRef(function ProviderRef({ docId, ...props }, ref) {
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
 
@@ -168,7 +168,7 @@ export default React.forwardRef(function ProviderRef({docId, ...props}, ref) {
 
           <Modal show={show} title="同步发生错误" onClose={onRefresh}>
             <h1>
-              { error?.message }
+              {error?.message}
             </h1>
             <div>请刷新</div>
           </Modal>
