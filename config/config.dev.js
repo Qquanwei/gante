@@ -1,9 +1,9 @@
+console.log('use dev config')
 module.exports = {
-  MONGO_ADDR: 'mongodb://root:example@localhost:27017/test?authSource=admin',
   pg: {
     user: 'postgres',
     password: '1234',
-    host: 'localhost',
+    host: '172.21.96.1',
     database: 'gantedb',
     port: 5432
   }

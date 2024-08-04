@@ -1,7 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 import { Transition } from '@headlessui/react';
 import classNames from 'classnames';
-import useGante from './useGante';
 import * as actions from './action';
 
 const HEIGHT = 45;
@@ -72,11 +71,6 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
               })
             }
 
-            <span
-              title="临时不做的任务可以放入收纳盒中，未来再开启任务"
-              className="ml-2 mr-auto text-[12px] text-black cursor-pointer">
-              收纳
-            </span>
             <span
               title="锁定之后将无法直接修改任务时间，避免误操作导致时间发生变更"
               className="mr-auto ml-2  text-[12px] text-black cursor-pointer" onClick={onClickLock}>

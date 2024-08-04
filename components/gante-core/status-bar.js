@@ -1,35 +1,11 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { useConnectionRef } from 'recoil-sharedb';
-
-
-const CONNECTED = 'connected';
-const DISCONNECTED = 'disconnected';
-const CONNECTING = 'connecting';
-const READY = 'ready';
-
 
 export default React.memo(function StatusBar({ className, children }) {
   const connectionRef = useConnectionRef();
   const [hasPending, setHasPending] = useState(false);
-  const [state, setState] = useState(() => {
-    return connectionRef.current.state;
-  });
 
-  const iconMap = {
-    [CONNECTED]: (
-      <div className="text-yellow-500 text-[12px] cursor-pointer">连接中</div>
-    ),
-    [DISCONNECTED]: (
-      <div className="text-red-500 text-[12px] cursor-pointer">重连中...</div>
-    ),
-    [CONNECTED]: (
-      <div className="text-green-500 text-[12px] cursor-pointer">已连接</div>
-    ),
-    [READY]: (
-      <div className="text-green-500 text-[12px] cursor-pointer">已就绪</div>
-    )
-  };
 
   const pendingMap = {
     [true]: (

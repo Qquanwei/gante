@@ -1,19 +1,16 @@
+/* eslint-disable react/display-name */
 import React, {
-  useReducer, useMemo, useState, useCallback, useRef, useEffect, useImperativeHandle,
+  useMemo, useState, useCallback, useRef, useEffect, useImperativeHandle,
   Suspense
 } from 'react';
 import Events from 'events';
-import dynamic from 'next/dynamic';
-import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState, useRecoilCallback } from 'recoil';
-import { RecoilSyncShareDB, useConnectionRef } from 'recoil-sharedb';
+import { RecoilRoot, useSetRecoilState, useRecoilCallback } from 'recoil';
+import { RecoilSyncShareDB } from 'recoil-sharedb';
 import * as R from 'ramda';
 import { ErrorBoundary } from 'react-error-boundary';
 import Modal from '../../components/modal';
 import * as atoms from './atom';
-import dayjs from 'dayjs';
-import * as json1 from 'ot-json1';
 import Loading from './loading';
-import { hasProp } from './utils';
 import * as actions from './action';
 
 const Context = React.createContext();
@@ -26,8 +23,6 @@ export {
 const Provider = React.forwardRef(({ children, user }, forwardRef) => {
   const graphRef = useRef(null);
   const sinkRef = useRef(null);
-  const portalRef = useRef(null);
-  const list = useRecoilValue(atoms.list);
   const setSpotWidth = useSetRecoilState(atoms.SPOT_WIDTH);
   const updateItemProperty = actions.useUpdateItemProperty();
 

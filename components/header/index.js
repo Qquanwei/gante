@@ -54,7 +54,6 @@ function LeftHeader({ children, className, user, ganteRef }) {
               <Pin pin={null} dragMode="copy" />
             </li>
             <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]" data-mode="agent" onClick={onClickMode}>agenda</li>
-            <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]">收纳x10</li>
           </ul>
           <div className="mt-auto mb-20">
             <div className="flex justify-center">
