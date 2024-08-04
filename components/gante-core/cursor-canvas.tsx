@@ -1,5 +1,5 @@
 import { useConnectionRef, useGetDoc } from 'recoil-sharedb';
-import React, { useEffect, Fragment, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import crypto from 'crypto';
 import { getPosition, throttle } from './utils';
 import useGante from './useGante';
@@ -75,13 +75,13 @@ export default React.memo(function CursorCanvas() {
             domMap[presenceId].appendChild(name);
 
             domMap[presenceId].className='transition-all ease-out duration-75 absolute whitespace-nowrap text-[12px] left-0 pointer-events-none  bg-contain top-0 w-[20px] h-[20px] z-10';
-            containerRef.current.appendChild(domMap[presenceId]);
+            containerRef?.current?.appendChild(domMap[presenceId]);
             length ++;
           }
         }
       } else {
         if (domMap[presenceId]) {
-          containerRef.current.removeChild(domMap[presenceId]);
+          containerRef?.current?.removeChild(domMap[presenceId]);
           domMap[presenceId] = null;
           length --;
         }
@@ -102,7 +102,7 @@ export default React.memo(function CursorCanvas() {
       document.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('mousemove', onMouseMove);
     }
-  }, [user]);
+  }, [connectionRef, getDoc, graphRef, user]);
 
   return (
     <div ref={containerRef}></div>

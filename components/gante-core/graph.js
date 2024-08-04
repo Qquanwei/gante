@@ -2,13 +2,12 @@ import React, { Fragment, useMemo } from 'react';
 import Sink from './sink';
 import Node from './node';
 import Timeline from './timeline';
-import TodoList from './todolist';
 import useGante from './useGante';
 import CursorCanvas from './cursor-canvas';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import * as atoms from './atom';
 
-function Graph({ children }) {
+function Graph() {
   const { graphRef } = useGante();
   const { version } = useRecoilValue(atoms._listCore__editor);
 
@@ -29,7 +28,7 @@ function Graph({ children }) {
         </div>
       </div>
     </div>
-  ), [version]);
+  ), [graphRef, version]);
 }
 
 export default React.memo(Graph);

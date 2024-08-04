@@ -1,15 +1,13 @@
+/* eslint-disable react/display-name */
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { useRecoilValue, useRecoilCallback } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import * as atoms from './atom';
 import isBetween from 'dayjs/plugin/isBetween';
 import classNames from 'classnames';
 import useCurrentDate from './useCurrentDate';
-import useGante from './useGante';
 import * as utils from './utils';
-import * as R from 'ramda';
 import TimelineStatusBar from './timeline-status-bar';
-import TimelineDayBar from './timeline-day-bar';
 import AgendaStatusBar from './agenda-status-bar';
 import * as actions from './action';
 import Pin from './pin';
@@ -32,8 +30,7 @@ const TimelinePerf = React.memo(({
   onDrop,
   SPOT_WIDTH,
   getDayTitle,
-  getDaySubtitle,
-  pins
+  getDaySubtitle
 }) => {
   return useMemo(() => {
     let ans = [];
@@ -70,7 +67,7 @@ const TimelinePerf = React.memo(({
       );
     }
     return ans;
-  }, [startTime, endTime, inRange, currentTime, getDaySubtitle, getDayTitle, onDrop, onDragEnter, onDragLeave, previewPin, pins]);
+  }, [startTime, endTime, inRange, currentTime, todayRef, previewPin, onDragEnter, onDragLeave, onDrop, SPOT_WIDTH, getDayTitle, getDaySubtitle]);
 }, () => {
   return busy;
 });
@@ -80,7 +77,6 @@ const TimelinePerf = React.memo(({
  */
 export default React.memo(function Timeline({ children }) {
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
-  const list = useRecoilValue(atoms.list);
   const startTime = useRecoilValue(atoms.startTime);
   const todayRef = useRef(null);
   const endTime = useRecoilValue(atoms.endTime);
@@ -114,7 +110,7 @@ export default React.memo(function Timeline({ children }) {
       return false;
     }
     return ts.isBetween(currentNode.startTime, currentNode.endTime, 'day', '[]');
-  }, [currentNode?.startTime, currentNode?.endTime]);
+  }, [currentNode]);
 
   const getDaySubtitle = useCallback((momDay) => {
     const day = momDay.day();
@@ -217,7 +213,7 @@ export default React.memo(function Timeline({ children }) {
     } catch(e) {
       return null;
     }
-  }, [isThisDayPin]);
+  }, [addPin, isThisDayPin, updatePin]);
 
   return (
     <div>

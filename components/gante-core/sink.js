@@ -85,7 +85,7 @@ export default React.memo(function Sink() {
         endTime: beginTime.valueOf() + 7 * 24 * 60 * 60 * 1000,
       }, Math.max(idx - 1, 0));
     }
-  }, [startTime, SPOT_WIDTH, createNewItem]);
+  }, [graphRef, SPOT_WIDTH, startTime, SINK_HEIGHT, createNewItem]);
 
   useEffect(() => {
     const gotoToday = () => {

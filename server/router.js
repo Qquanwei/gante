@@ -34,25 +34,23 @@ router.get('/cb/login/github', async (ctx, next) => {
   const githubCode = ctx.query.code;
 
   console.log('->', githubCode);
-
-  const tokenReq = await axios({
-    url: 'https://github.com/login/oauth/access_token',
-    method: 'post',
-    responseType: 'json',
-    headers: {
-      accept: 'application/json'
-    },
-    data: {
-      client_id: process.env.GANTE_GITHUB_CLIENT_ID,
-      client_secret: process.env.GANTE_GITHUB_CLIENT_SECRET,
-      code: githubCode
-    }
-  });
-
-  console.log('get token success', tokenReq.data);
-  let userReq = null;
-
   try {
+    const tokenReq = await axios({
+      url: 'https://github.com/login/oauth/access_token',
+      method: 'post',
+      responseType: 'json',
+      headers: {
+        accept: 'application/json'
+      },
+      data: {
+        client_id: process.env.GANTE_GITHUB_CLIENT_ID,
+        client_secret: process.env.GANTE_GITHUB_CLIENT_SECRET,
+        code: githubCode
+      }
+    });
+
+    let userReq = null;
+
     userReq = await axios({
       url: 'https://api.github.com/user',
       method: 'get',
@@ -64,7 +62,7 @@ router.get('/cb/login/github', async (ctx, next) => {
     throw new Error('服务器访问github发生错误: ' + e.message );
   };
 
-  console.log('get user success', userReq.data);
+  console.log('get github user success', userReq.data);
   const User = ctx.db.collection('users');
 
   const currentUser = await User.findOne({

@@ -66,7 +66,7 @@ function PhoneLogin({ className }) {
       <form className="relative flex items-center" onSubmit={onPhoneSubmit}>
         <span>+86</span>
         <input className="mx-2 p-2 focus:outline-none rounded h-[50px] w-[160px]" name="ipt" type="text" />
-        <button type="submit" className={classNames("whitespace-nowrap ml-2 flex items-center cursor-pointer select-none hover:text-sky-500 transition-all", {
+        <button type="submit" className={classNames("whitespace-nowrap ml-2 flex items-center cursor-pointer select-none hover:text-sky-500 text-[14px] transition-all", {
           'opacity-5': loading
         })}>{ outTime > Date.now() ? Math.floor((outTime - Date.now()) / 1000) + 's' : '立即登录'}
           <div className={classNames('text-red-500 text-[12px] absolute bottom-0 left-[40px] ml-2', { hidden: !error})}>{ error }</div>
