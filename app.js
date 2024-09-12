@@ -155,7 +155,6 @@ async function shareBackend() {
     if (
       (listId === id || `${id}`.startsWith(listId + '.'))
     ) {
-      console.log('apply:', id, op);
       next();
     } else {
       console.log('error 跨文档操作对象');

@@ -14,6 +14,7 @@ const colors = [
   ['#AA767C', '#fff'],
   ['#7FBEEB', '#fff'],
   ['#134074', '#fff'],
+  ['#cd60b1', '#fff']
 ];
 
 
@@ -38,7 +39,7 @@ function NodeControlPanel({ node, contextInfo, left, hover }) {
 
   const onClickLock = useCallback(() => {
     updateItemProperty(node.id, 'lock', !node.lock);
-  }, [node.id, node.lock]);
+  }, [node.id, node.lock, updateItemProperty]);
 
   const show = hover && contextInfo.show;
 
