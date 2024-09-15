@@ -20,7 +20,7 @@ const Contribute: React.FC<IContributeProps> = ({ className, contributes }) => {
         捐赠者会永久出现在本站捐赠者名单上。
       </div>
       <div className="mt-2">
-        通过下方捐赠渠道，转账备注格式：您的称呼（展示在捐赠者名单中），备注说明（展示在捐赠者名单中），手机号（用于关联本站用户）
+        通过下方捐赠渠道，转账/红包备注格式：您的称呼（展示在捐赠者名单中），备注说明（展示在捐赠者名单中），手机号（用于关联本站用户）
       </div>
 
       <div className="mt-2 bg-[url(/a6x06616enwielom9aa0y4b.png)] bg-contain bg-white w-[200px] h-[200px] rounded-[5px]">
