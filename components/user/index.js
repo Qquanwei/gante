@@ -39,7 +39,7 @@ function User({ user }) {
     <div>
       <div
         className={
-        classNames("flex justify-center items-center text-xs select-none cursor-pointer w-[50px] h-[50px] rounded-full")
+        classNames("flex justify-center items-center text-xs select-none cursor-pointer w-[50px] h-[50px] animate-bounce animate-[bounce_.8s_3_linear] rounded-full")
         }>
         {
           isLogin ? (

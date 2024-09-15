@@ -83,7 +83,9 @@ function Header({ children, className, user, side, ganteRef }) {
 
 
   if (side === 'left') {
-    return <LeftHeader children={children} className={className} user={user} side={side} ganteRef={ganteRef} />;
+    return <LeftHeader  className={className} user={user} side={side} ganteRef={ganteRef} >
+      { children }
+    </LeftHeader>;
    }
 
   return (
