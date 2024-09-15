@@ -48,6 +48,11 @@ Services.prototype.getUser = async function () {
   return user;
 };
 
+Services.prototype.getContributes = async function() {
+  const contributes = (await helper.queryAll(this.ctx.pgClient.query('select username, content, contribute_date from contributes')));
+  return contributes;
+}
+
 // 从session里获取用户
 Services.prototype.getUserByUD = async function(ud, { allowExpire = false }) {
   const data = await helper.queryOne(this.ctx.pgClient.query('select uid,expire from sessions where token = $1', [ud]));

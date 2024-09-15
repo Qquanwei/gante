@@ -46,5 +46,9 @@ module.exports = helpers = {
 
   async queryOne(queryObj) {
     return (await queryObj).rows[0];
+  },
+
+  async queryAll(queryObj) {
+    return (await queryObj).rows;
   }
 };

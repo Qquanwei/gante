@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
-import PhoneLogin from 'components/phone-login';
+import Contribute from 'components/contribute';
 import Input from 'components/main-input';
 import Button from 'components/button';
 import classNames from 'classnames';
 import Link from 'next/link';
 
-function UserProfile({ user: defaultUser }) {
+function UserProfile({ user: defaultUser, contribute }) {
   const [user, setUser] = useState(defaultUser);
   const [showUserNameInput, setShowUserNameInput] = useState(false);
 
@@ -81,11 +81,21 @@ function UserProfile({ user: defaultUser }) {
             user?.roles ? null : <span className="text-gray-500 ml-2">无</span>
           }
         </div>
+
+
       </div>
+
+
+
 
       <div className="h-[50px] flex ml-[100px] mt-[80px]">
         <Button className="w-[100px]" onClick={onClickBack}>返回</Button>
       </div>
+
+      <div className="w-[800px] ml-[100px] pt-[50px]">
+        <Contribute className='mt-10' contributes={contribute}/>
+      </div>
+
     </div>
   );
 }
@@ -99,12 +109,26 @@ export async function getServerSideProps({ req }) {
         cookie: req.headers.cookie
       }
     });
+    let contributeReq;
+    try {
+      contributeReq = await axios({
+        url: 'http://localhost:8088/api/contributes',
+        headers: {
+          cookie: req.headers.cookie
+        }
+      })
+    } catch {
+
+    }
+
     return {
       props: {
-        user: userReq.data
+        user: userReq.data,
+        contribute: contributeReq ? contributeReq.data : null
       }
     };
   } catch(error) {
+    console.log('error:', error);
     return {
       props: {}
     };

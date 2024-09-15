@@ -110,6 +110,16 @@ router.get('/user', async (ctx) => {
   }
 });
 
+router.get('/contributes', async (ctx) => {
+  const services = new Services(ctx);
+  const cbs = await services.getContributes();
+  if (cbs) {
+    ctx.body = cbs;
+  } else {
+    ctx.status = 500;
+  }
+});
+
 router.put('/user/:property', async (ctx) => {
   const { value } = ctx.request.body;
   const { property } = ctx.params;

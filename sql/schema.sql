@@ -67,3 +67,10 @@ CREATE TABLE IF NOT EXiSTS suggests(
  sender text,
  uid character varying(50) references users(_id)
 );
+
+CREATE TABLE IF NOT EXISTS contributes(
+  username text,
+  content text,
+  phone text,
+  contribute_date text
+);

@@ -53,7 +53,6 @@ async function startApp() {
 
   const wsServer = new WebSocketServer({ noServer: true });
   server.on('upgrade', function upgrade(request, socket, head) {
-    console.log('begin upgrade');
     const { pathname } = parse(request.url);
     console.log('upgrade', pathname);
     if (pathname === '/share') {
@@ -142,7 +141,6 @@ async function shareBackend() {
   });
 
   backend.use('query', function({ query}, next) {
-    console.log('query:', query);
     next();
   });
 
