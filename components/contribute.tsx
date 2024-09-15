@@ -22,9 +22,14 @@ const Contribute: React.FC<IContributeProps> = ({ className, contributes }) => {
         通过下方捐赠渠道，转账/红包备注格式：您的称呼（展示在捐赠者名单中），备注说明（展示在捐赠者名单中），手机号（用于关联本站用户）
       </div>
 
+      <div>
       <div className="mt-2 bg-[url(/a6x06616enwielom9aa0y4b.png)] bg-contain bg-white w-[200px] h-[200px] rounded-[5px]">
 
       </div>
+      <div className="w-[200px] text-center text-white/90 text-[12px]">支付宝</div>
+      </div>
+
+
 
       <div className="mt-[20px] text-amber-300">
         <div>捐赠者名单</div>
