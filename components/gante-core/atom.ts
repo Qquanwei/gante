@@ -105,7 +105,7 @@ export const pins = selector({
   set: ({ set }, newValue) => {
     return set(_listCore__editor, oldValue => ({
       ...oldValue,
-      pin: newValue
+      pin: newValue as any
     }));
   }
 });
@@ -158,7 +158,7 @@ export const _listCore__list = selector<string[]>({
   set: ({ set }, newValue) => {
     set(_listCore__editor, oldValue => ({
       ...oldValue,
-      list: newValue
+      list: newValue as any
     }));
   }
 });
@@ -171,7 +171,7 @@ export const showAgentInTimeline = selector({
   set: ({ set }, newValue) => {
     set(_listCore__editor, oldValue => ({
       ...oldValue,
-      showAgentInTimeline: newValue
+      showAgentInTimeline: newValue as any
     }));
   }
 });

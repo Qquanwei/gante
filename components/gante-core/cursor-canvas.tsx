@@ -17,7 +17,7 @@ const localPresenceId = crypto.randomBytes(24).toString('hex');
 export default React.memo(function CursorCanvas() {
   const connectionRef = useConnectionRef();
   const getDoc = useGetDoc();
-  const containerRef = useRef();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const { graphRef, user } = useGante();
 
   useEffect(() => {
@@ -65,8 +65,8 @@ export default React.memo(function CursorCanvas() {
             domMap[presenceId] = document.createElement('div');
             const ns = document.createElementNS('http://www.w3.org/2000/svg', "svg");
             ns.setAttribute('viewBox', "0 0 16 16");
-            ns.setAttribute('width', 20);
-            ns.setAttribute('height', 20);
+            ns.setAttribute('width', '20');
+            ns.setAttribute('height', '20');
             ns.innerHTML = `<path fill=${colors[length % colors.length].fill} d="M13.3 9.06 4.67 2.22l1.32 10.93 2.04-2.88 2.43 4.35 1.75-.98-2.44-4.35 3.53-.23z"/>`;
             domMap[presenceId].appendChild(ns);
             const name = document.createElement('div');
@@ -75,7 +75,10 @@ export default React.memo(function CursorCanvas() {
             domMap[presenceId].appendChild(name);
 
             domMap[presenceId].className='transition-all ease-out duration-75 absolute whitespace-nowrap text-[12px] left-0 pointer-events-none  bg-contain top-0 w-[20px] h-[20px] z-10';
-            containerRef?.current?.appendChild(domMap[presenceId]);
+            if (containerRef.current) {
+              containerRef.current.appendChild(domMap[presenceId]);
+            }
+
             length ++;
           }
         }
