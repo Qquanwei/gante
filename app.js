@@ -39,8 +39,10 @@ async function startApp() {
   router.use(serverApi.allowedMethods());
   router.get(/^[^(api)].*$/, async ctx => {
     console.log('next:', ctx.req.url);
-    await handler(ctx.req, ctx.res);
     ctx.respond = false;
+    ctx.response.status = 200;
+    await handler(ctx.req, ctx.res);
+
   });
   app.use(router.routes());
   const port = process.env.PORT || 8088;

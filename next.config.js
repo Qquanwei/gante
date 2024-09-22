@@ -7,7 +7,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   env: {
-    GANTE_GITHUB_CLIENT_ID: process.env.GANTE_GITHUB_CLIENT_ID
+    GANTE_GITHUB_CLIENT_ID: process.env.GANTE_GITHUB_CLIENT_ID || ''
   }
 }
 
