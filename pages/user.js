@@ -28,7 +28,7 @@ function UserProfile({ user: defaultUser, contribute }) {
 
   return (
     <div className="bg-[#fbfbfb] w-[100vw] h-[100vh] font-mono pt-[20px]">
-      <Link href="/">
+      <Link href="/" passHref>
         <div className="ml-[100px] bg-[url(/logo.png)] rounded cursor-pointer bg-white w-[60px] bg-cover h-[60px]"></div>
       </Link>
       <div className="w-[800px] ml-[100px] pt-[50px]">
@@ -101,6 +101,7 @@ function UserProfile({ user: defaultUser, contribute }) {
 }
 
 import axios from 'axios';
+import React from 'react';
 export async function getServerSideProps({ req }) {
   try {
     const userReq = await axios({

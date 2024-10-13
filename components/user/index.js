@@ -6,26 +6,12 @@ import { Menu, MenuItem, MenuHeader, MenuDivider, MenuButton } from '@szhsin/rea
 import '@szhsin/react-menu/dist/index.css';
 import '@szhsin/react-menu/dist/transitions/slide.css';
 import PhoneLogin from 'components/phone-login';
-import Script from 'next/script'
 
 
 function User({ user }) {
   const [isLogin, setLogin] = useState(!!user);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  useEffect(() => {
-    window.onGoogleSignIn = function (googleUser) {
-      var profile = googleUser.getBasicProfile();
-      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-      console.log('Name: ' + profile.getName());
-      console.log('Image URL: ' + profile.getImageUrl());
-      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
-    }
-
-    return () => {
-      window.onGoogleSignIn = null;
-    }
-  }, []);
 
   const onClick = useCallback(() => {
     setShowLoginModal(true);
@@ -39,7 +25,9 @@ function User({ user }) {
     <div>
       <div
         className={
-        classNames("flex justify-center items-center text-xs select-none cursor-pointer w-[50px] h-[50px] animate-bounce animate-[bounce_.8s_3_linear] rounded-full")
+        classNames("flex justify-center items-center text-xs select-none cursor-pointer w-[50px] h-[50px]  rounded-full", {
+          'animate-bounce animate-[bounce_.8s_3_linear]': !user.is_contributor
+        })
         }>
         {
           isLogin ? (

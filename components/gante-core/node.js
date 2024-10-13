@@ -227,7 +227,7 @@ const Node = React.memo(({id, index }) => {
           )}
       </Fragment>
 
-      <span className={classNames('p-2 absolute whitespace-pre text-xs left-full ml-2 text-gray-500 transition-all pointer-events-none', {
+      <span className={classNames('p-2 absolute whitespace-pre text-xs left-full ml-6 text-gray-500 transition-all pointer-events-none', {
       })}>
         { item.remark }
       </span>
