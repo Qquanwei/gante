@@ -26,7 +26,7 @@ function User({ user }) {
       <div
         className={
         classNames("flex justify-center items-center text-xs select-none cursor-pointer w-[50px] h-[50px]  rounded-full", {
-          'animate-bounce animate-[bounce_.8s_3_linear]': !user.is_contributor
+          'animate-bounce animate-[bounce_.8s_3_linear]': isLogin ? !user.is_contributor : false
         })
         }>
         {
