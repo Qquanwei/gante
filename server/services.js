@@ -138,4 +138,10 @@ Services.prototype.getPhoneUserByCaptcha = async function(phone, captcha, defaul
   }
 }
 
+Services.prototype.reportMetrics = async function(action, value) {
+ return await helper.queryOne(this.ctx.pgClient.query('insert into metrics(action,value)  values($1, $2)', [
+   action, value
+  ]));
+}
+
 module.exports = Services;

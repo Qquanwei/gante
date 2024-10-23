@@ -55,10 +55,16 @@ async function startApp() {
   server.on('upgrade', function upgrade(request, socket, head) {
     const { pathname } = parse(request.url);
     console.log('upgrade', pathname);
+    const startTime = Date.now();
+
     if (pathname === '/share') {
       wsServer.handleUpgrade(request, socket, head, (ws) => {
         const stream = new WebSocketJSONStream(ws);
         const agent = backend.listen(stream, request);
+        agent.custom.connectionCost = Date.now() - startTime;
+
+        const cost = Date.now() - startTime;
+        console.log('cost:', cost);
         stream.on('error', (error) => {
           agent.close(error);
         });
@@ -90,6 +96,7 @@ async function shareBackend() {
   const helpers = require('./server/helpers');
   backend.use('connect', async (ctx, next) => {
     console.log('新连接接入', ctx.req.url);
+    const startTime =Date.now();
 
     try {
       const qs = queryString.parse(Url.parse(ctx.req.url).query);
@@ -107,6 +114,8 @@ async function shareBackend() {
           }
         }
       });
+
+
 
       const user = await msServices.getUserByUD(cookieObj.ud, {
         allowExpire: true
@@ -133,6 +142,10 @@ async function shareBackend() {
       ctx.stream.on('close', async () => {
         await pgClient.query('update mem set cnt = cnt - 1 where listId = $1', [listId]);
       });
+      msServices.reportMetrics('connect-cost', {
+        connectionCost: ctx.agent.custom.connectionCost,
+        sharedbInitCost: Date.now() - startTime
+      })
       next();
     } catch(e) {
       console.error(e);

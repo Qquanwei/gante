@@ -74,3 +74,9 @@ CREATE TABLE IF NOT EXISTS contributes(
   phone text,
   contribute_date text
 );
+
+
+CREATE TABLE IF NOT EXISTS metrics(
+  action character varying(255) not null,
+  value JSONB
+);
