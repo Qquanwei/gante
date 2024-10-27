@@ -1,15 +1,20 @@
 import classNames from 'classnames';
-import React, { useState, useCallback, useRef } from 'react';
-import { useRecoilValue } from 'recoil';
-import * as atoms from './atom';
+import React, { useState, useCallback, useRef, CSSProperties } from 'react';
 import Popup from './popup';
 import Button from '../button';
 import * as actions from './action';
 
+interface IPinProps {
+  showPin: boolean;
+  className: string;
+  pin: any;
+  dragMode: 'move';
+  style?: CSSProperties
+}
 // pin 有两种模式，一种依附在 timeline 上，一种依附在 node 上。
 // timeline 为绝对位置， day 属性有效
 // node 为相对位置，offset 属性有效
-export default React.memo(function Pin({ className, pin, dragMode, showPin, style }) {
+export default React.memo<IPinProps>(function Pin({ className, pin, dragMode, showPin, style }) {
   const updatePin = actions.useUpdatePinContent();
   const removePin = actions.useRemovePin();
   const data = pin;
@@ -27,11 +32,11 @@ export default React.memo(function Pin({ className, pin, dragMode, showPin, styl
       });
       close();
     };
-  }, [pin]);
+  }, [pin, updatePin]);
 
   const onClickDelete = useCallback(() => {
     removePin(data.pinIdx);
-  }, [data]);
+  }, [data?.pinIdx, removePin]);
 
   const onDragPinStart = useCallback((event) => {
     event.dataTransfer.setData('text/plain', JSON.stringify({ type: 'pin', pinIdx: data ? data.pinIdx : -1 }));
@@ -40,7 +45,7 @@ export default React.memo(function Pin({ className, pin, dragMode, showPin, styl
     if (dragMode === 'move') {
       setHiddenIcon(true);
     }
-  }, [dragMode, data?.pinIdx]);
+  }, [data, dragMode]);
 
   const onDragPinEnd = useCallback(() => {
     if (hiddenIcon) {
@@ -67,7 +72,7 @@ export default React.memo(function Pin({ className, pin, dragMode, showPin, styl
               <label className="mr-2">pin</label>
               <input name="fixed" type="checkbox" value="enable" defaultChecked={data?.fixed === 'enable'} />
             </div>
-            <textarea name="content" className="p-1" type="text" defaultValue={data?.content} />
+            <textarea name="content" className="p-1" defaultValue={data?.content} />
           </form>
           <div className="flex justify-between">
             <Button className="w-[90px] border rounded flex justify-center items-center bg-rose-300 text-white" onClick={onClickDelete}>删除</Button>

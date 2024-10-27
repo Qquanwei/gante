@@ -91,7 +91,12 @@ export const _listCore__editor = atom({
   ]
 });
 
-export const pins = selector({
+export interface IPins {
+  pinIdx: number;
+  type: 'timeline' | 'remove';
+  day: string;
+}
+export const pins = selector<IPins[]>({
   key: 'gante global pins',
   get: ({ get }) => {
     const list = get(_listCore__editor).pin || [];
@@ -203,20 +208,26 @@ export const thatNode = atomFamily<INode, string>({
   }
 });
 
+
 export const list = selector<string[]>({
   key: 'gante list',
   get: ({ get }) => {
-    return get(_listCore__list);
+    markOnlyFirst('list_fetch_start')
+    const listData =  get(_listCore__list);
+    performance.measure('list_fetch', 'list_fetch_start');
+    return listData;
   }
 });
-
 
 export const allNodes = selector<INode[]>({
   key: 'all nodes selector',
   get: ({ get }) => {
-    return get(waitForAll(get(list).map(nodeId => {
+    markOnlyFirst('all_node_start');
+    const data= get(waitForAll(get(list).map(nodeId => {
       return thatNode(nodeId);
     })));
+    performance.measure('all_node_fetch','all_node_start');
+    return data;
   }
 });
 
@@ -275,6 +286,8 @@ export const currentNodeId = atom({
 export interface INode {
   startTime: number;
   endTime: number;
+  title: string;
+  remark?: string;
   id: string;
   type: string;
   lock: boolean;
@@ -303,9 +316,15 @@ export const currentFeatures = atom({
 });
 
 
-import { dayToRect, Position } from './utils';
+import { dayToRect, markOnlyFirst, Position } from './utils';
 // 当前所有的连线
-export const connections = selector({
+export interface IConnection {
+  fromPoint: Position;
+  toPoint: Position;
+  node: INode;
+  tNode: INode;
+}
+export const connections = selector<IConnection[] | null>({
   key: 'connections',
   get: ({ get }) => {
     const list = get(_listCore__list);
@@ -316,7 +335,7 @@ export const connections = selector({
 
     const nodeMap = R.indexBy(R.prop('id'), get(allNodes));
 
-    return R.filter(v => !!v, R.flatten(get(allNodes).map((node) => {
+    return R.filter(R.identity, R.flatten(get(allNodes).map((node) => {
       if (node && node.connectTo && node.connectTo.length) {
         const rect = dayToRect(get(SPOT_WIDTH), get(startTime), dayjs(node.startTime), dayjs(node.endTime));
         const left = rect.x;
@@ -336,7 +355,6 @@ export const connections = selector({
 
           const tRect = dayToRect(get(SPOT_WIDTH), get(startTime), dayjs(tNode.startTime), dayjs(tNode.endTime));
           const tLeft = tRect.x;
-          const tWidth = tRect.w;
           const tTop = getNodeTop(tNode);
 
           const toPoint = new Position(

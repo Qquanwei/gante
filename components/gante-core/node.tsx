@@ -12,7 +12,13 @@ import NodeFormModal from './node-form-modal';
 import { positionToDay } from './utils';
 import DraggleBar from './draggle-bar';
 
-const Node = React.memo(({id, index }) => {
+
+interface INodeProps {
+  id: string;
+  index: number;
+}
+
+const Node = React.memo<INodeProps>(({ id, index }) => {
   const item = useRecoilValue(atoms.thatNode(id));
   const updateItemProperty = actions.useUpdateItemProperty();
   const SINK_HEIGHT = useRecoilValue(atoms.SINK_HEIGHT);
@@ -27,17 +33,18 @@ const Node = React.memo(({id, index }) => {
   // 是否是小节点，对于小节点的定义为：文字比节点本身的宽度更宽，此时文字会超出节点本身的宽度，样式上会不好看，需要特殊处理
   const [smallNode, setSmallNode] = useState(false);
 
-  const [contextInfo, setContextInfo] = useState({
+  const [contextInfo, setContextInfo] = useState<{
+    show?: boolean;
+    point?: boolean;
+  }>({
     show: false,
     point: null
   });
 
-  const width = useRecoilValue(atoms.thatNodeWidth(id));
-  const left = useRecoilValue(atoms.thatNodeLeft(id));
-  const days = useRecoilValue(atoms.thatNodeDays(id));
+  const width = useRecoilValue(atoms.thatNodeWidth(id + ''));
+  const left = useRecoilValue(atoms.thatNodeLeft(id + ''));
+  const days = useRecoilValue(atoms.thatNodeDays(id + ''));
   const hover = currentId === item.id;
-
-
 
   const ref = useInteractionEvent(id, {
     onChange: (event, args) => {
@@ -233,8 +240,11 @@ const Node = React.memo(({id, index }) => {
       </span>
 
       <div data-role="ignore-events">
-        <NodeControlPanel node={item} close={closeContext}
-          contextInfo={contextInfo} left={left} hover={hover}/>
+        <NodeControlPanel
+          node={item}
+          contextInfo={contextInfo}
+          left={left}
+          hover={hover}/>
 
         <NodeFormModal node={item}
           close={closeContext} contextInfo={contextInfo} top={top} left={left} hover={hover}/>
@@ -272,7 +282,7 @@ export default React.memo(function Nodes() {
       {
         list.map((item, index) => {
           return (
-            <Suspense key={item} fallback={<div>加载中</div>}>
+            <Suspense key={item} fallback={null}>
               <Node id={item} index={index} />
             </Suspense>
           );

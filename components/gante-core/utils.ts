@@ -99,10 +99,13 @@ export function getEleRect(graphEle, Ele) {
 
 // 将鼠标坐标转化成天数
 import dayjs, { Dayjs } from 'dayjs';
+import * as R from 'ramda';
 
-export function positionToDay(SPOT_WIDTH, startTime, left, paddingFunction) {
-  return dayjs(startTime).add((paddingFunction || Math.floor)(left / SPOT_WIDTH), 'd');
+export function positionToDay(SPOT_WIDTH, startTime, left, paddingFunction = Math.floor) {
+  return dayjs(startTime).add(paddingFunction(left / SPOT_WIDTH), 'd');
 }
+
+export const markOnlyFirst = R.memoizeWith(R.identity, tag => performance.mark(tag));
 
 export function getRangeDays(startTime, endTime) {
   if (dayjs.isDayjs(startTime) && dayjs.isDayjs(endTime)) {

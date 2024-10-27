@@ -121,13 +121,16 @@ function ErrorFallback({ error }) {
 }
 
 import ReactDOM from 'react-dom/client';
+import { markOnlyFirst } from './utils';
 function SmartLoading() {
   useEffect(() => {
     const loadingDiv = document.createElement('div');
     loadingDiv.className = 'fixed top-0 bottom-0 left-0 right-0 flex justify-center items-center transition-all duration-[1s] opacity-1';
     document.body.appendChild(loadingDiv);
     ReactDOM.createRoot(loadingDiv).render(<Loading />);
+    markOnlyFirst('loading_page_start');
     return () => {
+      performance.measure('loading_page', 'loading_page_start');
       loadingDiv.classList.add('opacity-0');
       setTimeout(() => {
         document.body.removeChild(loadingDiv);

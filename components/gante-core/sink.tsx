@@ -14,6 +14,7 @@ import {
   getPosition, positionToDay, dayToRect, getRangeDays,
   getScrollingElement
 } from './utils';
+import { useRecoilValueLoadableMemo as useRecoilValueLoadable } from 'recoil-enhance';
 
 /*
   泳道，绘制一个通道, 绘制连线
@@ -39,8 +40,10 @@ export default React.memo(function Sink() {
   const OFFSET_DAY = getRangeDays(startTime, currentTime);
   const todayRectRef = useRef(null);
   const enlargeEditor = useEnlargeEditor();
-  const connections = useRecoilValue(atoms.connections);
+  const connectionsLoadable = useRecoilValueLoadable(atoms.connections);
   const autoGotoTodayFlagRef = useRef(false);
+
+  const connections: atoms.IConnection[] | undefined = connectionsLoadable.valueMaybe() ;
 
   const { x: left } = useMemo(() => {
     if (!currentNode) {
@@ -48,7 +51,7 @@ export default React.memo(function Sink() {
         x: -99
       };
     }
-    return dayToRect(SPOT_WIDTH, startTime, dayjs(currentNode.startTime), currentNode.endTime);
+    return dayToRect(SPOT_WIDTH, startTime, dayjs(currentNode.startTime), dayjs(currentNode.endTime));
   }, [currentNode, startTime, SPOT_WIDTH]);
 
   const onClickConnectLine = useCallback((fromNode, toNode) => {
@@ -128,8 +131,7 @@ export default React.memo(function Sink() {
     const length = list.length;
     const arg = [];
     for (let index = 0; index < Math.max(length, 20); ++index) {
-      const features = (list[index] || {}).id === currentId ? (currentFeatures || {}) : {};
-
+      const features = (list[index] || {}) === currentId ? (currentFeatures || {}) : {};
       arg.push(
         <line key={index}
           x1={0} y1={(index + 1) * SINK_HEIGHT}
@@ -143,11 +145,11 @@ export default React.memo(function Sink() {
     }
 
     return arg;
-  }, [list.length, currentFeatures, SINK_HEIGHT]);
+  }, [list, currentId, currentFeatures, SINK_HEIGHT]);
 
   // 处理connectTo
   const connectToEle = useMemo(() => {
-    return R.sortBy(R.prop('weight'))(connections.map(({ fromPoint, toPoint, node, tNode}, index) => {
+    return R.sortBy(R.prop('weight'))((connections || []).map(({ fromPoint, toPoint, node, tNode}, index) => {
       const selected = (
         currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
       );

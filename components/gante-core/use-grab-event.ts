@@ -54,7 +54,7 @@ GrabMode.prototype.onMouseUp = function() {
   this.machine.switchMode(new NormalState());
 }
 
-function useGrabEvent({ onGrab }) {
+function useGrabEvent({ onGrab }: { onGrab?: () => void}) {
   const { graphRef } = useGante();
   const elementRef = useRef(null);
   const onGrabRef = useRef(null);
@@ -76,7 +76,7 @@ function useGrabEvent({ onGrab }) {
     return () => {
       machine.dispose();
     };
-  }, []);
+  }, [graphRef]);
 
   return elementRef;
 

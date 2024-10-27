@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import dayjs from 'dayjs';
+import React, { useCallback, useEffect, useRef, useState, useMemo, ReactNode, ReactElement, DragEvent } from 'react';
+import dayjs, { Dayjs } from 'dayjs';
 import { useRecoilValue } from 'recoil';
 import * as atoms from './atom';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -15,10 +15,21 @@ dayjs.extend(isBetween);
 
 import { busy } from './use-interaction-event';
 
+interface ITimelinePerfProps extends Pick<React.BaseHTMLAttributes<HTMLDivElement>, 'onDragEnter' | 'onDragLeave' | 'onDrop'> {
+  startTime: Dayjs;
+  endTime: Dayjs;
+  inRange: (time: Dayjs) => boolean;
+  currentTime: Dayjs;
+  todayRef: React.RefObject<any>;
+  previewPin: string;
+  SPOT_WIDTH: number;
+  getDayTitle: (time: Dayjs, option: { showPin: boolean }) => ReactNode;
+  getDaySubtitle: (time: Dayjs) => string;
+}
 /*
   这个组件每次重绘性能开销最大，尽量减少不必要的性能开销
 */
-const TimelinePerf = React.memo(({
+const TimelinePerf = React.memo<ITimelinePerfProps>(({
   startTime,
   endTime,
   inRange,
@@ -33,7 +44,7 @@ const TimelinePerf = React.memo(({
   getDaySubtitle
 }) => {
   return useMemo(() => {
-    let ans = [];
+    let ans: ReactElement[] = [];
     const totalDays = utils.getRangeDays(startTime, endTime) + 1;
     for (let i = 0; i < totalDays ; ++i) {
       const day = startTime.add(i, 'days');
@@ -66,7 +77,7 @@ const TimelinePerf = React.memo(({
         </div>
       );
     }
-    return ans;
+    return <>{ans}</>;
   }, [startTime, endTime, inRange, currentTime, todayRef, previewPin, onDragEnter, onDragLeave, onDrop, SPOT_WIDTH, getDayTitle, getDaySubtitle]);
 }, () => {
   return busy;
@@ -75,7 +86,7 @@ const TimelinePerf = React.memo(({
 /*
    展示时间轴，横轴
  */
-export default React.memo(function Timeline({ children }) {
+export default React.memo<{ children: React.ReactNode }>(function Timeline({ children }) {
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
   const startTime = useRecoilValue(atoms.startTime);
   const todayRef = useRef(null);
@@ -84,7 +95,7 @@ export default React.memo(function Timeline({ children }) {
   const currentNode = useRecoilValue(atoms.currentNode);
   const showAgentInTimeline = useRecoilValue(atoms.showAgentInTimeline);
   // dayjs string
-  const [previewPin, setPreviewPin] = useState(false);
+  const [previewPin, setPreviewPin] = useState('');
   const pins = useRecoilValue(atoms.pins);
 
   const cachePinsMap = useMemo(() => {
@@ -129,7 +140,7 @@ export default React.memo(function Timeline({ children }) {
     }
   }, [SPOT_WIDTH]);
 
-  const getDayTitle = useCallback((time, { showPin }) => {
+  const getDayTitle = useCallback((time: Dayjs, { showPin }) => {
     if (!dayjs.isDayjs(time)) {
       throw new Error('time is not dayjs instance');
     }
@@ -226,7 +237,6 @@ export default React.memo(function Timeline({ children }) {
           onDrop={onDrop}
           getDayTitle={getDayTitle}
           getDaySubtitle={getDaySubtitle}
-          pins={pins}
           SPOT_WIDTH={SPOT_WIDTH}
           startTime={startTime}
           endTime={endTime} inRange={inRange} currentTime={currentTime} />
