@@ -10,8 +10,6 @@ import Image from 'next/image';
  */
 
 function TimelineStatusBar() {
-  const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
-  const startTime = useRecoilValue(atoms.startTime);
   const item = useRecoilValue(atoms.currentNode);
 
   const left = useRecoilValue(atoms.thatNodeLeft(item?.id));

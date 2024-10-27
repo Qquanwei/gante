@@ -9,7 +9,6 @@ import * as atoms from './atom';
 
 function Graph() {
   const { graphRef } = useGante();
-  const { version } = useRecoilValue(atoms._listCore__editor);
 
   return useMemo(() => (
     <div className="relative w-full flex pl-10 select-none" >
@@ -23,12 +22,9 @@ function Graph() {
             <Node />
           </Fragment>
         </Timeline>
-        <div className="absolute top-[100px] left-[100px] text-[#ccc]">
-          { version }
-        </div>
       </div>
     </div>
-  ), [graphRef, version]);
+  ), [graphRef]);
 }
 
 export default React.memo(Graph);

@@ -41,6 +41,10 @@ export default React.memo<IStatusBarProps>(function StatusBar({ className, child
   useEffect(() => {
     const con = connectionRef.current;
 
+    if (!con) {
+      return () => {};
+    }
+
     let nothingPendingFlag = false;
     function onSendCheck() {
       if (con.hasWritePending()) {
@@ -67,7 +71,8 @@ export default React.memo<IStatusBarProps>(function StatusBar({ className, child
       clearInterval(timer);
       con.off('send', onSendCheck);
     };
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectionRef, connectionRef.current]);
 
   return (
     <div className={classNames(className, 'h-[30px] px-[80px] bg-[#f0f0f0] flex items-center border-t-white border box-border')}>

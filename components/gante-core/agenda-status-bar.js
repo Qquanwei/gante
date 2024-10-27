@@ -3,16 +3,24 @@ import dayjs from 'dayjs';
 import classNames from 'classnames';
 import { sortBy, groupBy, toPairs, compose, nth, filter, prop } from 'ramda';
 import { useRecoilValueMemo } from 'recoil-enhance';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValueLoadable, useSetRecoilState } from 'recoil';
 import { headerMode } from '../header';
 import * as atoms from '../gante-core/atom';
 
 function AgendaStatusBar() {
   const setHeaderMode = useSetRecoilState(headerMode);
-  const agent = useRecoilValueMemo(atoms.agent);
+  const agentLoadable = useRecoilValueLoadable(atoms.agent);
   const SPOT_WIDTH = useRecoilValueMemo(atoms.SPOT_WIDTH);
   const startTime = useRecoilValueMemo(atoms.startTime);
   const endTime = useRecoilValueMemo(atoms.endTime);
+  const agent = useMemo(() => {
+    return agentLoadable.valueMaybe() || {
+      todo: [],
+      done: [],
+      keyword: [],
+      archive: []
+    };
+  }, [agentLoadable]);
 
   // 在当前时间轴内的agent，过滤出来
   // validAgent是个pair, [dateStr, [todo1, todo2] ]
@@ -28,9 +36,6 @@ function AgendaStatusBar() {
 
   const nodes = useMemo(() => {
     let ans = [];
-    let currentDay = dayjs(startTime);
-    let tmpAgentList = validAgent;
-
     let i = 0;
     for (let i of validAgent) {
       const date = i[0];
@@ -50,7 +55,7 @@ function AgendaStatusBar() {
       );
     }
     return ans;
-  }, [startTime, endTime, validAgent, SPOT_WIDTH, onClickAgenda]);
+  }, [startTime, validAgent, SPOT_WIDTH, onClickAgenda]);
 
   if (!agent) {
     return null;

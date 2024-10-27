@@ -14,6 +14,7 @@ import Pin from './pin';
 dayjs.extend(isBetween);
 
 import { busy } from './use-interaction-event';
+import { useRecoilValueMemo } from 'recoil-enhance';
 
 interface ITimelinePerfProps extends Pick<React.BaseHTMLAttributes<HTMLDivElement>, 'onDragEnter' | 'onDragLeave' | 'onDrop'> {
   startTime: Dayjs;
@@ -87,10 +88,12 @@ const TimelinePerf = React.memo<ITimelinePerfProps>(({
    展示时间轴，横轴
  */
 export default React.memo<{ children: React.ReactNode }>(function Timeline({ children }) {
+
   const SPOT_WIDTH = useRecoilValue(atoms.SPOT_WIDTH);
-  const startTime = useRecoilValue(atoms.startTime);
+  const startTime = useRecoilValueMemo(atoms.startTime);
   const todayRef = useRef(null);
   const endTime = useRecoilValue(atoms.endTime);
+
   const currentTime = useCurrentDate();
   const currentNode = useRecoilValue(atoms.currentNode);
   const showAgentInTimeline = useRecoilValue(atoms.showAgentInTimeline);
