@@ -143,6 +143,8 @@ async function shareBackend() {
         await pgClient.query('update mem set cnt = cnt - 1 where listId = $1', [listId]);
       });
       msServices.reportMetrics('connect-cost', {
+        date: Date.now(),
+        listId: listId,
         connectionCost: ctx.agent.custom.connectionCost,
         sharedbInitCost: Date.now() - startTime
       })
