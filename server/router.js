@@ -92,7 +92,7 @@ router.get('/count', async (ctx) => {
     return;
   }
 
-  const cnt = services.getCount(listId);
+  const cnt = await services.getCount(listId);
   ctx.body = {
     count: cnt,
     exceed: cnt > 50
@@ -125,7 +125,7 @@ router.put('/user/:property', async (ctx) => {
   const { property } = ctx.params;
 
   // 仅允许修改特定字段
-  if (!R.includes(property, ['userName'])) {
+  if (!R.includes(property, ['userName', 'email'])) {
     ctx.status = 401;
     ctx.body = {
       message: 'forbidden'
@@ -136,11 +136,19 @@ router.put('/user/:property', async (ctx) => {
     await services.updateUserName(value);
     ctx.body = await services.getUser();
   } else {
-    ctx.status = 401;
+    await services.updateUser(property, value);
+    ctx.body = await services.getUser();
   }
 });
 
-const sms = require('./sms');
+router.post('/user/notify', async (ctx) => {
+  console.log('TODO: 收到notify');
+  await ctx.app.smtp.sendMail('quanwei9958@gmail.com', 'test subject', 'test content', '<body>content in html</body>');
+  ctx.status = 200;
+  ctx.body = {
+    message: 'TODO'
+  }
+})
 
 router.post('/captcha', async (ctx, next) => {
   const { phone } = ctx.request.body;

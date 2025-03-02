@@ -10,7 +10,7 @@ module.exports = helpers = {
       return null;
     }
 
-    const data = (await ctx.pgClient.query('select * from sessions where token = $1', [ud])).rows[0];
+    const data = (await ctx.app.pgClient.query('select * from sessions where token = $1', [ud])).rows[0];
 
     if (data && data.uid) {
       if (Number(data.expire) >= Date.now()) {
@@ -24,7 +24,7 @@ module.exports = helpers = {
 
   generateSessionByUser: async (ctx, id, expire) => {
     const rid = crypto.randomUUID();
-    await ctx.pgClient.query('INSERT INTO sessions(uid, token, expire) values($1, $2, $3)', [
+    await ctx.app.pgClient.query('INSERT INTO sessions(uid, token, expire) values($1, $2, $3)', [
       id,
       rid,
       expire

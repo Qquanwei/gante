@@ -3,12 +3,14 @@ import dayjs from 'dayjs';
 import { effect } from 'recoil-sharedb';
 import * as refine from '@recoiljs/refine';
 import * as R from 'ramda';
+import { dayToRect, markOnlyFirst, Position } from './utils';
+import { User } from '../../types/model';
 
 const memoizeDayjs = R.memoizeWith(dayNum => `${dayNum}`, (dayNum: number) => {
   return dayjs(dayNum);
 });
 
-export const user = atom({
+export const user = atom<User>({
   key: 'current user',
   default: null
 });
@@ -316,7 +318,6 @@ export const currentFeatures = atom({
 });
 
 
-import { dayToRect, markOnlyFirst, Position } from './utils';
 // 当前所有的连线
 export interface IConnection {
   fromPoint: Position;

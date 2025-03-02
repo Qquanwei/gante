@@ -1,8 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { Fragment, HTMLAttributes } from 'react';
 import classNames from 'classnames';
 
-function Modal({ show, title, onClose, onOk, children, className }) {
+function Modal({ show, title, onClose, children, className }: HTMLAttributes<HTMLDivElement> & { show: boolean, title: string, onClose: () => void}) {
     return (
       <Transition appear show={show} as={Fragment}>
         <Dialog as="div" onClose={onClose} className='z-10 relative'>

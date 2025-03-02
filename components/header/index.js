@@ -8,10 +8,12 @@ import Pin from '../gante-core/pin';
 
 const SearchPanel = dynamic(() => import('../search-panel'));
 const AgendaPanel = dynamic(() => import('../agenda-panel'));
+const MailPanel = dynamic(() => import('../mail-panel'));
 
 const modeMap = {
   search: SearchPanel,
-  agent: AgendaPanel
+  agent: AgendaPanel,
+  mail: MailPanel
 };
 
 export const headerMode = atom({
@@ -28,17 +30,17 @@ function LeftHeader({ children, className, user, ganteRef }) {
     } else {
       setMode(e.target.dataset.mode);
     }
-  }, [mode]);
+  }, [mode, setMode]);
 
   return (
-    <div className={classNames("transition-all z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block border-r-[#e0e0e0] border-r", {
+    <div className={classNames(className, "transition-all z-20 text-[#333] fixed top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block border-r-[#e0e0e0] border-r", {
            'w-[320px]': mode !== ''
          })}>
       <div className={"transition-all z-20 text-[#333] absolute top-0 bottom-0 left-0 w-[60px] bg-white hidden sm:block"}>
         <div className="bg-[url(/logo.png)] cursor-pointer bg-white w-[60px] bg-cover h-[60px]" onClick={() => ganteRef?.current?.gotoToday()}></div>
         <div className="flex flex-col items-center h-full select-none">
           <ul className="flex mt-2 flex-col text-[12px] text-center">
-            <Link href="/">
+            <Link href="/" passHref>
               <li className="cursor-pointer h-[24px] bg-[url(/house.png)] bg-no-repeat bg-contain bg-center"/>
             </Link>
             <li className="cursor-pointer h-[24px] mt-[20px]" data-mode="search" onClick={onClickMode}>搜索</li>
@@ -54,10 +56,13 @@ function LeftHeader({ children, className, user, ganteRef }) {
               <Pin pin={null} dragMode="copy" />
             </li>
             <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]" data-mode="agent" onClick={onClickMode}>agenda</li>
+            <li className={classNames('hidden cursor-pointer h-[24px] flex justify-center items-center mt-[20px]', {
+              hidden: !user
+            })} data-mode="mail" onClick={onClickMode}>mail</li>
           </ul>
           <div className="mt-auto mb-20">
             <div className="flex justify-center">
-              <Link href="https://github.com/Qquanwei/gante" target="_blank">
+              <Link href="https://github.com/Qquanwei/gante" target="_blank" passHref>
                 <div className="mb-[30px] w-[30px] h-[30px] bg-contain bg-[url(/github-mark.png)]"></div>
               </Link>
             </div>

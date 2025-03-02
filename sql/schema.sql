@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS users (
   githubUserId character varying(255),
   password character varying(255),
   defaultTableId character varying(255) not null,
-  extra jsonb not null default '{}'::jsonb
+  extra jsonb not null default '{}'::jsonb,
+  email TEXT
 );
 
 CREATE TABLE IF NOT EXISTS sessions (

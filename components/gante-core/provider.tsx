@@ -1,32 +1,36 @@
 /* eslint-disable react/display-name */
 import React, {
   useMemo, useState, useCallback, useRef, useEffect, useImperativeHandle,
-  Suspense
+  Suspense,
+  HTMLAttributes
 } from 'react';
 import Events from 'events';
-import { RecoilRoot, useSetRecoilState, useRecoilCallback } from 'recoil';
+import { RecoilRoot, useSetRecoilState, useRecoilCallback, MutableSnapshot } from 'recoil';
 import { RecoilSyncShareDB } from 'recoil-sharedb';
 import * as R from 'ramda';
 import { ErrorBoundary } from 'react-error-boundary';
-import Modal from '../../components/modal';
+import Modal from '../modal';
 import * as atoms from './atom';
 import Loading from './loading';
 import * as actions from './action';
 
-const Context = React.createContext();
+const Context = React.createContext(null);
 
 export {
   Context
 };
 
+interface IProviderImplInterface {
+  gotoTodayImpl?: () => void;
+}
 
-const Provider = React.forwardRef(({ children, user }, forwardRef) => {
+const Provider = React.forwardRef(({ children }: HTMLAttributes<HTMLDivElement>, forwardRef) => {
   const graphRef = useRef(null);
   const sinkRef = useRef(null);
   const setSpotWidth = useSetRecoilState(atoms.SPOT_WIDTH);
   const updateItemProperty = actions.useUpdateItemProperty();
 
-  const impl = useRef({});
+  const impl = useRef<IProviderImplInterface>({});
 
   const zoomOut = useCallback(() => {
     setSpotWidth(v => Math.max(v - 5, 25));
@@ -37,7 +41,7 @@ const Provider = React.forwardRef(({ children, user }, forwardRef) => {
   }, [setSpotWidth]);
 
   const setGotoTodayImpl = useCallback((gotoImpl) => {
-    impl.gotoTodayImpl = gotoImpl;
+    impl.current.gotoTodayImpl = gotoImpl;
   }, []);
 
   const event = useMemo(() => {
@@ -83,8 +87,8 @@ const Provider = React.forwardRef(({ children, user }, forwardRef) => {
       zoomOut,
       zoomIn,
       gotoToday: () => {
-        if (impl.gotoTodayImpl) {
-          impl.gotoTodayImpl();
+        if (impl.current.gotoTodayImpl) {
+          impl.current.gotoTodayImpl();
         }
       }
     };
@@ -98,9 +102,8 @@ const Provider = React.forwardRef(({ children, user }, forwardRef) => {
       sinkRef,
       zoomOut,
       zoomIn,
-      user
     };
-  }, [setGotoTodayImpl, updateItemConnect, user, zoomIn, zoomOut]);
+  }, [setGotoTodayImpl, updateItemConnect, zoomIn, zoomOut]);
 
   return (
     <Context.Provider value={contextValue}>
@@ -121,7 +124,7 @@ function ErrorFallback({ error }) {
 }
 
 import ReactDOM from 'react-dom/client';
-import { markOnlyFirst } from './utils';
+import { User } from '../../types/model';
 function SmartLoading() {
   useEffect(() => {
     const loadingDiv = document.createElement('div');
@@ -132,16 +135,18 @@ function SmartLoading() {
     const startTime = Date.now();
     performance.mark(startTime + '');
     return () => {
-      performance.measure('loading_page' + startTime, startTime);
+      performance.measure('loading_page' + startTime, startTime + '');
       loadingDiv.classList.add('opacity-0');
       setTimeout(() => {
         document.body.removeChild(loadingDiv);
       }, 1000);
     }
   }, []);
+
+  return null;
 }
 
-export default React.forwardRef(function ProviderRef({ docId, ...props }, ref) {
+export default React.forwardRef(function ProviderRef({ user, docId, ...props }: { docId: string, user: User } & HTMLAttributes<HTMLDivElement>, ref) {
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
 
@@ -161,8 +166,13 @@ export default React.forwardRef(function ProviderRef({ docId, ...props }, ref) {
     return 'ws://';
   }, []);
 
+  const initializeState = useCallback((snapshot: MutableSnapshot) => {
+    snapshot.set(atoms.user, user)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <RecoilRoot>
+    <RecoilRoot initializeState={initializeState}>
       <Suspense fallback={<div>global loading...</div>}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <RecoilSyncShareDB wsUrl={`${protocol}${window.location.host}/share?id=${docId}`} onError={onError} docId={docId}>

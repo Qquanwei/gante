@@ -1,6 +1,5 @@
 const http = require('http');
 const next = require('next');
-const { Pool } = require('pg');
 const ShareDB = require('sharedb');
 const Router = require('koa-router');
 const koa = require('koa');
@@ -11,6 +10,7 @@ const cookie = require('cookie');
 const serverApi = require('./server/router');
 const config = require('./config');
 const Services = require('./server/services');
+const AppServices = require('./server/app-service');
 const app = new koa();
 const server = http.createServer(app.callback());
 
@@ -20,14 +20,14 @@ const nextApp = next({
 });
 const handler = nextApp.getRequestHandler();
 const router = new Router();
-let pgClient = null;
+
 
 async function startApp() {
-  pgClient = new Pool(config.pg);
-  await pgClient.query('update mem set cnt = 0');
   await nextApp.prepare();
 
-
+  for (let plugin of AppServices.services) {
+    await plugin(app, config);
+  }
 
   router.use(serverApi.routes());
   router.use(serverApi.allowedMethods());
@@ -37,10 +37,6 @@ async function startApp() {
     ctx.respond = false;
   });
 
-  app.use(async (ctx, next) => {
-    ctx.pgClient = pgClient;
-    await next();
-  });
   app.use(router.routes());
   const port = process.env.PORT || 8088;
 
@@ -88,15 +84,14 @@ const backend = new ShareDB({
 
 /* SHAREDB BEGIN */
 async function shareBackend() {
-
   ShareDB.types.register(json1.type);
-
   const Url = require('url');
   const queryString = require('querystring');
   const helpers = require('./server/helpers');
+  const pgClient = app.pgClient;
   backend.use('connect', async (ctx, next) => {
     console.log('新连接接入', ctx.req.url);
-    const startTime =Date.now();
+    const startTime = Date.now();
 
     try {
       const qs = queryString.parse(Url.parse(ctx.req.url).query);
@@ -107,7 +102,9 @@ async function shareBackend() {
       const cookieObj = cookie.parse(ctx.req.headers.cookie || '');
 
       const msServices = new Services({
-        pgClient,
+        app: {
+          pgClient: app.pgClient,
+        },
         cookies: {
           get: (key) => {
             return cookieObj[key];

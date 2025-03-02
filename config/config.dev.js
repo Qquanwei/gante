@@ -3,7 +3,7 @@ module.exports = {
   pg: {
     user: 'postgres',
     password: '1234',
-    host: '192.168.1.8',
+    host: '192.168.1.17',
     database: 'gantedb',
     port: 5432
   }

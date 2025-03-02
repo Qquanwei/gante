@@ -22,9 +22,10 @@ const Editor = dynamic(() => Promise.resolve(
       setShowSuggest(false);
     }, []);
 
+
     if (exceed) {
       return (
-        <div>当前文档已超过最大同时在线人数 { count }</div>
+        <div className="text-primary h-[100vh] w-[100vw] flex items-center justify-center">当前文档已超过最大同时在线人数 { count }</div>
       );
     }
 
@@ -96,6 +97,7 @@ export async function getServerSideProps({ res, req }) {
       cookie: req.headers.cookie
     }
   });
+
   try {
     const userReq = await axios({
       url: 'http://localhost:8088/api/user',

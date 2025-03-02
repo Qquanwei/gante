@@ -42,6 +42,8 @@ const sendCaptchaSms = async ({
   console.log(await client.sendSmsWithOptions(sendSmsRequest, runtime));
 };
 
-module.exports = {
-  sendCaptchaSms
+module.exports = function(app) {
+  app.sms = {
+    sendCaptchaSms
+  }
 }
