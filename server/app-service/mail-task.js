@@ -8,9 +8,12 @@ dayjs.extend(isSameOrBefore)
 module.exports = function (app) {
   async function generateMailContent(app, user) {
     const pgClient = app.pgClient;
-    const agenda = await helpers.queryOne(pgClient.query("select * from snapshots where collection='agent' and doc_id = $1", [user.defaulttableid]));
+    const agenda = await helpers.queryOne(pgClient.query("select * from snapshots where collection='agent' and doc_id = $1", [user.defaulttableid || user.defaultTableId]));
     if (agenda && agenda.data && agenda.data.todo && agenda.data.todo.length) {
-      const todayTask = agenda.data.todo.filter(todo => {
+      const allTask = agenda.data.todo.filter((todo) => {
+        return todo.headline === 'todo';
+      })
+      const todayTask = allTask.filter(todo => {
         return dayjs(todo.schedule).isSameOrBefore(dayjs());
       });
       const formatTodo = (todo) => {
@@ -19,7 +22,7 @@ module.exports = function (app) {
       const htmlMail = pug.renderFile(path.resolve(__dirname, './utils/mail-template.pug'), {
         date: (new Date()).toLocaleDateString(),
         todayTasks: todayTask.map(formatTodo),
-        allTasks: agenda.data.todo.map(formatTodo)
+        allTasks: allTask.map(formatTodo)
       })
       return htmlMail;
     }
