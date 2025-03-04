@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ToastContainer } from 'react-toastify';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
@@ -9,7 +10,14 @@ function MyApp({ Component, pageProps }) {
     }
   }, []);
 
-  return <Component {...pageProps} />
+  return (
+    <div>
+      <Component {...pageProps} />
+      <ToastContainer></ToastContainer>
+    </div>
+
+  )
+
 }
 
 export default MyApp

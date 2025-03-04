@@ -125,7 +125,7 @@ router.put('/user/:property', async (ctx) => {
   const { property } = ctx.params;
 
   // 仅允许修改特定字段
-  if (!R.includes(property, ['userName', 'email'])) {
+  if (!R.includes(property, ['userName', 'email', 'extra'])) {
     ctx.status = 401;
     ctx.body = {
       message: 'forbidden'
@@ -142,11 +142,11 @@ router.put('/user/:property', async (ctx) => {
 });
 
 router.post('/user/notify', async (ctx) => {
-  console.log('TODO: 收到notify');
-  await ctx.app.smtp.sendMail('quanwei9958@gmail.com', 'test subject', 'test content', '<body>content in html</body>');
+  const service = new Services(ctx);
+  await ctx.app.mailTask.triggerUserMailTask(await service.getUser());
   ctx.status = 200;
   ctx.body = {
-    message: 'TODO'
+    message: '发送成功'
   }
 })
 

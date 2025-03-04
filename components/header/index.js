@@ -1,5 +1,6 @@
-import React, { useCallback, useState, Suspense } from 'react';
+import React, { useCallback, useState, Suspense, useMemo } from 'react';
 import classNames from 'classnames';
+import qs from 'qs';
 import { atom, useRecoilState } from 'recoil';
 import dynamic from 'next/dynamic';
 import User from 'components/user';
@@ -23,6 +24,10 @@ export const headerMode = atom({
 
 function LeftHeader({ children, className, user, ganteRef }) {
   const [mode, setMode] = useRecoilState(headerMode);
+
+  const query = useMemo(() => {
+   return qs.parse(window.location.search.slice(1));
+  }, []);
 
   const onClickMode = useCallback((e) => {
     if (mode === e.target.dataset.mode) {
@@ -56,9 +61,9 @@ function LeftHeader({ children, className, user, ganteRef }) {
               <Pin pin={null} dragMode="copy" />
             </li>
             <li className="cursor-pointer h-[24px] flex justify-center items-center mt-[20px]" data-mode="agent" onClick={onClickMode}>agenda</li>
-            <li className={classNames('hidden cursor-pointer h-[24px] flex justify-center items-center mt-[20px]', {
-              hidden: !user
-            })} data-mode="mail" onClick={onClickMode}>mail</li>
+            <li className={classNames('cursor-pointer h-[24px] flex justify-center items-center mt-[20px] bg-[url(/mail.png)] bg-contain bg-center bg-no-repeat', {
+              hidden: !user || query.id === 'guest'
+            })} data-mode="mail" onClick={onClickMode}></li>
           </ul>
           <div className="mt-auto mb-20">
             <div className="flex justify-center">

@@ -44,7 +44,7 @@ Services.prototype.createGithubUser = async function({
 
 Services.prototype.getUser = async function () {
   const uid = await helper.getUserIdBySession(this.ctx);
-  const user = (await helper.queryOne(this.ctx.app.pgClient.query('select users._id, users.avatar, users.defaultTableId as \"defaultTableId\", users.userName as \"userName\", case when contributes.phone is NULL then false else true end as is_contributor, users.email as email  from users left join contributes on users.phone = contributes.phone where users._id = $1', [uid])));
+  const user = (await helper.queryOne(this.ctx.app.pgClient.query('select users._id, users.extra, users.avatar, users.defaultTableId as \"defaultTableId\", users.userName as \"userName\", case when contributes.phone is NULL then false else true end as is_contributor, users.email as email  from users left join contributes on users.phone = contributes.phone where users._id = $1', [uid])));
   return user;
 };
 

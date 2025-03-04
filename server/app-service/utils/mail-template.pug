@@ -1,0 +1,25 @@
+html
+  head
+   style(type="text/css").
+    html {
+      background: #fffdf9;
+      font-size: 14px;
+      font-family: Inter, Helvetica, Helvetica, arial, sans-serif;
+    }
+    .task_list {
+      background: #f5f3eb;
+    }
+  body
+   h3 #{date} Gante Daily Agenda
+   h3 Today
+   ul.task_list
+     each task in todayTasks
+      li.task= task
+   h3 All
+   ul.task_list
+    each task in allTasks
+     li.task= task
+
+   a(href='https://gante.link') 去gante.link查看。
+
+   p 本邮件自动发送，暂不支持回复。邮件内容完善中，如有打扰，可登录网站侧边栏邮件功能关闭，如非您邮箱可以官网产品建议中反馈。

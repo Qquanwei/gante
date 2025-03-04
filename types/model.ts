@@ -4,5 +4,6 @@ export interface User {
   is_contributor: boolean;
   userName: string;
   email?: string;
+  extra?: Record<string, string>;
   _id: string;
 }

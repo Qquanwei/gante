@@ -2,9 +2,7 @@ import { useState, useCallback } from 'react';
 import { Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { Bars4Icon } from '@heroicons/react/24/solid';
-import { HomeIcon, ArrowDownOnSquareIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/outline';
-import { Tooltip } from '@material-tailwind/react';
-import Button from 'components/button';
+import { HomeIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import useGante from 'components/gante-core/useGante';
 
@@ -39,9 +37,7 @@ function Sidebar({ onExport }) {
       <div className={classNames({ hidden: toggleOpen })}>
         <div>
           <Link href="/">
-            <Tooltip className="z-20" content="回到主页" placement="right">
-              <HomeIcon className="cursor-pointer w-[24px]" onClick={onClickHome} />
-            </Tooltip>
+            <HomeIcon className="cursor-pointer w-[24px]" onClick={onClickHome} />
           </Link>
         </div>
         <div>
