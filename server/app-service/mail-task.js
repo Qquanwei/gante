@@ -17,7 +17,17 @@ module.exports = function (app) {
         return dayjs(todo.schedule).isSameOrBefore(dayjs());
       });
       const formatTodo = (todo) => {
+        const diff = dayjs().diff(dayjs(todo.schedule).startOf('day'), 'day');
+
+        if (diff > 0) {
+          return '+' +  diff + '天 ' + todo.title;
+        }
+        if (diff === 0) {
+          return todo.title;
+        }
+
         return dayjs(todo.schedule).format('YYYY/MM/DD') + ' ' + todo.title;
+
       }
       const htmlMail = pug.renderFile(path.resolve(__dirname, './utils/mail-template.pug'), {
         date: (new Date()).toLocaleDateString(),
