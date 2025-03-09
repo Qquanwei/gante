@@ -43,7 +43,7 @@ export default React.memo(function Sink() {
   const connectionsLoadable = useRecoilValueLoadable(atoms.connections);
   const autoGotoTodayFlagRef = useRef(false);
 
-  const connections: atoms.IConnection[] | undefined = connectionsLoadable.valueMaybe() ;
+  const connections: atoms.IConnection[] | undefined = connectionsLoadable.valueMaybe();
 
   const { x: left } = useMemo(() => {
     if (!currentNode) {
@@ -70,8 +70,8 @@ export default React.memo(function Sink() {
 
   const onMouseLeaveConnectLine = useCallback((fromNode, tNode) => {
     if (currentSelectConnect &&
-        currentSelectConnect[0] === fromNode.id &&
-        currentSelectConnect[1] === tNode.id) {
+      currentSelectConnect[0] === fromNode.id &&
+      currentSelectConnect[1] === tNode.id) {
       setCurrentSelectConnect(null);
     }
   }, [currentSelectConnect]);
@@ -81,7 +81,7 @@ export default React.memo(function Sink() {
     if (event.detail === 2) {
       const position = getPosition(graphRef.current, event);
       const beginTime = positionToDay(SPOT_WIDTH, startTime, position.x);
-      const idx= Math.ceil(position.y / SINK_HEIGHT);
+      const idx = Math.ceil(position.y / SINK_HEIGHT);
       createNewItem({
         title: '新建任务',
         startTime: beginTime.valueOf(),
@@ -93,7 +93,7 @@ export default React.memo(function Sink() {
   useEffect(() => {
     const gotoToday = () => {
       const scrollElement = getScrollingElement(todayRectRef.current);
-      scrollElement.scrollLeft =  SPOT_WIDTH * (OFFSET_DAY - 15);
+      scrollElement.scrollLeft = SPOT_WIDTH * (OFFSET_DAY - 15);
     };
 
     setGotoTodayImpl(gotoToday);
@@ -149,7 +149,7 @@ export default React.memo(function Sink() {
 
   // 处理connectTo
   const connectToEle = useMemo(() => {
-    return R.sortBy(R.prop('weight'))((connections || []).map(({ fromPoint, toPoint, node, tNode}, index) => {
+    return R.sortBy(R.prop('weight'))((connections || []).map(({ fromPoint, toPoint, node, tNode }, index) => {
       const selected = (
         currentSelectConnect && currentSelectConnect[0] === node.id && currentSelectConnect[1] === tNode.id
       );
@@ -161,7 +161,7 @@ export default React.memo(function Sink() {
         selected,
         weight: selected ? Infinity : index
       }
-    })).map(({ selected, fromPoint, toPoint, node, tNode}, index) => {
+    })).map(({ selected, fromPoint, toPoint, node, tNode }, index) => {
       const d = connectTo(fromPoint, toPoint);
       // 增加 custom-order 相当于改变path的层级，达到zIndex的效果
       return (
@@ -185,7 +185,7 @@ export default React.memo(function Sink() {
         width="100%"
         height="100%"
         onClick={onClickEmptySVG}
-        style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT}} className="bg-gray-200 cursor-grab">
+        style={{ height: Math.max(list.length + 20, 20) * SINK_HEIGHT }} className="bg-gray-200 cursor-grab">
         <g>
           {
             memLinEle
@@ -239,7 +239,9 @@ export default React.memo(function Sink() {
       </div>
 
       <div className="absolute top-0 bottom-0 left-0 w-[60px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('left')}></div>
-      <div className="absolute top-0 bottom-0 right-0 w-[30px] bg-white/30 hover:bg-white/50 cursor-pointer" onClick={onClickEnlarge('right')}></div>
+      <div className="absolute top-0 bottom-0 right-0 w-[30px] bg-white/30 hover:bg-white/50 text-center cursor-pointer text-center pt-[50px] text-sky-600 text-[14px]" onClick={onClickEnlarge('right')}>
+        <div className='animate-pulse inline-block' style={{ writingMode: 'vertical-lr' }} >画布不够用，鼠标点击这里，会延长...</div>
+      </div>
     </div>
   );
 });
