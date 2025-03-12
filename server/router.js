@@ -29,7 +29,7 @@ async function login(ctx, user) {
 router.get('/cb/login/github', async (ctx, next) => {
   // github 临时 code 参数，用于获取详用户细信息
   const githubCode = ctx.query.code;
-
+  let userReq = null;
   console.log('->', githubCode);
   try {
     const tokenReq = await axios({
@@ -46,7 +46,6 @@ router.get('/cb/login/github', async (ctx, next) => {
       }
     });
 
-    let userReq = null;
 
     userReq = await axios({
       url: 'https://api.github.com/user',

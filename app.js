@@ -132,6 +132,7 @@ async function shareBackend() {
       }
 
       await pgClient.query('INSERT INTO mem(listId, cnt) values($1, $2) ON CONFLICT (listId) DO UPDATE SET cnt = $3', [listId, 1, (memList?.cnt || 0) + 1]);
+      await pgClient.query('UPDATE users set last_date=now() where defaultTableId= $1', [listId]);
       // 注入 listId, 所有操作的item必须在listId下.
       ctx.agent.custom.listId = listId;
       ctx.agent.custom.user = user;

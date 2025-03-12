@@ -31,7 +31,7 @@ function User({ user }) {
         }>
         {
           isLogin ? (
-            <Menu menuButton={<MenuButton><img src={user.avatar} className="rounded-full bg-black/5 border-box hover:border-sky-500/40 border-2 border-sky-500/10" width="50" height="50" /></MenuButton>} transition>
+            <Menu menuButton={<MenuButton><img src={user.avatar || '/user.png'} className="rounded-full bg-black/5 border-box hover:border-sky-500/40 border-2 border-sky-500/10" width="50" height="50" /></MenuButton>} transition>
               <Link href='/user'>
                 <MenuItem>
                   个人中心
