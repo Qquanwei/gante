@@ -169,5 +169,15 @@ describe('agenda-panel', () => {
       expect(todo.deadline).toEqual('');
       expect(dayjs(todo.schedule).isSame(dayjs('2023 03 08').add(60, 'day'), 'day')).toBe(true);
     })
+
+    it.skip ('case18', () => {
+      const todo = parseTodoStr('abc +3m', today);
+      expect(todo.title).toEqual('abc');
+      expect(todo.headline).toEqual('todo');
+      expect(todo.repeat).toEqual(0);
+      expect(todo.deadline).toEqual('');
+      console.log(todo)
+      expect(dayjs(todo.schedule).isSame(dayjs('2023 03 08').add(3, 'month'), 'day')).toBe(true);
+    })
 });
 });

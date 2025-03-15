@@ -14,7 +14,7 @@ module.exports = function (app) {
         return todo.headline === 'todo';
       })
       const todayTask = allTask.filter(todo => {
-        return dayjs(todo.schedule).isSameOrBefore(dayjs());
+        return dayjs(todo.schedule).startOf('day').isSameOrBefore(dayjs(), 'day');
       });
       const formatTodo = (todo) => {
         const diff = dayjs().diff(dayjs(todo.schedule).startOf('day'), 'day');
