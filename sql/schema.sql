@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS users (
   password character varying(255),
   defaultTableId character varying(255) not null,
   extra jsonb not null default '{}'::jsonb,
-  email TEXT
+  email TEXT,
+  last_date date
 );
 
 CREATE TABLE IF NOT EXISTS sessions (

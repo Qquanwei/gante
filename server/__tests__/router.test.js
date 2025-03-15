@@ -16,4 +16,8 @@ describe('router test', () => {
   beforeEach(() => {
     app = getApp();
   });
+
+  it ('should be ok', () => {
+    // pass
+  })
 });

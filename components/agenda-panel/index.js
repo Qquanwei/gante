@@ -42,7 +42,7 @@ export function parseTodoStr(str, today) {
      6. abc 12.12 -> 12月12日开始，不重复
    */
   const scheduleAndRepat = /^.*\+[0-9 ]+\/[0-9 ]+$/;
-  const onlySchedule = /^.*\+\d$/;
+  const onlySchedule = /^.*\+\d+$/;
   const onlyRepeat = /\/\d$/;
   const date1 = /\d+$/;
   const date2 = /\d+\.\d+$/;

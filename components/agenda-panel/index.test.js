@@ -161,5 +161,13 @@ describe('agenda-panel', () => {
       expect(dayjs(todo.schedule).isSame(dayjs('2023 03 10'), 'day')).toBe(true);
     });
 
+    it ('case17', () => {
+      const todo = parseTodoStr('abc +60', today);
+      expect(todo.title).toEqual('abc');
+      expect(todo.headline).toEqual('todo');
+      expect(todo.repeat).toEqual(0);
+      expect(todo.deadline).toEqual('');
+      expect(dayjs(todo.schedule).isSame(dayjs('2023 03 08').add(60, 'day'), 'day')).toBe(true);
+    })
 });
 });
