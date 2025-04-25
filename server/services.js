@@ -115,6 +115,7 @@ Services.prototype.sendCaptcha = async function(phone) {
       phone,
       number: num
     });
+    console.log('当前验证码为:', phone, num);
   } else {
     console.log('开发环境不会真正发送短信, 当前验证码为:', num);
   }
@@ -127,9 +128,11 @@ Services.prototype.sendCaptcha = async function(phone) {
 };
 
 Services.prototype.getPhoneUserByCaptcha = async function(phone, captcha, defaultTableId) {
+  // 验证码有效期改为12h
   const { cnt } = await helper.queryOne(this.ctx.app.pgClient.query('select count(1) as cnt from captcha where phone = $1 and number = $2 and sendTime > $3', [
-    phone, captcha, (Date.now() - 180 * 1000) + ''
+    phone, captcha, (Date.now() - 12 * 60 * 60 * 1000) + ''
   ]));
+
 
   // 验证码成功，检查是否已创建
   if (cnt != 0) {

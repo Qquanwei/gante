@@ -73,6 +73,7 @@ function PhoneLogin({ className }) {
         </button>
       </form>
       <form className={classNames("mt-2 border-t border-sky-500/20 pt-2 rounded", { hidden: !showCaptcha })} onSubmit={onCaptchaSubmit}>
+      <div className='text-[14px] text-orange-500 w-full max-w-[300px]'>因运营商短信服务调整，暂时发送验证码功能有可能失败，如需紧急使用可联系 quanwei9958@126.com 索要验证码</div>
         <input name="captcha" type="text" className="mx-2 p-2 focus:outline-none rounded h-[50px]" placeholder="请输入验证码" />
         <button type="submit">确定</button>
       </form>
