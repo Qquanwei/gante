@@ -10,6 +10,7 @@
     "test": "cross-env NODE_ENV=unittest jest"
   },
   "dependencies": {
+    "@alicloud/dypnsapi20170525": "^1.2.3",
     "@alicloud/dysmsapi20170525": "^2.0.23",
     "@alicloud/openapi-client": "^0.4.5",
     "@alicloud/pop-core": "^1.7.12",

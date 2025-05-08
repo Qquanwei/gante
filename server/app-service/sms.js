@@ -1,4 +1,4 @@
-const Dysmsapi20170525 = require('@alicloud/dysmsapi20170525');
+const { default: Dysmsapi20170525, SendSmsVerifyCodeRequest } = require('@alicloud/dypnsapi20170525');
 // 依赖的模块可通过下载工程中的模块依赖文件或右上角的获取 SDK 依赖信息查看
 const OpenApi = require('@alicloud/openapi-client');
 const Util = require('@alicloud/tea-util');
@@ -19,8 +19,8 @@ const getClient = (() => {
         accessKeySecret: process.env.GANTE_SMS_accessKeySecret,
       });
       // 访问的域名
-      config.endpoint = `dysmsapi.aliyuncs.com`;
-      client = new Dysmsapi20170525.default(config);
+      config.endpoint = `dypnsapi.aliyuncs.com`;
+      client = new Dysmsapi20170525(config);
     }
     return client;
   };
@@ -32,14 +32,14 @@ const sendCaptchaSms = async ({
   number
 }) => {
   const client = getClient();
-  let sendSmsRequest = new Dysmsapi20170525.SendSmsRequest({
-    phoneNumbers: phone,
-    signName: "gante甘特图",
-    templateCode: "SMS_270865308",
-    templateParam: `{"code":"${number}"}`,
+  let sendSmsRequest = new SendSmsVerifyCodeRequest({
+    phoneNumber: phone,
+    signName: "速通互联验证服务",
+    templateCode: "100001",
+    templateParam: JSON.stringify({"code":`${number}`, min: 1})
   });
   let runtime = new Util.RuntimeOptions({ });
-  console.log(await client.sendSmsWithOptions(sendSmsRequest, runtime));
+  console.log(await client.sendSmsVerifyCodeWithOptions(sendSmsRequest, runtime));
 };
 
 module.exports = function(app) {
