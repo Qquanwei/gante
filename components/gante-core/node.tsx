@@ -150,7 +150,6 @@ const Node = React.memo<INodeProps>(({ id, index }) => {
           break;
         case 'sort':
           {
-            const { position } = args;
             const toIndex = Math.floor(args.position.y / SINK_HEIGHT) - 2;
             if (toIndex !== index && toIndex >= 0 && Number.isInteger(toIndex)) {
               swapItem(

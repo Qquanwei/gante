@@ -172,8 +172,14 @@ router.post('/captcha', async (ctx, next) => {
 
 router.post('/suggest', async (ctx, next) => {
   const { sender, content } = ctx.request.body;
+  const app = ctx.app;
   const services = new Services(ctx);
   await services.addSuggest(content, sender);
+
+  if (process.env.SUGGEST_MAIL_ADMIN) {
+    app.smtp.sendMail(SUGGEST_MAIL_ADMIN, `${(new Date()).toLocaleString()} Gante Suggest`, '', content);
+  }
+
   ctx.status = 200;
   ctx.body = {
     message: '提交成功'
