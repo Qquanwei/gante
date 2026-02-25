@@ -51,8 +51,6 @@ jobs:
         context: .
         push: true
         tags: ${{secrets.DOCKER_URL}}/liquanwei/gante:latest
-        cache-from: type=registry
-        cache-to: type=registry,mode=max
         build-args: |
           GANTE_PSQL_UNAME=${{secrets.GANTE_PSQL_UNAME}}
           GANTE_PSQL_PASS=${{secrets.GANTE_PSQL_PASS}}
