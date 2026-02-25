@@ -8,7 +8,7 @@ WORKDIR /gante/
 
 COPY ./.next/standalone ./
 COPY ./public ./public
-COPY ./.next/static ./static
+COPY ./.next/static ./.next/static
 
 ENV GANTE_PUBLIC_PATH=$GANTE_PUBLIC_PATH
 ENV GANTE_PSQL_UNAME=$GANTE_PSQL_UNAME
