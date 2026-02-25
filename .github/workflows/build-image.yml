@@ -23,7 +23,7 @@ jobs:
         node-version: 16.19.0
         cache: 'pnpm'
 
-    - uses: aliyun/setup-ossutil-environment@latest
+    - uses: manyuanrong/setup-ossutil@v2.0
       name: Setup aliyun ossutil
       with:
         access-key-id: ${{secrets.oss_access_key_id}}
