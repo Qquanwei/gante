@@ -26,9 +26,9 @@ jobs:
     - uses: manyuanrong/setup-ossutil@v2.0
       name: Setup aliyun ossutil
       with:
-        access-key-id: ${{secrets.oss_access_key_id}}
-        access-key-secret: ${{secrets.oss_access_secret}}
-        endpoint: ${{secrets.oss_endpoint}}
+        access-key-id: ${{secrets.OSS_ACCESS_KEY_ID}}
+        access-key-secret: ${{secrets.SS_ACCESS_SECRET}}
+        endpoint: ${{secrets.OSS_ENDPOINT}}
 
     - name: install dependencies
       run: pnpm i --forzen-lockfile
