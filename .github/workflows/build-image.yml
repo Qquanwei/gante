@@ -7,8 +7,6 @@ on:
     branches: [ "master" ]
 
 jobs:
-  test:
-    name: Test
   build-image:
     runs-on: ubuntu-latest
     environment: production
