@@ -10,8 +10,6 @@ jobs:
   build-image:
     runs-on: ubuntu-latest
     environment: production
-    env:
-      GANTE_PUBLIC_PATH: ${{secrets.gante_public_path}}
     steps:
     - uses: actions/checkout@v3
     - uses: pnpm/action-setup@v4
@@ -36,10 +34,10 @@ jobs:
     - name: build
       run: pnpm run build
 
-    - name: Sync file to oss
-      run: |
-        ossutil cp .next/static oss://gantestatic/_next/static -rf
-        ossutil cp public oss://gantestatic -rf
+#    - name: Sync file to oss
+#      run: |
+#        ossutil cp .next/static oss://gantestatic/_next/static -rf
+#        ossutil cp public oss://gantestatic -rf
     - name: Login to docker
       uses: docker/login-action@v3
       with:
@@ -55,6 +53,5 @@ jobs:
         cache-from: type=registry
         cache-to: type=registry,mode=max
         build-args: |
-          GANTE_PUBLIC_PATH=${{secrets.GANTE_PUBLIC_PATH}}
           GANTE_PSQL_UNAME=${{secrets.GANTE_PSQL_UNAME}}
           GANTE_PSQL_PASS=${{secrets.GANTE_PSQL_PASS}}
