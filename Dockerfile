@@ -6,7 +6,9 @@ FROM node:20-alpine
 
 WORKDIR /gante/
 
-COPY ./ ./
+COPY ./.next/standalone ./
+COPY ./public ./public
+COPY ./.next/static ./static
 
 ENV GANTE_PUBLIC_PATH=$GANTE_PUBLIC_PATH
 ENV GANTE_PSQL_UNAME=$GANTE_PSQL_UNAME
@@ -14,4 +16,4 @@ ENV GANTE_PSQL_PASS=$GANTE_PSQL_PASS
 
 ENV PORT=3000
 
-CMD [ "node", "./.next/standalone/server.js"]
+CMD [ "node", "./server.js"]
