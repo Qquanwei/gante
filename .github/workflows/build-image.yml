@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      GANTE_PUBLIC_PATH: ${{secret.gante_public_path}}
+      GANTE_PUBLIC_PATH: ${{secrets.gante_public_path}}
     steps:
     - uses: actions/checkout@v3
     - uses: pnpm/action-setup@v4
@@ -43,18 +43,18 @@ jobs:
     - name: Login to docker
       uses: docker/login-action@v3
       with:
-        username: ${{secret.DOCKER_USER}}
-        password: ${{secret.DOCKER_PASS}}
+        username: ${{secrets.DOCKER_USER}}
+        password: ${{secrets.DOCKER_PASS}}
 
     - name: Build docker image
       uses: docker/build-push-action@v6
       with:
         context: .
         push: true
-        tags: ${{secret.DOCKER_URL}}/liquanwei/gante:latest
+        tags: ${{secrets.DOCKER_URL}}/liquanwei/gante:latest
         cache-from: type=registry
         cache-to: type=registry,mode=max
         build-args: |
-          GANTE_PUBLIC_PATH=${{secret.GANTE_PUBLIC_PATH}}
-          GANTE_PSQL_UNAME=${{secret.GANTE_PSQL_UNAME}}
-          GANTE_PSQL_PASS=${{secret.GANTE_PSQL_PASS}}
+          GANTE_PUBLIC_PATH=${{secrets.GANTE_PUBLIC_PATH}}
+          GANTE_PSQL_UNAME=${{secrets.GANTE_PSQL_UNAME}}
+          GANTE_PSQL_PASS=${{secrets.GANTE_PSQL_PASS}}
