@@ -2,13 +2,14 @@
 
 const nextConfig = {
   reactStrictMode: true,
-  assetPrefix: process.env.GANTE_PUBLIC_PATH || '',
+  assetPrefix: process.env.GANTE_PUBLIC_PATH || "",
+  output: "standalone",
   eslint: {
     ignoreDuringBuilds: true,
   },
   env: {
-    GANTE_GITHUB_CLIENT_ID: process.env.GANTE_GITHUB_CLIENT_ID
-  }
-}
+    GANTE_GITHUB_CLIENT_ID: process.env.GANTE_GITHUB_CLIENT_ID,
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
