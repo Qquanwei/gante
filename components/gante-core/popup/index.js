@@ -1,9 +1,21 @@
-import React, { useCallback, useState, useRef, Fragment, useEffect, useMemo } from 'react';
-import ReactDOM from 'react-dom';
-import useGante from '../useGante';
-import { getPosition, Position, getEleRect } from '../utils';
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  Fragment,
+  useEffect,
+} from "react";
+import ReactDOM from "react-dom";
+import useGante from "../useGante";
+import { getPosition, Position } from "../utils";
 
-export default function Popup({ children, content, disable, showPreview, previewContent }) {
+export default function Popup({
+  children,
+  content,
+  disable,
+  showPreview,
+  previewContent,
+}) {
   const [showContent, setShowContent] = useState(false);
   const positionRef = useRef(null);
   const { graphRef } = useGante();
@@ -15,30 +27,31 @@ export default function Popup({ children, content, disable, showPreview, preview
   const onClick = useCallback((event) => {
     const position = getPosition(graphRef.current, event);
     positionRef.current = position.add(new Position(10, 10));
-    setShowContent(v => !v);
+    setShowContent((v) => !v);
   }, []);
 
   useEffect(() => {
     if (!popupContainerRef.current) {
-      popupContainerRef.current = document.createElement('div');
-      popupContainerRef.current.dataset.role = 'popupcontainer';
+      popupContainerRef.current = document.createElement("div");
+      popupContainerRef.current.dataset.role = "popupcontainer";
       graphRef.current.appendChild(popupContainerRef.current);
     }
 
     const onClickOutside = (nativeEvent) => {
-      if (!popupContainerRef.current.contains(nativeEvent.target) &&
-          !elementRef.current.contains(nativeEvent.target)
-         ) {
+      if (
+        !popupContainerRef.current.contains(nativeEvent.target) &&
+        !elementRef.current.contains(nativeEvent.target)
+      ) {
         if (!focusRef.current) {
           setShowContent(false);
         }
       }
     };
 
-    document.addEventListener('click', onClickOutside);
+    document.addEventListener("click", onClickOutside);
 
     return () => {
-      document.removeEventListener('click', onClickOutside);
+      document.removeEventListener("click", onClickOutside);
       if (popupContainerRef.current && graphRef.current) {
         if (graphRef.current.contains(popupContainerRef.current)) {
           graphRef.current.removeChild(popupContainerRef.current);
@@ -54,48 +67,41 @@ export default function Popup({ children, content, disable, showPreview, preview
 
   return (
     <Fragment>
-      {
-        React.cloneElement(children, {
-          ref: elementRef,
-          children: (
-            <Fragment>
-              <Fragment>
-                {
-                  showPreview && (previewContent)
-                }
-              </Fragment>
-              { children.props.children }
-            </Fragment>
-          ),
-          onClick: (e) => {
-            if (!disable) {
-              onClick(e);
-            }
-            if (children.props.onClick) {
-              return children.props.onClick(e);
-            }
+      {React.cloneElement(children, {
+        ref: elementRef,
+        children: (
+          <Fragment>
+            <Fragment>{showPreview && previewContent}</Fragment>
+            {children.props.children}
+          </Fragment>
+        ),
+        onClick: (e) => {
+          if (!disable) {
+            onClick(e);
           }
-        })
-      }
+          if (children.props.onClick) {
+            return children.props.onClick(e);
+          }
+        },
+      })}
       <Fragment>
-        {
-          showContent && (
-            ReactDOM.createPortal(
-              <div
-                className="bg-yellow-100 border border-sky-500 p-2 rounded min-w-[200px] min-h-[50px] absolute z-10" style={{
-                  top: positionRef.current?.y || 0,
-                  left: positionRef.current?.x || 0
-                }}>
-                { typeof content === 'function' ? content({ close: onHidden }) : content }
-              </div>,
-              popupContainerRef.current
-            )
-          )
-        }
+        {showContent &&
+          ReactDOM.createPortal(
+            <div
+              className="bg-yellow-100 border border-sky-500 p-2 rounded min-w-[200px] min-h-[50px] absolute z-10"
+              style={{
+                top: positionRef.current?.y || 0,
+                left: positionRef.current?.x || 0,
+              }}
+            >
+              {typeof content === "function"
+                ? content({ close: onHidden })
+                : content}
+            </div>,
+            popupContainerRef.current,
+          )}
       </Fragment>
-      <Fragment>
-
-      </Fragment>
+      <Fragment></Fragment>
     </Fragment>
   );
 }

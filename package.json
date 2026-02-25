@@ -21,6 +21,8 @@
     "@recoiljs/refine": "^0.1.1",
     "@szhsin/react-menu": "^3.4.1",
     "@teamwork/websocket-json-stream": "^2.0.0",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
     "autoprefix": "^1.0.1",
     "axios": "^1.2.1",
     "classnames": "^2.3.1",
